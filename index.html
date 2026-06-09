@@ -715,68 +715,86 @@ function showScriptAgain(){
 async function buildPromptsFromScript(){
   const numClips = Math.ceil(S.durSec/10);
 
+  // Show progress
+  setMsg('Gemini בונה ' + numClips + ' פרומפטים... (זה לוקח כ-30 שניות)');
+
   const prompt = `You are a professional Hollywood cinematographer converting a Hebrew script to Veo 3.1 prompts.
 
 Torah portion: "${S.parasha.h}" — ${numClips} scenes of 10 seconds each.
 
-Hebrew script (already approved):
+Hebrew script:
 ---
 ${S.hebrewScript}
 ---
 
-Convert EACH scene from the script into a detailed Veo 3.1 prompt.
-The script already has the story, dialogue and audio — use it exactly.
+Convert EACH of the ${numClips} scenes into a Veo 3.1 prompt with ALL 11 sections.
 
-For each scene include ALL 11 sections:
+IMPORTANT: Return ONLY a JSON array. No markdown. No explanation. Start with { immediately.
 
-[STYLE]: High-budget 3D animated film, photorealistic CGI 4K. Prince of Egypt meets Pixar. Realistic textures, cloth physics, hair simulation. FULLY RENDERED 3D ANIMATION. 10 seconds.
+[STYLE]: High-budget 3D animated film, photorealistic CGI 4K. Prince of Egypt meets Pixar. FULLY RENDERED 3D ANIMATION. 10 seconds.
+[CHARACTERS]: Full detail — name, age, face, beard, hair, exact clothing. Consistent across scenes.
+[ACTION]: Precise movements and micro-expressions.
+[DIALOGUE]: Hebrew only from script. Format: "טקסט" (phonetic). NO repetition.
+[SUBTITLES]: White Hebrew subtitles at bottom with black outline.
+[SETTING]: Detailed environment. Massive crowds when script mentions בני ישראל.
+[CAMERA]: Shot + movement + DOF + angle. Vary across scenes.
+[LIGHTING]: Match scene emotion. Include color grade.
+[DRAMA]: Peak moment, silence, power dynamic.
+[AUDIO]: Exact sounds from script's סאונד section + instruments.
+[COLOR_GRADE]: Unique color palette.
 
-[CHARACTERS]: Full detail — name, age, face, beard, hair, exact clothing, sandals, jewelry. Consistent across scenes.
+JSON format ONLY:
+{"scenes":[{"id":1,"hebrewDesc":"תיאור בעברית","prompt":"full English prompt","duration":10}]}`;
 
-[ACTION]: Precise movements and micro-expressions matching this scene's drama.
+  let raw, clean, parsed;
 
-[DIALOGUE]: Hebrew only — exact words from this scene's dialogue in the script. Format: "טקסט" (phonetic). NO repetition.
-
-[SUBTITLES]: White Hebrew subtitles with black outline at bottom. Exact text from this scene's narration/dialogue.
-
-[SETTING]: Detailed environment. Show massive crowds when script mentions בני ישראל.
-
-[CAMERA]: Shot type + movement + DOF + angle. Vary across scenes. Include timing e.g. "0-3s wide, cut to 7s close-up".
-
-[LIGHTING]: Match emotion from script — joyful: golden warm; tense: cold dark; miraculous: divine rays. Include color grade.
-
-[DRAMA]: Peak moment, silence technique, power dynamic, weather effects from script.
-
-[AUDIO]: Use the exact sounds/music described in the script's סאונד section. Add specific instruments and ambient sounds.
-
-[COLOR_GRADE]: Unique color palette matching this scene's mood.
-
-Return ONLY valid JSON:
-{"scenes":[{"id":1,"hebrewDesc":"תיאור קצר בעברית","prompt":"full English prompt","duration":10}]}`;
-
-  const raw = await callGemini(prompt, 65000);
-  const clean = raw.replace(/```json|```/g,'').trim();
-
-  let parsed;
-  try{
-    parsed = JSON.parse(clean);
-  }catch(e){
-    const sceneMatches = [...clean.matchAll(/\{"id"\s*:\s*\d+[\s\S]*?"duration"\s*:\s*10\s*\}/g)];
-    if(sceneMatches.length > 0){
-      const scenes = [];
-      for(const m of sceneMatches){
-        try{ scenes.push(JSON.parse(m[0])); }catch(e2){}
-      }
-      if(scenes.length > 0){ parsed = {scenes}; toast('שוחזרו '+scenes.length+' סצנות'); }
-      else throw new Error('שגיאת JSON — נסה שוב');
-    } else throw new Error('שגיאת JSON: '+e.message.substring(0,100));
+  try {
+    raw = await callGemini(prompt, 65000);
+  } catch(e) {
+    throw new Error('שגיאת Gemini API: ' + e.message);
   }
 
-  if(!parsed.scenes||!parsed.scenes.length) throw new Error('לא התקבלו סצנות');
+  if(!raw || raw.trim().length < 50) {
+    throw new Error('Gemini לא החזיר תשובה — נסה שוב');
+  }
 
-  S.scenes = parsed.scenes.map(sc=>{
+  // Clean the response aggressively
+  clean = raw
+    .replace(/```json/gi, '')
+    .replace(/```/g, '')
+    .trim();
+
+  // Try to find JSON object in response
+  const jsonStart = clean.indexOf('{');
+  const jsonEnd = clean.lastIndexOf('}');
+  if(jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+    clean = clean.substring(jsonStart, jsonEnd + 1);
+  }
+
+  try {
+    parsed = JSON.parse(clean);
+  } catch(e) {
+    // Try to extract individual scene objects
+    const sceneMatches = [...clean.matchAll(/\{"id"\s*:\s*\d+[\s\S]*?"duration"\s*:\s*10\s*\}/g)];
+    const scenes = [];
+    for(const m of sceneMatches) {
+      try { scenes.push(JSON.parse(m[0])); } catch(e2) {}
+    }
+    if(scenes.length > 0) {
+      parsed = {scenes};
+      toast('שוחזרו ' + scenes.length + ' סצנות');
+    } else {
+      throw new Error('Gemini החזיר תשובה לא תקינה. נסה שוב — לפעמים זה קורה.');
+    }
+  }
+
+  if(!parsed || !parsed.scenes || !parsed.scenes.length) {
+    throw new Error('לא התקבלו סצנות מGemini — נסה שוב');
+  }
+
+  S.scenes = parsed.scenes.map(sc => {
     const checks = scorePrompt(sc.prompt);
-    const score = Math.round(checks.filter(c=>c.pass).length/checks.length*10);
+    const score = Math.round(checks.filter(c => c.pass).length / checks.length * 10);
     return {...sc, checks, score};
   });
 
@@ -785,6 +803,7 @@ Return ONLY valid JSON:
   document.getElementById('s2content').style.display = 'block';
   renderS2();
 }
+
 
 async function buildPromptsWithGemini(){
   await buildPromptsFromScript();
