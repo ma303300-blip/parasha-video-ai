@@ -1740,6 +1740,7 @@ async function mergeNarration(){
 
     const vid = document.createElement('video');
     vid.src = URL.createObjectURL(mergedBlob);
+    vid.crossOrigin = 'anonymous';
     vid.muted = true;
     vid.playsInline = true;
     await new Promise(r => { vid.onloadeddata = r; vid.load(); });
