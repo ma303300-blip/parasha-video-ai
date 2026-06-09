@@ -339,15 +339,6 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
     </div>
   </div>
 
-  <!-- DEBUG BOX -->
-  <div id="debugBox" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#0a0a0f;border-top:2px solid #c8a44a;padding:10px;z-index:9999;max-height:40vh;overflow-y:auto;font-family:monospace;font-size:.72rem;direction:ltr;text-align:left;">
-    <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-      <span style="color:#c8a44a;font-weight:700;">🔍 Debug Log</span>
-      <button onclick="document.getElementById('debugBox').style.display='none'" style="background:none;border:1px solid #555;color:#aaa;padding:2px 8px;cursor:pointer;border-radius:4px;">✕</button>
-    </div>
-    <div id="debugLog" style="color:#90d090;"></div>
-  </div>
-
   <!-- STEP B: PROMPTS -->
   <div id="s2content" style="display:none;">
     <div class="sh"><h2>פרומפטים לVeo 3</h2><p>בדוק כל פרומפט — בחינם ב-AI Studio לפני שמוציאים כסף</p></div>
@@ -648,20 +639,8 @@ async function fetchAndBuild(){
 function setMsg(m){
   const el = document.getElementById('s2loadMsg');
   if(el) el.textContent = m;
-  dbg('📋 ' + m);
 }
 
-function dbg(msg){
-  const box = document.getElementById('debugBox');
-  const log = document.getElementById('debugLog');
-  if(!box || !log) return;
-  box.style.display = 'block';
-  const line = document.createElement('div');
-  line.style.cssText = 'border-bottom:1px solid #222;padding:3px 0;color:#90d090;';
-  line.textContent = new Date().toLocaleTimeString() + ' | ' + msg;
-  log.appendChild(line);
-  box.scrollTop = box.scrollHeight;
-}
 
 function flatText(arr){
   const o=[];
@@ -785,20 +764,13 @@ JSON format ONLY:
 
   let raw, clean, parsed;
 
-  dbg('Calling Gemini API with ' + prompt.length + ' chars prompt');
-  dbg('S.hebrewScript length: ' + (S.hebrewScript||'').length);
-  dbg('S.apiKey: ' + (S.apiKey ? S.apiKey.substring(0,8)+'...' : 'MISSING'));
-
   try {
     setMsg('שולח בקשה לGemini...');
     raw = await callGemini(prompt, 65000);
   } catch(e) {
-    dbg('ERROR calling Gemini: ' + e.message);
     throw new Error('שגיאת Gemini API: ' + e.message);
   }
 
-  dbg('Got response: ' + (raw||'').length + ' chars');
-  // debug removed
 
   if(!raw || raw.trim().length < 50) {
     throw new Error('Gemini לא החזיר תשובה (אורך: ' + (raw||'').length + ') — נסה שוב');
@@ -821,14 +793,9 @@ JSON format ONLY:
     throw new Error('לא נמצא JSON בתשובה. תחילת התשובה: ' + clean.substring(0,200));
   }
 
-  dbg('jsonStart: ' + jsonStart + ', jsonEnd: ' + jsonEnd);
-  // debug removed
-
   try {
     parsed = JSON.parse(clean);
-    dbg('JSON parsed OK: ' + (parsed.scenes||[]).length + ' scenes');
   } catch(e) {
-    dbg('JSON parse error: ' + e.message);
     // Try to extract individual scene objects
     const sceneMatches = [...clean.matchAll(/\{"id"\s*:\s*\d+[\s\S]*?"duration"\s*:\s*10\s*\}/g)];
     const scenes = [];
