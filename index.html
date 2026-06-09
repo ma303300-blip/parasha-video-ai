@@ -429,6 +429,21 @@ const VEO_CHECKS = [
   {k:'emotion',   label:'אווירה/רגש',    q:'האם יש תיאור רגשי/אווירתי?'},
 ];
 
+function scorePrompt(p){
+  return VEO_CHECKS.map(c=>{
+    let pass=false;
+    if(c.k==='subject')  pass=p.length>100;
+    if(c.k==='action')   pass=/shot|tracking|push|pull|pan|crane|walk|run|speak|gesture|movement/i.test(p);
+    if(c.k==='camera')   pass=/camera|shot|angle|pan|zoom|close.up|wide|tracking|drone|tilt|crane/i.test(p);
+    if(c.k==='lighting') pass=/light|shadow|golden|dramatic|warm|cool|sun|glow|dawn|dusk|bright|dark|beam/i.test(p);
+    if(c.k==='style')    pass=/cinematic|animation|render|quality|Pixar|biblical|3D|CGI/i.test(p);
+    if(c.k==='no_text')  pass=/no text|no subtitle/i.test(p);
+    if(c.k==='duration') pass=/10 second/i.test(p);
+    if(c.k==='emotion')  pass=/atmosphere|emotion|dramatic|feeling|tension|epic|grand|solemn|joyful|fearful|mood/i.test(p);
+    return {...c,pass};
+  });
+}
+
 // ════════════════════════════════════════
 // STATE
 // ════════════════════════════════════════
