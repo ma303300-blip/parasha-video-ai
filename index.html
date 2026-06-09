@@ -514,8 +514,9 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
         <input type="number" id="narClips" min="1" max="60" value="24" style="width:90px;text-align:center;">
         <span style="font-size:.74rem;color:var(--muted);margin-right:8px;">= <span id="narDurDisplay">240</span> שניות</span>
       </div>
-      <div class="row-c" style="justify-content:flex-start;margin-bottom:10px;">
-        <button class="btn btn-ghost" onclick="generateNarText()" id="btnGenNar">✨ צור קריינות עם Gemini</button>
+      <div class="row-c" style="justify-content:flex-start;margin-bottom:10px;gap:8px;">
+        <button class="btn btn-ghost" onclick="generateNarText()" id="btnGenNar">✨ קריינות עם Gemini</button>
+        <button class="btn btn-ghost" onclick="generateVoiceAct()" id="btnGenVoice">🎭 דיבוב דמויות</button>
       </div>
       <div id="narBlocksWrap"></div>
       <textarea id="narText" style="width:100%;min-height:180px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Heebo',sans-serif;font-size:.84rem;line-height:1.8;padding:12px;outline:none;resize:vertical;direction:rtl;display:none;" placeholder="הטקסט יופיע כאן — ניתן לערוך לפני יצירת הקול..."></textarea>
@@ -1897,6 +1898,160 @@ function audioBufferToWav(buffer){
     }
   }
   return new Blob([ab], { type: 'audio/wav' });
+}
+
+// ════════════════════════════════════════
+// VOICE ACTING — דיבוב דמויות
+// ════════════════════════════════════════
+
+const VOICE_MAP = {
+  'השם':   { voice:'he-IL-Wavenet-B', rate:0.70, pitch:-6.0, breakMs:900 },
+  'נביא':  { voice:'he-IL-Wavenet-D', rate:0.85, pitch:-3.0, breakMs:600 },
+  'משה':   { voice:'he-IL-Wavenet-D', rate:0.88, pitch:-2.0, breakMs:500 },
+  'מלך':   { voice:'he-IL-Wavenet-B', rate:0.85, pitch:-1.5, breakMs:500 },
+  'לוחם':  { voice:'he-IL-Wavenet-D', rate:1.10, pitch: 1.0, breakMs:300 },
+  'מבוגר': { voice:'he-IL-Wavenet-C', rate:0.88, pitch:-1.0, breakMs:450 },
+  'מלאך':  { voice:'he-IL-Wavenet-A', rate:0.90, pitch: 3.0, breakMs:600 },
+  'ילד':   { voice:'he-IL-Wavenet-A', rate:1.05, pitch: 4.0, breakMs:300 },
+  'ילדה':  { voice:'he-IL-Wavenet-C', rate:1.05, pitch: 4.0, breakMs:300 },
+  'נרטור': { voice:'he-IL-Wavenet-D', rate:0.92, pitch:-1.0, breakMs:500 },
+};
+
+async function generateVoiceAct(){
+  const btn = document.getElementById('btnGenVoice');
+  btn.disabled = true;
+  btn.textContent = '⏳ כותב תסריט...';
+  try{
+    const clips = parseInt(document.getElementById('narClips').value) || 24;
+    const parasha = S.parasha?.h || '';
+    const scenes = S.scenes || [];
+
+    let scenesDesc = '';
+    for(let i=0;i<clips;i++){
+      const sc = scenes[i];
+      const title = sc ? sc.title || ('סצנה '+(i+1)) : ('סצנה '+(i+1));
+      scenesDesc += (i+1)+'. ['+(i*10)+'–'+((i+1)*10)+' שניות] '+title+'\n';
+    }
+
+    const prompt =
+      'אתה כותב תסריט דיבוב לסרטון תנכי בסגנון Testament של Netflix.\n\n'+
+      'פרשה: '+parasha+'\n\n'+
+      'סצנות:\n'+scenesDesc+'\n'+
+      'כתוב תסריט דיבוב מלא. כל שורה בפורמט הזה בדיוק:\n'+
+      '[דמות|קצב] טקסט\n\n'+
+      'דמויות אפשריות: השם, נביא, משה, מלך, לוחם, מבוגר, מלאך, ילד, ילדה, נרטור\n'+
+      'קצבים: איטי / רגיל / מהיר\n\n'+
+      'כללים:\n'+
+      '• [השם|איטי] — סמכותי מאוד, קול אלוהי עמוק\n'+
+      '• [משה|רגיל] — מנהיג, נחרץ, סמכותי\n'+
+      '• [לוחם|מהיר] — אנרגטי, קצר, חד\n'+
+      '• [מלאך|רגיל] — שקט, מסתורי, רך\n'+
+      '• [נרטור|רגיל] — לתיאורי סצנה בלבד\n'+
+      '• כל שורה: מקסימום 15 מילים\n'+
+      '• התאם דמות לפי מה שקורה בכל סצנה\n'+
+      '• סצנת מתח → קצב מהיר. התגלות → איטי. דיאלוג → רגיל\n'+
+      '• ללא הסברים — רק שורות תסריט\n\n'+
+      'כתוב את התסריט:';
+
+    const raw = await callGemini(prompt, 8000);
+    const lines = raw.split('\n').filter(l => l.trim() && l.match(/^\[/));
+
+    document.getElementById('narText').value = raw.trim();
+    document.getElementById('narText').style.display = 'block';
+    document.getElementById('narBlocksWrap').innerHTML =
+      '<div style="background:rgba(200,164,74,.08);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px;">'+
+      '<div style="font-size:.74rem;color:var(--gold);margin-bottom:4px;">🎭 '+lines.length+' שורות דיבוב — ניתן לערוך למעלה</div>'+
+      '<div style="font-size:.7rem;color:var(--muted);">לחץ "צור קולות" ליצירת הדיבוב המלא</div></div>';
+
+    window._voiceLines = lines;
+    document.getElementById('btnTTS').textContent = '🎭 צור קולות';
+    document.getElementById('btnTTS').onclick = generateTTSMultiVoice;
+    document.getElementById('narStep2').style.display = 'block';
+    toast(lines.length+' שורות דיבוב מוכנות');
+  }catch(e){
+    toast('שגיאה: '+e.message);
+  }
+  btn.disabled = false;
+  btn.textContent = '🎭 דיבוב דמויות';
+}
+
+async function generateTTSMultiVoice(){
+  const lines = window._voiceLines;
+  if(!lines || !lines.length){ toast('אין תסריט דיבוב'); return; }
+
+  const btn = document.getElementById('btnTTS');
+  btn.disabled = true;
+
+  try{
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const audioBuffers = [];
+
+    for(let i=0;i<lines.length;i++){
+      const line = lines[i].trim();
+      const m = line.match(/^\[([^\|]+)\|([^\]]+)\]\s*(.*)/);
+      if(!m) continue;
+      const role = m[1].trim();
+      const speed = m[2].trim();
+      const text = m[3].trim();
+      if(!text) continue;
+
+      const cfg = VOICE_MAP[role] || VOICE_MAP['נרטור'];
+      let rateMulti = 1.0;
+      if(speed === 'איטי') rateMulti = 0.85;
+      else if(speed === 'מהיר') rateMulti = 1.15;
+      const finalRate = Math.min(Math.max(cfg.rate * rateMulti, 0.25), 4.0);
+
+      btn.textContent = '⏳ '+(i+1)+'/'+lines.length+' — '+role+'...';
+
+      const clean = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const ssml = '<speak><prosody rate="'+(finalRate*100).toFixed(0)+'%" pitch="'+cfg.pitch+'st">'+
+        clean+'</prosody><break time="'+cfg.breakMs+'ms"/></speak>';
+
+      const resp = await fetch(
+        'https://texttospeech.googleapis.com/v1/text:synthesize?key='+(S.ttsKey||S.apiKey),
+        {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            input:{ ssml },
+            voice:{ languageCode:'he-IL', name: cfg.voice },
+            audioConfig:{ audioEncoding:'MP3' }
+          })
+        }
+      );
+      if(!resp.ok){ const e=await resp.json(); throw new Error(e.error?.message||'שגיאת TTS'); }
+      const data = await resp.json();
+      const bytes = atob(data.audioContent);
+      const arr = new Uint8Array(bytes.length);
+      for(let j=0;j<bytes.length;j++) arr[j]=bytes.charCodeAt(j);
+      const ab = await audioCtx.decodeAudioData(arr.buffer);
+      audioBuffers.push(ab);
+    }
+
+    btn.textContent = '⏳ מחבר קולות...';
+    const sr = audioBuffers[0].sampleRate;
+    const totalLen = audioBuffers.reduce((s,b) => s+b.length, 0);
+    const merged = audioCtx.createBuffer(1, totalLen, sr);
+    const ch = merged.getChannelData(0);
+    let offset = 0;
+    for(const b of audioBuffers){
+      ch.set(b.getChannelData(0), offset);
+      offset += b.length;
+    }
+    audioCtx.close();
+
+    narBlob = audioBufferToWav(merged);
+    const url = URL.createObjectURL(narBlob);
+    const audio = document.getElementById('narAudio');
+    audio.src = url;
+    audio.style.display = 'block';
+    document.getElementById('narStep3').style.display = 'block';
+    toast('דיבוב מוכן — האזן לפני מיזוג');
+  }catch(e){
+    toast('שגיאת דיבוב: '+e.message);
+  }
+  btn.disabled = false;
+  btn.textContent = '🎭 צור קולות';
 }
 
 function downloadFinal(){
