@@ -1222,59 +1222,158 @@ async function startMerge(){
   document.getElementById('mergeProgress').style.display = 'block';
   document.getElementById('btnMerge').disabled = true;
   document.getElementById('mergeResult').style.display = 'none';
-
-  // Remove old error messages
   document.querySelectorAll('#mergeCard .msg.error').forEach(e=>e.remove());
 
+  const FADE_MS = 1600; // 1.6 sec cross-fade
+  const FPS = 30;
+
   try{
-    setMergeStatus('קורא קליפים...');
-    setMergePct(5);
+    // STEP 1: Preload ALL clips completely before starting
+    setMergeStatus('טוען קליפים...');
+    setMergePct(2);
 
-    // Read all files as ArrayBuffers
-    const buffers = [];
-    for(let i=0; i<VE.clips.length; i++){
-      const buf = await VE.clips[i].file.arrayBuffer();
-      buffers.push(buf);
-      setMergePct(5 + Math.round((i+1)/VE.clips.length * 40));
-      setMergeStatus('קורא קליפ ' + (i+1) + ' מתוך ' + VE.clips.length + '...');
+    const vids = [];
+    for(let i = 0; i < VE.clips.length; i++){
+      const v = document.createElement('video');
+      v.playsInline = true;
+      v.crossOrigin = 'anonymous';
+      v.preload = 'auto';
+      await new Promise((res) => {
+        v.src = VE.clips[i].url;
+        v.oncanplaythrough = res;
+        v.onerror = res;
+        v.load();
+      });
+      vids.push(v);
+      setMergePct(2 + Math.round((i+1)/VE.clips.length * 18));
+      setMergeStatus('טוען ' + (i+1) + '/' + VE.clips.length);
     }
 
-    setMergeStatus('מחבר קליפים...');
-    setMergePct(50);
+    setMergeStatus('מכין הקלטה...');
+    setMergePct(20);
 
-    // Simple concatenation - works for same-codec MP4s from Veo
-    // All Veo clips have identical codec/resolution so this works
-    const totalSize = buffers.reduce((s,b) => s+b.byteLength, 0);
-    const merged = new Uint8Array(totalSize);
-    let offset = 0;
-    for(const buf of buffers){
-      merged.set(new Uint8Array(buf), offset);
-      offset += buf.byteLength;
-      setMergePct(50 + Math.round(offset/totalSize * 45));
+    // STEP 2: Setup canvas + audio
+    const canvas = document.createElement('canvas');
+    canvas.width = 1280; canvas.height = 720;
+    const ctx = canvas.getContext('2d');
+    const videoStream = canvas.captureStream(FPS);
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const audioDest = audioCtx.createMediaStreamDestination();
+
+    // Connect all videos to audio context
+    const gains = vids.map(v => {
+      v.muted = false;
+      const src = audioCtx.createMediaElementSource(v);
+      const gain = audioCtx.createGain();
+      gain.gain.value = 0; // start silent
+      src.connect(gain);
+      gain.connect(audioDest);
+      return gain;
+    });
+
+    const combined = new MediaStream([
+      ...videoStream.getVideoTracks(),
+      ...audioDest.stream.getAudioTracks()
+    ]);
+
+    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
+      ? 'video/webm;codecs=vp9,opus' : 'video/webm';
+
+    const rec = new MediaRecorder(combined, { mimeType, videoBitsPerSecond: 8000000 });
+    const chunks = [];
+    rec.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
+    rec.start(100);
+
+    // STEP 3: Play and record with smooth cross-fade
+    for(let i = 0; i < vids.length; i++){
+      const curr = vids[i];
+      const next = i < vids.length - 1 ? vids[i+1] : null;
+      const gCurr = gains[i];
+      const gNext = next ? gains[i+1] : null;
+      const duration = isNaN(curr.duration) || curr.duration === Infinity ? 10 : curr.duration;
+
+      setMergeStatus('מעבד קליפ ' + (i+1) + ' מתוך ' + vids.length);
+      setMergePct(20 + Math.round(i / vids.length * 73));
+
+      // Fade in current
+      gCurr.gain.setValueAtTime(0, audioCtx.currentTime);
+      gCurr.gain.linearRampToValueAtTime(1, audioCtx.currentTime + FADE_MS/1000);
+
+      await curr.play();
+
+      await new Promise(resolve => {
+        const startTime = performance.now();
+
+        function frame(){
+          const elapsed = performance.now() - startTime;
+          const remaining = duration * 1000 - elapsed;
+
+          // Fade in (start of clip)
+          let alpha = 1;
+          if(i === 0 && elapsed < FADE_MS) alpha = elapsed / FADE_MS;
+
+          // Cross-fade out (end of clip into next)
+          if(next && remaining < FADE_MS){
+            alpha = remaining / FADE_MS;
+            // Start next video during fade
+            if(remaining < FADE_MS && next.paused){
+              next.play().catch(()=>{});
+              gNext.gain.setValueAtTime(0, audioCtx.currentTime);
+              gNext.gain.linearRampToValueAtTime(1, audioCtx.currentTime + FADE_MS/1000);
+            }
+          }
+
+          // Draw: next clip underneath, current on top fading out
+          ctx.fillStyle = '#000';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          if(next && remaining < FADE_MS){
+            ctx.globalAlpha = 1 - alpha;
+            try { ctx.drawImage(next, 0, 0, canvas.width, canvas.height); } catch(e){}
+          }
+
+          ctx.globalAlpha = alpha;
+          try { ctx.drawImage(curr, 0, 0, canvas.width, canvas.height); } catch(e){}
+          ctx.globalAlpha = 1;
+
+          if(elapsed < duration * 1000){
+            requestAnimationFrame(frame);
+          } else {
+            curr.pause();
+            resolve();
+          }
+        }
+
+        requestAnimationFrame(frame);
+      });
     }
 
-    setMergeStatus('מכין להורדה...');
-    setMergePct(97);
+    setMergeStatus('מסיים...');
+    setMergePct(95);
 
-    mergedBlob = new Blob(buffers.map(b => new Uint8Array(b)), {type:'video/mp4'});
+    await new Promise(resolve => { rec.onstop = resolve; rec.stop(); });
+    audioCtx.close();
+
+    mergedBlob = new Blob(chunks, { type: mimeType });
     const url = URL.createObjectURL(mergedBlob);
 
     setMergePct(100);
     setMergeStatus('מוכן!');
-
     document.getElementById('mergedVideo').src = url;
     document.getElementById('mergeResult').style.display = 'block';
     document.getElementById('mergeProgress').style.display = 'none';
     document.getElementById('btnMerge').disabled = false;
-    toast('הסרטון מוכן! לחץ שמור לגלריה');
+    toast('הסרטון מוכן!');
 
   }catch(e){
     document.getElementById('mergeProgress').style.display = 'none';
     document.getElementById('btnMerge').disabled = false;
     document.getElementById('mergeCard').insertAdjacentHTML('beforeend',
-      '<div class="msg error" style="margin-top:8px;">❌ '+e.message+'</div>');
+      '<div class="msg error" style="margin-top:8px;">❌ ' + e.message + '</div>');
   }
 }
+
 
 function setMergePct(p){
   document.getElementById('mergePct').textContent = p+'%';
@@ -1288,7 +1387,8 @@ function downloadMerged(){
   if(!mergedBlob){ toast('אין סרטון'); return; }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(mergedBlob);
-  a.download = (S.parasha?.h||'video') + '_מלא.mp4';
+  const ext = mergedBlob.type.includes('mp4') ? '.mp4' : '.webm';
+  a.download = (S.parasha?.h||'video') + '_מלא' + ext;
   a.click();
   toast('נשמר!');
 }
