@@ -548,35 +548,54 @@ function selByCalendar(ref,hn){
 // ════════════════════════════════════════
 // FETCH + BUILD PROMPTS (S2) — NO API KEY
 // ════════════════════════════════════════
+// ════════════════════════════════════════
+// FETCH PARASHA + BUILD PROMPTS WITH GEMINI
+// Gemini = חינמי | Veo = בתשלום
+// ════════════════════════════════════════
 async function fetchAndBuild(){
   if(!S.parasha){toast('בחר פרשה'); return;}
+
+  // Gemini API key required for prompt generation
+  S.apiKey = document.getElementById('apiKey').value.trim()
+           || localStorage.getItem('veo_key')
+           || S.apiKey || '';
+  if(!S.apiKey){
+    toast('נא להזין API key של Gemini בהגדרות — חינמי לגמרי');
+    showScreen(0);
+    return;
+  }
+
   showScreen(2);
   document.getElementById('s2loading').style.display='block';
   document.getElementById('s2content').style.display='none';
-  setMsg('שולף פרשה מ-Sefaria...');
 
   try{
-    // 1. Fetch parasha from Sefaria — FREE, no API key
-    const ref=encodeURIComponent(S.parasha.r.replace(/ /g,'.'));
-    const resp=await fetch('https://www.sefaria.org/api/texts/'+ref+'?lang=he&context=0');
-    const data=await resp.json();
-    let he=data.he||data.text;
-    let txt=Array.isArray(he)?flatText(he).join(' '):String(he);
-    txt=txt.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
-    if(txt.length>8000) txt=txt.substring(0,8000)+'...';
-    S.parashaText=txt;
+    // STEP 1: Fetch parasha text from Sefaria (free, no API)
+    setMsg('שולף פרשה מ-Sefaria...');
+    const ref = encodeURIComponent(S.parasha.r.replace(/ /g,'.'));
+    const resp = await fetch('https://www.sefaria.org/api/texts/'+ref+'?lang=he&context=0');
+    if(!resp.ok) throw new Error('שגיאה בשליפה מ-Sefaria');
+    const data = await resp.json();
+    let he = data.he || data.text;
+    let txt = Array.isArray(he) ? flatText(he).join(' ') : String(he);
+    txt = txt.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
+    if(txt.length > 9000) txt = txt.substring(0,9000)+'...';
+    S.parashaText = txt;
 
-    setMsg('בונה פרומפטים לפי כללי Veo 3...');
-
-    // 2. Build prompts locally — FREE, no API key
-    buildPromptsLocally();
+    // STEP 2: Use Gemini to build professional Veo 3 prompts
+    setMsg('Gemini בונה פרומפטים מקצועיים לVeo 3...');
+    await buildPromptsWithGemini();
 
   }catch(e){
     setMsg('שגיאה: '+e.message);
+    document.getElementById('s2loading').innerHTML =
+      '<div class="msg error">❌ '+e.message+'<br><button class="btn btn-ghost" style="margin-top:9px;" onclick="showScreen(1)">← חזור</button></div>';
   }
 }
 
-function setMsg(m){document.getElementById('s2loadMsg').textContent=m;}
+function setMsg(m){
+  document.getElementById('s2loadMsg').textContent=m;
+}
 
 function flatText(arr){
   const o=[];
@@ -587,119 +606,125 @@ function flatText(arr){
   return o;
 }
 
-// Build VEO 3 optimized prompts from parasha text — fully local, no API
-function buildPromptsLocally(){
+async function buildPromptsWithGemini(){
   const numClips = Math.ceil(S.durSec/8);
 
-  // Split parasha text into equal chunks
-  const sentences = S.parashaText.split(/[.!?׃]/).filter(s=>s.trim().length>10);
-  const chunkSize = Math.ceil(sentences.length/numClips);
+  // This is the master prompt that teaches Gemini exactly how to write
+  // professional Veo 3 prompts — based on Google's official prompt guide (updated March 2026)
+  const masterPrompt = `You are an expert at writing video generation prompts for Google Veo 3.
+You will read a Torah portion (Parasha) and create ${numClips} sequential video scene prompts.
 
-  // Key biblical themes for visual mapping
-  const visualThemes = {
-    'בראשית':  {env:'Garden of Eden, lush paradise',      light:'soft golden morning light'},
-    'נח':      {env:'ancient world, massive wooden ark',   light:'stormy dramatic sky, rain'},
-    'לך לך':   {env:'ancient Mesopotamia desert journey',  light:'harsh desert sun, long shadows'},
-    'וירא':    {env:'Mamre desert oasis, tent dwelling',   light:'blazing midday heat haze'},
-    'שמות':    {env:'ancient Egypt, pyramids and slaves',  light:'harsh Egyptian sun, dust'},
-    'בשלח':    {env:'Red Sea coastline, dramatic waves',   light:'dawn light on water'},
-    'יתרו':    {env:'Mount Sinai rocky wilderness',        light:'divine golden radiance'},
-    'default': {env:'ancient Judean landscape, hills',     light:'warm golden afternoon light'},
-  };
-  const theme = visualThemes[S.parasha.h] || visualThemes['default'];
+=== OFFICIAL VEO 3 PROMPT STRUCTURE (Google's guidelines, March 2026) ===
+Each prompt MUST contain these elements in this order:
 
-  S.scenes = [];
-  for(let i=0;i<numClips;i++){
-    const chunk = sentences.slice(i*chunkSize,(i+1)*chunkSize).join('. ').trim();
-    const isFirst = i===0;
-    const isLast  = i===numClips-1;
+1. SUBJECT — Who/what is the main focus? Be specific. Name the character, describe appearance.
+2. ACTION — What is happening right now? Use active verbs. Be precise and physical.
+3. SCENE/CONTEXT — Where? What time of day? What environment surrounds them?
+4. CAMERA — Shot type + movement. Must choose from:
+   [extreme wide shot / wide shot / medium shot / close-up / extreme close-up]
+   + [static / slow pan / tracking shot / drone pullback / push-in / tilt up/down]
+5. VISUAL STYLE — Always include: "cinematic 3D biblical animation, Pixar-quality photorealistic render, ancient Middle East setting"
+6. LIGHTING — Be specific: golden hour sunlight / dramatic storm light / firelight / dawn mist / harsh midday sun
+7. AUDIO — Describe ambient sounds: wind, crowd murmur, silence, footsteps, water
+8. NEGATIVE PROMPT — End with: "No text overlays. No subtitles. No modern elements."
 
-    // Camera variety — Veo 3 responds best to specific camera instructions
-    const cameras = [
-      'extreme wide establishing shot, slow drone pull-back',
-      'medium shot, slow cinematic push-in',
-      'close-up on face, shallow depth of field',
-      'over-the-shoulder medium shot',
-      'low angle heroic shot looking up',
-      'wide shot with foreground element, rack focus',
-      'tracking shot following subject',
-      'static wide shot, subtle atmospheric movement',
-    ];
-    const camera = cameras[i % cameras.length];
+=== CRITICAL RULES ===
+- Each scene must be COMPLETELY DIFFERENT from the previous — different location, camera, lighting, action
+- Maintain NARRATIVE CONTINUITY — each scene flows from the previous one
+- Be SPECIFIC to the actual Torah text — describe what literally happens in that passage
+- Write in PRESENT TENSE — "Moses raises his staff" not "Moses raised his staff"
+- Keep prompts to 80-120 words — not too short (vague) not too long (confused)
+- The 8-second duration means ONE clear action — not multiple events
+- Characters must be CONSISTENT across scenes — same description each time they appear
 
-    // Build Veo 3 optimized prompt
-    const prompt = [
-      // Style — always first per Google guidelines
-      `${VEO_STYLE}.`,
-      // Environment
-      `Setting: ${theme.env}.`,
-      // Lighting
-      `Lighting: ${theme.light}, dramatic shadows, rich warm color grade.`,
-      // Camera
-      `Camera: ${camera}.`,
-      // Action/Subject from parasha
-      `Scene: ${summarizeChunk(chunk, S.parasha.h, i, numClips)}.`,
-      // Atmosphere
-      `Atmosphere: ${isFirst?'epic opening, sense of ancient grandeur':isLast?'powerful emotional conclusion, sense of destiny':'tense dramatic moment, ancient world feeling'}.`,
-      // Technical Veo requirements
-      `No text overlays. No subtitles. Photorealistic characters with period-accurate Hebrew attire.`,
-    ].join(' ');
+=== PARASHA ===
+Name: ${S.parasha.h}
+Duration: ${S.durSec} seconds total / ${numClips} scenes of 8 seconds each
 
-    // Score the prompt against Veo 3 criteria
-    const checks = scorePrompt(prompt);
-    const score = Math.round(checks.filter(c=>c.pass).length / checks.length * 10);
+Full text:
+---
+${S.parashaText}
+---
 
-    S.scenes.push({
-      id: i+1,
-      hebrewDesc: getHebrewDesc(chunk, i, numClips, S.parasha.h),
-      prompt,
-      duration: 8,
-      score,
-      checks,
-    });
+=== YOUR TASK ===
+1. Read the full parasha text above
+2. Divide it into ${numClips} equal narrative segments with clear story progression
+3. For each segment write one professional Veo 3 prompt following the structure above
+4. The ${numClips} scenes together should tell the complete story of the parasha
+
+Return ONLY valid JSON, no markdown, no explanation:
+{
+  "scenes": [
+    {
+      "id": 1,
+      "hebrewDesc": "one sentence in Hebrew describing what happens in this scene",
+      "prompt": "full English Veo 3 prompt here following the official structure",
+      "duration": 8
+    }
+  ]
+}`;
+
+  const raw = await callGemini(masterPrompt, 8000);
+  const clean = raw.replace(/```json|```/g,'').trim();
+
+  let parsed;
+  try{
+    parsed = JSON.parse(clean);
+  }catch(e){
+    const match = clean.match(/\{[\s\S]*\}/);
+    if(match) parsed = JSON.parse(match[0]);
+    else throw new Error('Gemini לא החזיר JSON תקין — נסה שוב');
   }
+
+  if(!parsed.scenes||!parsed.scenes.length)
+    throw new Error('לא התקבלו סצנות מ-Gemini');
+
+  S.scenes = parsed.scenes.map(sc=>{
+    const checks = scorePrompt(sc.prompt);
+    const score = Math.round(checks.filter(c=>c.pass).length/checks.length*10);
+    return {...sc, checks, score};
+  });
 
   renderS2();
 }
 
-function summarizeChunk(chunk, parshaName, idx, total){
-  if(!chunk||chunk.length<10){
-    return `A dramatic biblical scene from Parashat ${parshaName}, moment ${idx+1} of ${total}, ancient figures in meaningful interaction`;
-  }
-  // Clean Hebrew text to brief English visual description cue
-  const cleaned = chunk.substring(0,200).replace(/[^\u0590-\u05FF\s]/g,'').trim();
-  return `Biblical scene from Parashat ${parshaName}: ancient Hebrew figures in dramatic interaction, conveying the story's key moment ${idx+1}`;
-}
-
-function getHebrewDesc(chunk, idx, total, parshaName){
-  const descs = [
-    `פתיחה — פרשת ${parshaName}`,
-    `סצנה מרכזית — אירוע ראשון`,
-    `התפתחות הסיפור`,
-    `שיא הדרמה`,
-    `מפנה בסיפור`,
-    `השלכות ותוצאות`,
-    `מסר מרכזי`,
-    `סיום — פרשת ${parshaName}`,
-  ];
-  if(idx===0) return `פתיחה — פרשת ${parshaName}`;
-  if(idx===total-1) return `סיום — פרשת ${parshaName}`;
-  return descs[idx % descs.length] || `סצנה ${idx+1}`;
-}
 
 function scorePrompt(p){
   return VEO_CHECKS.map(c=>{
-    let pass = false;
-    if(c.k==='subject')  pass = p.length > 50;
-    if(c.k==='action')   pass = /shot|tracking|push|pull|pan|dolly|crane|cut/i.test(p);
-    if(c.k==='camera')   pass = /camera|shot|angle|pan|zoom|close.up|wide|tracking|drone/i.test(p);
-    if(c.k==='lighting') pass = /light|shadow|golden|dramatic|warm|cool|sun|glow|dawn|dusk/i.test(p);
-    if(c.k==='style')    pass = /cinematic|animation|render|quality|Pixar|biblical/i.test(p);
-    if(c.k==='no_text')  pass = /no text|no subtitle/i.test(p);
-    if(c.k==='duration') pass = /8 second/i.test(p);
-    if(c.k==='emotion')  pass = /atmosphere|emotion|dramatic|feeling|tension|epic|grand/i.test(p);
-    return {...c, pass};
+    let pass=false;
+    if(c.k==='subject')  pass=p.length>100;
+    if(c.k==='action')   pass=/shot|tracking|push|pull|pan|dolly|crane|walk|run|speak|gesture/i.test(p);
+    if(c.k==='camera')   pass=/camera|shot|angle|pan|zoom|close.up|wide|tracking|drone|tilt/i.test(p);
+    if(c.k==='lighting') pass=/light|shadow|golden|dramatic|warm|cool|sun|glow|dawn|dusk|bright|dark/i.test(p);
+    if(c.k==='style')    pass=/cinematic|animation|render|quality|Pixar|biblical|3D/i.test(p);
+    if(c.k==='no_text')  pass=/no text|no subtitle/i.test(p);
+    if(c.k==='duration') pass=/8 second/i.test(p);
+    if(c.k==='emotion')  pass=/atmosphere|emotion|dramatic|feeling|tension|epic|grand|solemn|joyful|fearful/i.test(p);
+    return {...c,pass};
   });
+}
+
+// ════════════════════════════════════════
+// GEMINI API
+// ════════════════════════════════════════
+async function callGemini(prompt, maxTokens=2000){
+  const resp = await fetch(
+    'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+S.apiKey,
+    {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        contents:[{parts:[{text:prompt}]}],
+        generationConfig:{temperature:0.7, maxOutputTokens:maxTokens}
+      })
+    }
+  );
+  if(!resp.ok){
+    const e=await resp.json();
+    throw new Error(e.error?.message||'שגיאת Gemini API');
+  }
+  const d=await resp.json();
+  return d.candidates?.[0]?.content?.parts?.[0]?.text||'';
 }
 
 function renderS2(){
