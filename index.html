@@ -1447,8 +1447,8 @@ async function startMerge(){
         }, delay);
       }
 
-      // Reset and play
-      curr.currentTime = 0;
+      // Reset and play — רק אם הקליפ לא כבר רץ מה-cross-fade
+      if(curr.paused) curr.currentTime = 0;
       await curr.play();
 
       // Draw loop עם cross-fade אוטומטי
