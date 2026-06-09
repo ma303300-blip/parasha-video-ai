@@ -238,9 +238,7 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
 .clip-dur{font-size:.68rem;color:var(--muted);flex-shrink:0;}
 .clip-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:0 3px;flex-shrink:0;}
 .clip-del:hover{color:var(--red);}
-.fade-btn{background:var(--s3);border:1px solid var(--border);border-radius:5px;color:var(--muted);cursor:pointer;font-size:.7rem;padding:3px 6px;flex-shrink:0;transition:all .18s;}
-.fade-btn:hover{border-color:var(--gold);color:var(--glt);}
-.fade-btn.active{background:var(--gdim);border-color:var(--gold);color:var(--glt);}
+
 
 @media(max-width:560px){
   .ov-grid{grid-template-columns:1fr 1fr;}
@@ -1317,8 +1315,6 @@ function updateClipUI(){
 
   const list = document.getElementById('clipList');
   list.innerHTML = VE.clips.map((cl,i) => {
-    const fadeIn  = cl.fadeIn  ? 'active' : '';
-    const fadeOut = cl.fadeOut ? 'active' : '';
     return `
     <div class="clip-item" id="ci${i}" draggable="true"
       ondragstart="dragStart(${i})" ondragover="dragOver(event,${i})"
@@ -1326,19 +1322,9 @@ function updateClipUI(){
       <div class="clip-num">${i+1}</div>
       <video class="clip-thumb" src="${cl.url}" muted></video>
       <div class="clip-name">${cl.name}</div>
-      <div style="display:flex;gap:4px;flex-shrink:0;">
-        <button class="fade-btn ${fadeIn}"  onclick="toggleFade(${i},'in')"  title="Fade In">▶️</button>
-        <button class="fade-btn ${fadeOut}" onclick="toggleFade(${i},'out')" title="Fade Out">⏹️</button>
-      </div>
       <button class="clip-del" onclick="removeClip(${i})">✕</button>
     </div>`;
   }).join('');
-}
-
-function toggleFade(idx, type){
-  if(type === 'in')  VE.clips[idx].fadeIn  = !VE.clips[idx].fadeIn;
-  if(type === 'out') VE.clips[idx].fadeOut = !VE.clips[idx].fadeOut;
-  updateClipUI();
 }
 
 // Drag and drop sorting
@@ -1423,6 +1409,8 @@ async function startMerge(){
     rec.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
     rec.start(100);
 
+    const XFADE_MS = 800; // 0.8 שניות cross-fade בין קליפים
+
     // STEP 3: Play each clip
     for(let i = 0; i < vids.length; i++){
       const curr    = vids[i];
@@ -1431,6 +1419,8 @@ async function startMerge(){
       const durMs   = (isNaN(curr.duration)||!isFinite(curr.duration) ? 10 : curr.duration) * 1000;
       const doFadeIn  = !!clip.fadeIn;
       const doFadeOut = !!clip.fadeOut;
+      const next    = vids[i+1] || null;
+      const gNext   = gains[i+1] || null;
 
       setMergeStatus('מעבד קליפ ' + (i+1) + ' מתוך ' + vids.length);
       setMergePct(18 + Math.round(i / vids.length * 75));
@@ -1439,11 +1429,9 @@ async function startMerge(){
       const now = audioCtx.currentTime;
       gCurr.gain.cancelScheduledValues(now);
       if(doFadeIn){
-        // Fade in: 0 → 1 over FADE_IN_MS
         gCurr.gain.setValueAtTime(0, now);
         gCurr.gain.linearRampToValueAtTime(1, now + FADE_IN_MS/1000);
       } else {
-        // Start at full volume immediately
         gCurr.gain.setValueAtTime(1, now);
       }
 
@@ -1459,20 +1447,64 @@ async function startMerge(){
         }, delay);
       }
 
+      // הכן את הקליפ הבא מראש
+      if(next){
+        next.currentTime = 0;
+        next.muted = true;
+        next.play().catch(()=>{});
+        next.pause();
+        next.currentTime = 0;
+        next.muted = false;
+        if(gNext) gNext.gain.setValueAtTime(0, audioCtx.currentTime);
+      }
+
       // Reset and play
       curr.currentTime = 0;
       await curr.play();
 
-      // Draw loop — simple, no cross-fade between clips
+      // Draw loop עם cross-fade אוטומטי
       await new Promise(resolve => {
         const t0 = performance.now();
+        let nextStarted = false;
 
         function frame(){
           const elapsed = performance.now() - t0;
-          ctx.drawImage(curr, 0, 0, canvas.width, canvas.height);
+          const remaining = durMs - elapsed;
+
+          // Cross-fade zone — 0.8 שניות לפני הסוף
+          if(next && remaining <= XFADE_MS && !nextStarted){
+            nextStarted = true;
+            next.currentTime = 0;
+            next.play().catch(()=>{});
+            if(gNext){
+              const t = audioCtx.currentTime;
+              gNext.gain.cancelScheduledValues(t);
+              gNext.gain.setValueAtTime(0, t);
+              gNext.gain.linearRampToValueAtTime(1, t + XFADE_MS/1000);
+            }
+          }
+
           if(elapsed < durMs){
+            // ציור הקליפ הנוכחי
+            ctx.globalAlpha = 1;
+            ctx.drawImage(curr, 0, 0, canvas.width, canvas.height);
+
+            // ציור הקליפ הבא מעליו עם opacity עולה
+            if(next && nextStarted){
+              const xPct = Math.min(1, (XFADE_MS - remaining) / XFADE_MS);
+              ctx.globalAlpha = xPct;
+              ctx.drawImage(next, 0, 0, canvas.width, canvas.height);
+              ctx.globalAlpha = 1;
+              // הנמך את הקליפ הנוכחי
+              if(!doFadeOut){
+                const t = audioCtx.currentTime;
+                gCurr.gain.cancelScheduledValues(t);
+                gCurr.gain.setValueAtTime(Math.max(0,1-xPct), t);
+              }
+            }
             requestAnimationFrame(frame);
           } else {
+            ctx.globalAlpha = 1;
             if(fadeOutTimer) clearTimeout(fadeOutTimer);
             curr.pause();
             gCurr.gain.setValueAtTime(0, audioCtx.currentTime);
