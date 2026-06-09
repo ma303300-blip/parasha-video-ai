@@ -238,6 +238,9 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
 .clip-dur{font-size:.68rem;color:var(--muted);flex-shrink:0;}
 .clip-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:0 3px;flex-shrink:0;}
 .clip-del:hover{color:var(--red);}
+.fade-btn{background:var(--s3);border:1px solid var(--border);border-radius:5px;color:var(--muted);cursor:pointer;font-size:.7rem;padding:3px 6px;flex-shrink:0;transition:all .18s;}
+.fade-btn:hover{border-color:var(--gold);color:var(--glt);}
+.fade-btn.active{background:var(--gdim);border-color:var(--gold);color:var(--glt);}
 
 @media(max-width:560px){
   .ov-grid{grid-template-columns:1fr 1fr;}
@@ -902,7 +905,7 @@ CRITICAL MUSIC RULE — treat the music like a real film score:
 
 IMPORTANT: Return ONLY a JSON array. No markdown. No explanation. Start with { immediately.
 
-[STYLE]: High-budget 3D animated film, photorealistic CGI 4K. Prince of Egypt meets Pixar. FULLY RENDERED 3D ANIMATION. 10 seconds. FAMILY FRIENDLY — suitable for all ages including young children. NO violence, NO blood, NO gore, NO weapons used harmfully. War or conflict shown only as distant movement of crowds, never up-close violence.
+[STYLE]: High-budget 3D animated film, photorealistic CGI 4K. Prince of Egypt meets Pixar. FULLY RENDERED 3D ANIMATION. 10 seconds. FAMILY FRIENDLY — suitable for all ages including young children. NO violence, NO blood, NO gore. REQUIRED AUDIO TRANSITIONS: seconds 0.0-1.5 audio fades IN from silence to full volume; seconds 7.5-10.0 audio fades OUT from full volume to silence. REQUIRED VISUAL: seconds 7.5-10.0 scene gradually darkens slightly (subtle vignette). These transitions are mandatory in every scene.
 [CHARACTERS]: Full detail — name, age, face, beard, hair, exact clothing. Consistent across scenes.
 [ACTION]: Precise movements and micro-expressions.
 [DIALOGUE]: NO spoken dialogue. NO character voices. NO narration. Complete silence on voices — only ambient sound and music.
@@ -1274,15 +1277,29 @@ function updateClipUI(){
   document.getElementById('clipCount').textContent = '(' + VE.clips.length + ')';
 
   const list = document.getElementById('clipList');
-  list.innerHTML = VE.clips.map((cl,i) => `
+  list.innerHTML = VE.clips.map((cl,i) => {
+    const fadeIn  = cl.fadeIn  ? 'active' : '';
+    const fadeOut = cl.fadeOut ? 'active' : '';
+    return `
     <div class="clip-item" id="ci${i}" draggable="true"
       ondragstart="dragStart(${i})" ondragover="dragOver(event,${i})"
       ondrop="dropOn(${i})" ondragleave="dragLeave(${i})">
       <div class="clip-num">${i+1}</div>
       <video class="clip-thumb" src="${cl.url}" muted></video>
       <div class="clip-name">${cl.name}</div>
+      <div style="display:flex;gap:4px;flex-shrink:0;">
+        <button class="fade-btn ${fadeIn}"  onclick="toggleFade(${i},'in')"  title="Fade In">▶️</button>
+        <button class="fade-btn ${fadeOut}" onclick="toggleFade(${i},'out')" title="Fade Out">⏹️</button>
+      </div>
       <button class="clip-del" onclick="removeClip(${i})">✕</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
+}
+
+function toggleFade(idx, type){
+  if(type === 'in')  VE.clips[idx].fadeIn  = !VE.clips[idx].fadeIn;
+  if(type === 'out') VE.clips[idx].fadeOut = !VE.clips[idx].fadeOut;
+  updateClipUI();
 }
 
 // Drag and drop sorting
@@ -1309,15 +1326,15 @@ async function startMerge(){
   document.getElementById('mergeResult').style.display = 'none';
   document.querySelectorAll('#mergeCard .msg.error').forEach(e=>e.remove());
 
-  const FPS          = 30;
-  const FADE_VID_MS  = 1200;  // visual cross-fade
-  const AUDIO_OUT_MS = 2500;  // how long before end audio starts fading out
-  const AUDIO_IN_MS  = 1200;  // audio fade-in for next clip
+  const FPS        = 30;
+  const FADE_IN_MS = 1500; // 1.5s fade-in audio when fadeIn button active
+  const FADE_OUT_MS= 1500; // 1.5s fade-out audio when fadeOut button active
 
   try{
     // STEP 1: Preload all clips
     setMergeStatus('טוען קליפים...');
     setMergePct(2);
+
     const vids = [];
     for(let i = 0; i < VE.clips.length; i++){
       const v = document.createElement('video');
@@ -1344,10 +1361,10 @@ async function startMerge(){
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const audioDest = audioCtx.createMediaStreamDestination();
 
-    // One gain node per clip, all start at 0
+    // Gain nodes — all start at 0
     const gains = vids.map(v => {
       v.muted = false;
-      const src = audioCtx.createMediaElementSource(v);
+      const src  = audioCtx.createMediaElementSource(v);
       const gain = audioCtx.createGain();
       gain.gain.value = 0;
       src.connect(gain);
@@ -1367,98 +1384,62 @@ async function startMerge(){
     rec.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
     rec.start(100);
 
-    // STEP 3: Play each clip with cross-fade
+    // STEP 3: Play each clip
     for(let i = 0; i < vids.length; i++){
-      const curr  = vids[i];
-      const next  = i < vids.length - 1 ? vids[i+1] : null;
-      const gCurr = gains[i];
-      const gNext = next ? gains[i+1] : null;
-      const durMs = (isNaN(curr.duration) || !isFinite(curr.duration) ? 10 : curr.duration) * 1000;
+      const curr    = vids[i];
+      const gCurr   = gains[i];
+      const clip    = VE.clips[i];
+      const durMs   = (isNaN(curr.duration)||!isFinite(curr.duration) ? 10 : curr.duration) * 1000;
+      const doFadeIn  = !!clip.fadeIn;
+      const doFadeOut = !!clip.fadeOut;
 
       setMergeStatus('מעבד קליפ ' + (i+1) + ' מתוך ' + vids.length);
       setMergePct(18 + Math.round(i / vids.length * 75));
 
-      // Only reset currentTime if clip hasn't started yet (avoid jumping if audio pre-started it)
-      if(curr.paused) curr.currentTime = 0;
-
-      // Fade in current clip audio (fast, 0.4s)
+      // Set initial gain
       const now = audioCtx.currentTime;
       gCurr.gain.cancelScheduledValues(now);
-      gCurr.gain.setValueAtTime(gCurr.gain.value, now);
-      gCurr.gain.linearRampToValueAtTime(1, now + 0.4);
+      if(doFadeIn){
+        // Fade in: 0 → 1 over FADE_IN_MS
+        gCurr.gain.setValueAtTime(0, now);
+        gCurr.gain.linearRampToValueAtTime(1, now + FADE_IN_MS/1000);
+      } else {
+        // Start at full volume immediately
+        gCurr.gain.setValueAtTime(1, now);
+      }
 
-      // Start playing
-      if(curr.paused) await curr.play();
+      // Schedule fade-out if requested
+      let fadeOutTimer = null;
+      if(doFadeOut){
+        const delay = Math.max(0, durMs - FADE_OUT_MS);
+        fadeOutTimer = setTimeout(() => {
+          const t = audioCtx.currentTime;
+          gCurr.gain.cancelScheduledValues(t);
+          gCurr.gain.setValueAtTime(gCurr.gain.value, t);
+          gCurr.gain.linearRampToValueAtTime(0, t + FADE_OUT_MS/1000);
+        }, delay);
+      }
 
-      // After play confirmed — schedule audio fade-out
-      const fadeOutDelay = Math.max(0, durMs - AUDIO_OUT_MS);
-      let nextAudioStarted = false;
-      const audioTimer = setTimeout(() => {
-        const t = audioCtx.currentTime;
-        // Fade out current
-        gCurr.gain.cancelScheduledValues(t);
-        gCurr.gain.setValueAtTime(gCurr.gain.value, t);
-        gCurr.gain.linearRampToValueAtTime(0, t + AUDIO_OUT_MS / 1000);
-        // Fade in next (overlapping)
-        if(next && gNext && !nextAudioStarted){
-          nextAudioStarted = true;
-          gNext.gain.cancelScheduledValues(t);
-          gNext.gain.setValueAtTime(0, t);
-          gNext.gain.linearRampToValueAtTime(1, t + AUDIO_IN_MS / 1000);
-          // Pre-start next clip audio (paused at 0, gain=0 so silent)
-          if(next.paused){
-            next.currentTime = 0;
-            next.play().catch(()=>{});
-          }
-        }
-      }, fadeOutDelay);
+      // Reset and play
+      curr.currentTime = 0;
+      await curr.play();
 
-      // Draw loop — visual cross-fade
+      // Draw loop — simple, no cross-fade between clips
       await new Promise(resolve => {
         const t0 = performance.now();
-        let vidFadeStarted = false;
 
         function frame(){
-          const elapsed   = performance.now() - t0;
-          const remaining = durMs - elapsed;
-
-          // Alpha: fade in for very first clip only
-          let alpha = 1;
-          if(i === 0 && elapsed < 400) alpha = elapsed / 400;
-
-          // Visual fade-out to next clip
-          if(next && remaining <= FADE_VID_MS){
-            alpha = Math.max(0, remaining / FADE_VID_MS);
-            // Ensure next is playing for visual (audio timer may have already started it)
-            if(!vidFadeStarted){
-              vidFadeStarted = true;
-              if(next.paused){
-                if(!nextAudioStarted) next.currentTime = 0;
-                next.play().catch(()=>{});
-              }
-            }
-          }
-
-          // Draw frame
-          ctx.fillStyle = '#000';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          if(next && remaining <= FADE_VID_MS){
-            ctx.globalAlpha = 1;
-            try { ctx.drawImage(next, 0, 0, canvas.width, canvas.height); } catch(e){}
-          }
-          ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
-          try { ctx.drawImage(curr, 0, 0, canvas.width, canvas.height); } catch(e){}
-          ctx.globalAlpha = 1;
-
+          const elapsed = performance.now() - t0;
+          ctx.drawImage(curr, 0, 0, canvas.width, canvas.height);
           if(elapsed < durMs){
             requestAnimationFrame(frame);
           } else {
-            clearTimeout(audioTimer);
+            if(fadeOutTimer) clearTimeout(fadeOutTimer);
             curr.pause();
+            gCurr.gain.setValueAtTime(0, audioCtx.currentTime);
             resolve();
           }
         }
-
         requestAnimationFrame(frame);
       });
     }
