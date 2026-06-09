@@ -565,9 +565,9 @@ function selByCalendar(ref, hn) {
 
 async function fetchParasha() {
   if (!S.parasha) { toast('בחר פרשה תחילה'); return; }
-  // Get API key
-  S.apiKey = document.getElementById('apiKey').value.trim() || localStorage.getItem('veo_key') || '';
-  if (!S.apiKey) { toast('נא להזין API key בהגדרות'); return; }
+  // Save API key if entered, but don't require it here
+  const k = document.getElementById('apiKey').value.trim() || localStorage.getItem('veo_key') || '';
+  if (k) S.apiKey = k;
 
   showScreen(2);
   const st = document.getElementById('scriptStatus');
@@ -621,6 +621,13 @@ ${S.parashaText}
 • פתיחה חזקה שמיד מושכת
 
 החזר את טקסט התסריט בלבד — ללא כותרות.`;
+
+  // API key required here for Gemini
+  S.apiKey = document.getElementById('apiKey').value.trim() || localStorage.getItem('veo_key') || S.apiKey || '';
+  if (!S.apiKey) {
+    document.getElementById('scriptStatus').innerHTML = '<span style="color:var(--red)">❌ נא להזין API key בהגדרות כדי לייצר תסריט</span>';
+    return;
+  }
 
   try {
     const text = await callGemini(prompt, 3000);
