@@ -528,12 +528,40 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
       <div style="font-size:.84rem;font-weight:600;color:var(--glt);margin-bottom:8px;">שלב 2 — יצירת קול</div>
       <div class="fld" style="margin-bottom:10px;">
         <label>קול</label>
-        <select id="narVoice" style="direction:rtl;">
-          <optgroup label="🌟 Gemini TTS — הכי טבעי">
-            <option value="gemini-tts-male" selected>Gemini TTS — גברי ★ מומלץ לקריינות</option>
-            <option value="gemini-tts-female">Gemini TTS — נשי</option>
+        <select id="narVoice" style="direction:ltr;text-align:right;">
+          <optgroup label="🌟 Gemini 3.1 Flash TTS">
+            <option value="gemini-Achird" selected>Achird — ידידותי (מומלץ)</option>
+            <option value="gemini-Sulafat">Sulafat — חמים</option>
+            <option value="gemini-Charon">Charon — אינפורמטיבי</option>
+            <option value="gemini-Sadaltager">Sadaltager — בקיא</option>
+            <option value="gemini-Gacrux">Gacrux — בוגר</option>
+            <option value="gemini-Rasalgethi">Rasalgethi — אינפורמטיבי</option>
+            <option value="gemini-Alnilam">Alnilam — יציב</option>
+            <option value="gemini-Schedar">Schedar — אחיד</option>
+            <option value="gemini-Iapetus">Iapetus — ברור</option>
+            <option value="gemini-Algenib">Algenib — גרגרני/עמוק</option>
+            <option value="gemini-Orus">Orus — יציב</option>
+            <option value="gemini-Kore">Kore — נחרץ</option>
+            <option value="gemini-Fenrir">Fenrir — נרגש</option>
+            <option value="gemini-Umbriel">Umbriel — קל</option>
+            <option value="gemini-Algieba">Algieba — חלק</option>
+            <option value="gemini-Despina">Despina — חלק</option>
+            <option value="gemini-Zubenelgenubi">Zubenelgenubi — קז'ואל</option>
+            <option value="gemini-Vindemiatrix">Vindemiatrix — עדין</option>
+            <option value="gemini-Sadachbia">Sadachbia — חיוני</option>
+            <option value="gemini-Pulcherrima">Pulcherrima — קדמי</option>
+            <option value="gemini-Aoede">Aoede — קליל</option>
+            <option value="gemini-Autonoe">Autonoe — בהיר</option>
+            <option value="gemini-Laomedeia">Laomedeia — עליז</option>
+            <option value="gemini-Puck">Puck — עליז</option>
+            <option value="gemini-Achernar">Achernar — רך</option>
+            <option value="gemini-Leda">Leda — צעיר</option>
+            <option value="gemini-Zephyr">Zephyr — בהיר</option>
+            <option value="gemini-Enceladus">Enceladus — נשימתי</option>
+            <option value="gemini-Erinome">Erinome — ברור</option>
+            <option value="gemini-Callirrhoe">Callirrhoe — קל</option>
           </optgroup>
-          <optgroup label="WaveNet — טבעי">
+          <optgroup label="WaveNet — גיבוי">
             <option value="he-IL-Wavenet-A">WaveNet — נשי (A)</option>
             <option value="he-IL-Wavenet-B">WaveNet — גברי (B)</option>
             <option value="he-IL-Wavenet-C">WaveNet — נשי (C)</option>
@@ -1734,34 +1762,27 @@ async function generateTTS(){
   try{
     const voice = document.getElementById('narVoice').value;
 
-    if(voice.startsWith('gemini-tts')){
-      // ── Gemini TTS ──
-      const isFemale = voice === 'gemini-tts-female';
-      const voiceName = isFemale ? 'Aoede' : 'Charon';
-      const stylePrompt = 'דבר כמו קריין סרט תנכי סיפורי — עברית ברורה, קצב איטי ומרגש, טון עמוק וסמכותי, כמו Testament של Netflix.';
+    if(voice.startsWith('gemini-')){
+      // ── Gemini 3.1 Flash TTS ──
+      const voiceName = voice.replace('gemini-', '');
+      const stylePrompt = 'קרא בעברית כמו קריין סרט תנכי סיפורי — קול חם, קצב איטי ומרגש, טון עמוק וסמכותי.';
 
       const resp = await fetch(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key='+S.apiKey,
+        'https://texttospeech.googleapis.com/v1beta1/text:synthesize?key='+(S.ttsKey||S.apiKey),
         {
           method:'POST',
           headers:{'Content-Type':'application/json'},
           body: JSON.stringify({
-            contents:[{ parts:[{ text: stylePrompt + '\n\n' + text }] }],
-            generationConfig:{
-              responseModalities:['AUDIO'],
-              speechConfig:{
-                voiceConfig:{
-                  prebuiltVoiceConfig:{ voiceName }
-                }
-              }
-            }
+            audioConfig:{ audioEncoding:'LINEAR16', pitch:0, speakingRate:1 },
+            input:{ prompt: stylePrompt, text },
+            voice:{ languageCode:'he-il', modelName:'gemini-3.1-flash-tts-preview', name: voiceName }
           })
         }
       );
       if(!resp.ok){ const e=await resp.json(); throw new Error(e.error?.message||'שגיאת Gemini TTS'); }
       const data = await resp.json();
-      const b64 = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-      if(!b64) throw new Error('לא התקבל אודיו מ-Gemini TTS');
+      const b64 = data.audioContent;
+      if(!b64) throw new Error('לא התקבל אודיו');
       const bytes = atob(b64);
       const arr = new Uint8Array(bytes.length);
       for(let i=0;i<bytes.length;i++) arr[i]=bytes.charCodeAt(i);
