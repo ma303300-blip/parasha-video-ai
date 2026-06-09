@@ -6,7 +6,7 @@
 <title>פרשת השבוע — יוצר סרטונים AI</title>
 
 <!-- PWA -->
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#c8a44a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,8 +14,6 @@
 <meta name="apple-mobile-web-app-title" content="פרשה AI">
 
 <!-- Apple Icons -->
-<link rel="apple-touch-icon" href="icon-152.png">
-<link rel="apple-touch-icon" sizes="152x152" href="icon-152.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
 
 <!-- Favicon -->
@@ -1101,6 +1099,13 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 // SERVICE WORKER
+// Show install banner as soon as prompt is available
+let _promptReady = false;
+window.addEventListener('appinstalled', () => {
+  const b = document.getElementById('_ib');
+  if(b) b.remove();
+});
+
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
@@ -1115,7 +1120,7 @@ window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   _deferredPrompt = e;
   if(!window.matchMedia('(display-mode: standalone)').matches){
-    setTimeout(() => _showInstallBanner(), 4000);
+    _showInstallBanner();
   }
 });
 function _showInstallBanner(){
@@ -1123,7 +1128,7 @@ function _showInstallBanner(){
   const b = document.createElement('div');
   b.id = '_ib';
   b.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0f0f1c;border:1px solid #c8a44a;border-radius:14px;padding:12px 18px;display:flex;align-items:center;gap:11px;z-index:9999;max-width:320px;width:calc(100% - 40px);box-shadow:0 8px 32px rgba(0,0,0,.6);';
-  b.innerHTML = '<img src="icon-72.png" style="width:38px;height:38px;border-radius:8px;"><div style="flex:1;"><div style="font-size:.83rem;font-weight:700;color:#e8cc80;font-family:Heebo,sans-serif;">התקן כאפליקציה</div><div style="font-size:.72rem;color:#7a7568;font-family:Heebo,sans-serif;">גישה מהירה מהמסך הראשי</div></div><button onclick="_installPWA()" style="background:linear-gradient(135deg,#c8a44a,#9a7828);border:none;border-radius:7px;color:#07070f;font-family:Heebo,sans-serif;font-size:.78rem;font-weight:700;padding:7px 11px;cursor:pointer;">התקן</button><button onclick="document.getElementById('_ib').remove()" style="background:none;border:none;color:#7a7568;cursor:pointer;font-size:1rem;padding:2px 4px;">✕</button>';
+  b.innerHTML = '<img src="icon-192.png" style="width:40px;height:40px;border-radius:9px;"><div style="flex:1;"><div style="font-size:.83rem;font-weight:700;color:#e8cc80;font-family:Heebo,sans-serif;">התקן כאפליקציה</div><div style="font-size:.72rem;color:#7a7568;font-family:Heebo,sans-serif;">גישה מהירה מהמסך הראשי</div></div><button onclick="_installPWA()" style="background:linear-gradient(135deg,#c8a44a,#9a7828);border:none;border-radius:7px;color:#07070f;font-family:Heebo,sans-serif;font-size:.78rem;font-weight:700;padding:7px 11px;cursor:pointer;">התקן</button><button onclick="document.getElementById('_ib').remove()" style="background:none;border:none;color:#7a7568;cursor:pointer;font-size:1rem;padding:2px 4px;">✕</button>';
   document.body.appendChild(b);
 }
 async function _installPWA(){
