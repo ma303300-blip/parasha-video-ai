@@ -1309,17 +1309,15 @@ async function startMerge(){
   document.getElementById('mergeResult').style.display = 'none';
   document.querySelectorAll('#mergeCard .msg.error').forEach(e=>e.remove());
 
-  // ─── CONSTANTS ───────────────────────────────────────────────
   const FPS          = 30;
-  const FADE_VID_MS  = 1200;  // visual cross-fade duration
-  const AUDIO_OUT_MS = 2500;  // audio fade-out starts this many ms before clip ends
-  const AUDIO_IN_MS  = 1200;  // audio fade-in duration for incoming clip
+  const FADE_VID_MS  = 1200;  // visual cross-fade
+  const AUDIO_OUT_MS = 2500;  // how long before end audio starts fading out
+  const AUDIO_IN_MS  = 1200;  // audio fade-in for next clip
 
   try{
-    // ─── STEP 1: PRELOAD ALL CLIPS ───────────────────────────────
+    // STEP 1: Preload all clips
     setMergeStatus('טוען קליפים...');
     setMergePct(2);
-
     const vids = [];
     for(let i = 0; i < VE.clips.length; i++){
       const v = document.createElement('video');
@@ -1335,22 +1333,21 @@ async function startMerge(){
       setMergePct(2 + Math.round((i+1)/VE.clips.length * 15));
     }
 
-    // ─── STEP 2: SETUP CANVAS + AUDIO ────────────────────────────
+    // STEP 2: Setup canvas + AudioContext
     setMergeStatus('מכין הקלטה...');
     setMergePct(18);
 
-    const canvas  = document.createElement('canvas');
-    canvas.width  = 1280;
-    canvas.height = 720;
-    const ctx     = canvas.getContext('2d');
+    const canvas = document.createElement('canvas');
+    canvas.width = 1280; canvas.height = 720;
+    const ctx = canvas.getContext('2d');
 
-    const audioCtx  = new (window.AudioContext || window.webkitAudioContext)();
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const audioDest = audioCtx.createMediaStreamDestination();
 
-    // Create gain node per clip — all start at 0
+    // One gain node per clip, all start at 0
     const gains = vids.map(v => {
       v.muted = false;
-      const src  = audioCtx.createMediaElementSource(v);
+      const src = audioCtx.createMediaElementSource(v);
       const gain = audioCtx.createGain();
       gain.gain.value = 0;
       src.connect(gain);
@@ -1365,90 +1362,90 @@ async function startMerge(){
 
     const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
       ? 'video/webm;codecs=vp9,opus' : 'video/webm';
-
-    const rec    = new MediaRecorder(combined, { mimeType, videoBitsPerSecond: 8_000_000 });
+    const rec = new MediaRecorder(combined, { mimeType, videoBitsPerSecond: 8_000_000 });
     const chunks = [];
     rec.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
     rec.start(100);
 
-    // ─── STEP 3: PLAY CLIPS WITH TIMED CROSS-FADE ────────────────
+    // STEP 3: Play each clip with cross-fade
     for(let i = 0; i < vids.length; i++){
-      const curr     = vids[i];
-      const next     = i < vids.length - 1 ? vids[i+1] : null;
-      const gCurr    = gains[i];
-      const gNext    = next ? gains[i+1] : null;
-      const durMs    = (isNaN(curr.duration) || !isFinite(curr.duration) ? 10 : curr.duration) * 1000;
-      const audioOutStart = Math.max(0, durMs - AUDIO_OUT_MS); // when to start fading out audio
-      const vidFadeStart  = Math.max(0, durMs - FADE_VID_MS);  // when to start visual fade
+      const curr  = vids[i];
+      const next  = i < vids.length - 1 ? vids[i+1] : null;
+      const gCurr = gains[i];
+      const gNext = next ? gains[i+1] : null;
+      const durMs = (isNaN(curr.duration) || !isFinite(curr.duration) ? 10 : curr.duration) * 1000;
 
       setMergeStatus('מעבד קליפ ' + (i+1) + ' מתוך ' + vids.length);
       setMergePct(18 + Math.round(i / vids.length * 75));
 
-      // Reset curr to start
-      curr.currentTime = 0;
+      // Only reset currentTime if clip hasn't started yet (avoid jumping if audio pre-started it)
+      if(curr.paused) curr.currentTime = 0;
 
-      // Fade IN current audio
+      // Fade in current clip audio (fast, 0.4s)
       const now = audioCtx.currentTime;
       gCurr.gain.cancelScheduledValues(now);
-      gCurr.gain.setValueAtTime(0, now);
-      gCurr.gain.linearRampToValueAtTime(1, now + 0.4); // quick fade in (0.4s)
+      gCurr.gain.setValueAtTime(gCurr.gain.value, now);
+      gCurr.gain.linearRampToValueAtTime(1, now + 0.4);
 
-      await curr.play();
+      // Start playing
+      if(curr.paused) await curr.play();
 
-      // Schedule audio fade-OUT using setTimeout (more reliable than RAF timing)
+      // After play confirmed — schedule audio fade-out
+      const fadeOutDelay = Math.max(0, durMs - AUDIO_OUT_MS);
       let nextAudioStarted = false;
-      const audioOutTimer = setTimeout(() => {
+      const audioTimer = setTimeout(() => {
         const t = audioCtx.currentTime;
+        // Fade out current
         gCurr.gain.cancelScheduledValues(t);
         gCurr.gain.setValueAtTime(gCurr.gain.value, t);
-        gCurr.gain.linearRampToValueAtTime(0, t + AUDIO_OUT_MS/1000);
-
-        // Start next clip audio EARLY (during fade-out) so it overlaps smoothly
+        gCurr.gain.linearRampToValueAtTime(0, t + AUDIO_OUT_MS / 1000);
+        // Fade in next (overlapping)
         if(next && gNext && !nextAudioStarted){
           nextAudioStarted = true;
-          next.currentTime = 0;
           gNext.gain.cancelScheduledValues(t);
           gNext.gain.setValueAtTime(0, t);
-          gNext.gain.linearRampToValueAtTime(1, t + AUDIO_IN_MS/1000);
-          next.play().catch(()=>{});
+          gNext.gain.linearRampToValueAtTime(1, t + AUDIO_IN_MS / 1000);
+          // Pre-start next clip audio (paused at 0, gain=0 so silent)
+          if(next.paused){
+            next.currentTime = 0;
+            next.play().catch(()=>{});
+          }
         }
-      }, audioOutStart);
+      }, fadeOutDelay);
 
-      // Draw loop with visual cross-fade
+      // Draw loop — visual cross-fade
       await new Promise(resolve => {
         const t0 = performance.now();
-        let visualFadeStarted = false;
+        let vidFadeStarted = false;
 
         function frame(){
           const elapsed   = performance.now() - t0;
           const remaining = durMs - elapsed;
 
-          // Visual alpha for current clip
+          // Alpha: fade in for very first clip only
           let alpha = 1;
-          if(i === 0 && elapsed < 400) alpha = elapsed / 400; // fade in first clip
+          if(i === 0 && elapsed < 400) alpha = elapsed / 400;
 
+          // Visual fade-out to next clip
           if(next && remaining <= FADE_VID_MS){
             alpha = Math.max(0, remaining / FADE_VID_MS);
-
-            // Ensure next clip is playing during visual fade
-            if(!visualFadeStarted){
-              visualFadeStarted = true;
+            // Ensure next is playing for visual (audio timer may have already started it)
+            if(!vidFadeStarted){
+              vidFadeStarted = true;
               if(next.paused){
-                next.currentTime = 0;
+                if(!nextAudioStarted) next.currentTime = 0;
                 next.play().catch(()=>{});
               }
             }
           }
 
-          // Draw: background = next clip, foreground = current fading out
+          // Draw frame
           ctx.fillStyle = '#000';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
-
           if(next && remaining <= FADE_VID_MS){
             ctx.globalAlpha = 1;
             try { ctx.drawImage(next, 0, 0, canvas.width, canvas.height); } catch(e){}
           }
-
           ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
           try { ctx.drawImage(curr, 0, 0, canvas.width, canvas.height); } catch(e){}
           ctx.globalAlpha = 1;
@@ -1456,7 +1453,7 @@ async function startMerge(){
           if(elapsed < durMs){
             requestAnimationFrame(frame);
           } else {
-            clearTimeout(audioOutTimer);
+            clearTimeout(audioTimer);
             curr.pause();
             resolve();
           }
@@ -1466,16 +1463,14 @@ async function startMerge(){
       });
     }
 
-    // ─── DONE ─────────────────────────────────────────────────────
+    // Done
     setMergeStatus('מסיים...');
     setMergePct(95);
-
     await new Promise(resolve => { rec.onstop = resolve; rec.stop(); });
     audioCtx.close();
 
     mergedBlob = new Blob(chunks, { type: mimeType });
-    const url  = URL.createObjectURL(mergedBlob);
-
+    const url = URL.createObjectURL(mergedBlob);
     setMergePct(100);
     setMergeStatus('מוכן!');
     document.getElementById('mergedVideo').src = url;
