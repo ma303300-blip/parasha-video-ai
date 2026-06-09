@@ -513,7 +513,7 @@ function calcDur(){
   const m=parseInt(document.getElementById('durM').value)||0;
   const s=parseInt(document.getElementById('durS').value)||0;
   S.durSec=m*60+s;
-  const clips=Math.max(1,Math.ceil(S.durSec/8));
+  const clips=Math.max(1,Math.ceil(S.durSec/10));
   const rate=S.model==='fast'?0.15:0.40;
   document.getElementById('durInfo').innerHTML=
     `<strong>${S.durSec} שניות</strong>${clips} קליפים | עלות: $${(S.durSec*rate).toFixed(2)}`;
@@ -639,39 +639,52 @@ function flatText(arr){
 }
 
 async function buildPromptsWithGemini(){
-  const numClips = Math.ceil(S.durSec/8);
+  const numClips = Math.ceil(S.durSec/10);
 
-  const prompt = `You are creating ${numClips} video scene prompts for Google Veo 3.
+  const prompt = `אתה מומחה ליצירת סרטוני וידאו תנ"כיים עם Veo 3.1 של Google.
 
-Torah portion: "${S.parasha.h}"
-Total duration: ${S.durSec} seconds (${numClips} clips x 8 seconds each)
+פרשה: "${S.parasha.h}"
+סה"כ: ${S.durSec} שניות / ${numClips} סצנות של 10 שניות כל אחת
 
-Torah text:
+טקסט הפרשה:
 ---
 ${S.parashaText}
 ---
 
-TASK:
-Read the Torah text above carefully. Divide it into ${numClips} sequential narrative segments.
-For EACH segment, write a unique Veo 3 prompt describing EXACTLY what happens in THAT part of the story.
+המשימה: צור ${numClips} פרומפטים מקצועיים לVeo 3.1 — אחד לכל סצנה.
 
-STRICT RULES for each prompt:
-- MUST describe the SPECIFIC event from that part of the Torah text (not generic)
-- MUST be completely different from all other prompts
-- MUST follow this exact structure:
-  [Subject doing Action]. [Specific environment]. [Lighting type]. [Camera movement]. Cinematic 3D biblical animation, Pixar-quality render, ancient Middle East. [Ambient sound]. No text overlays. No subtitles. 8 seconds.
-- Each prompt: 60-100 words maximum
-- English only
+חוקים חשובים:
+1. כל פרומפט חייב להיות באנגלית בלבד (Veo עובד הכי טוב עם אנגלית)
+2. כל סצנה חייבת להיות שונה לחלוטין מהקודמת
+3. המשכיות סיפורית — כל סצנה ממשיכה את הקודמת
+4. בסיס: הטקסט הספציפי של אותו חלק בפרשה
 
-Example of a GOOD prompt:
-"Abraham, elderly bearded patriarch in rough brown robes, raises his hand toward the night sky as God speaks. Vast Mesopotamian desert, rolling sand dunes stretching to horizon, a small campfire crackling nearby. Warm golden firelight from below, deep blue starlit sky above. Slow tilt up from Abraham's face to the star-filled heavens. Cinematic 3D biblical animation, Pixar-quality render, ancient Middle East. Crackling fire, desert wind. No text overlays. No subtitles. 8 seconds."
+מבנה חובה לכל פרומפט — חייב לכלול את כל 8 הרכיבים:
 
-Return ONLY this JSON, nothing else:
-{"scenes":[{"id":1,"hebrewDesc":"תיאור קצר של הסצנה בעברית","prompt":"unique scene-specific Veo 3 prompt","duration":8}]}`;
+[STYLE]: High-budget 3D animated film, photorealistic CGI render at 4K quality. Style reference: Prince of Egypt meets Pixar — fully animated characters with realistic skin textures, cloth physics, and hair simulation. Ancient Middle East setting. NOT live action. NOT illustration. FULLY RENDERED 3D ANIMATION. 10 seconds.
 
-  const raw = await callGemini(prompt, 8000);
-  console.log('Gemini raw response (first 500):', raw.substring(0,500));
-  setMsg('Gemini ענה — מעבד תוצאות...');
+[CHARACTERS]: תאר כל דמות בפירוט — שם, גיל, מראה פנים, שיער, זקן, ביגוד מדויק (צבע, בד, סגנון), נעליים, תכשיטים.
+
+[ACTION]: מה הדמויות עושות בדיוק — תנועות גוף, הבעות פנים, אינטראקציה.
+
+[DIALOGUE]: מה הדמויות אומרות — כתוב את הדיאלוג המדויק באנגלית. אם אין דיאלוג — כתוב narration voice-over של קריין.
+
+[SETTING]: תאר את המיקום בפירוט — סביבה, אדריכלות, צמחייה, חפצים ספציפיים.
+
+[CAMERA]: זווית וסוג תנועה מדויקים — לדוגמה: "slow crane shot rising from ground level to aerial view" / "tight close-up on character's face, slow rack focus to background".
+
+[LIGHTING]: סוג האור בפירוט — כיוון, צבע, עוצמה, צללים.
+
+[AUDIO]: תאר את הסאונד — מוזיקת רקע (סגנון, כלים), אפקטי סביבה, קצב.
+
+דוגמה לפרומפט מושלם:
+"Cinematic 3D biblical animation, Pixar-quality render, ancient Middle East, 10 seconds. [CHARACTERS] Moses: elderly man 80 years old, long white flowing beard, deep-set intense blue eyes, weathered sun-darkened skin, wearing rough brown wool robe with rope belt, worn leather sandals, holding tall gnarled wooden staff. [ACTION] Moses stands on rocky hillside, raises his staff dramatically toward the sky, robes billowing in wind, face showing awe and determination. [DIALOGUE] Moses speaks with commanding authority: 'Let my people go!' — voice echoing across desert. [SETTING] Vast Egyptian desert at dawn, distant pyramids silhouetted on horizon, sparse desert brush, large ancient stones. [CAMERA] Low angle heroic shot looking up at Moses, slow tilt up from sandaled feet to outstretched staff against sky. [LIGHTING] Dramatic golden sunrise backlighting Moses creating silhouette effect, warm amber rays piercing through dust. [AUDIO] Epic orchestral strings building tension, distant crowd murmur, wind howling, staff striking stone."
+
+החזר JSON בלבד:
+{"scenes":[{"id":1,"hebrewDesc":"תיאור קצר בעברית של הסצנה","prompt":"full detailed English prompt","duration":10}]}`;
+
+  const raw = await callGemini(prompt, 12000);
+  console.log('Gemini response:', raw.substring(0,300));
   const clean = raw.replace(/```json|```/g,'').trim();
 
   let parsed;
@@ -680,7 +693,7 @@ Return ONLY this JSON, nothing else:
   }catch(e){
     const match = clean.match(/\{[\s\S]*"scenes"[\s\S]*\}/);
     if(match) parsed = JSON.parse(match[0]);
-    else throw new Error('Gemini לא החזיר JSON תקין. תשובה: '+clean.substring(0,200));
+    else throw new Error('שגיאה בJSON — נסה שוב: '+clean.substring(0,150));
   }
 
   if(!parsed.scenes||!parsed.scenes.length)
@@ -692,11 +705,9 @@ Return ONLY this JSON, nothing else:
     return {...sc, checks, score};
   });
 
-  // Save to localStorage
   saveState();
   renderS2();
 }
-
 
 function scorePrompt(p){
   return VEO_CHECKS.map(c=>{
@@ -886,7 +897,7 @@ async function genClip(sc,idx){
   const resp=await fetch(
     'https://generativelanguage.googleapis.com/v1beta/models/'+MODEL_ID[S.model]+':predictLongRunning?key='+S.apiKey,
     {method:'POST',headers:{'Content-Type':'application/json'},
-     body:JSON.stringify({instances:[{prompt:sc.prompt}],parameters:{aspectRatio:'16:9',durationSeconds:8,sampleCount:1,addWatermark:false}})}
+     body:JSON.stringify({instances:[{prompt:sc.prompt}],parameters:{aspectRatio:'16:9',durationSeconds:10,sampleCount:1,addWatermark:false}})}
   );
   if(!resp.ok){const e=await resp.json();throw new Error(e.error?.message||'שגיאת שליחה');}
   const op=await resp.json();
