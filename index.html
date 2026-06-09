@@ -798,8 +798,7 @@ JSON format ONLY:
   }
 
   dbg('Got response: ' + (raw||'').length + ' chars');
-  dbg('First 100 chars: ' + (raw||'').substring(0,100).replace(/
-/g,' '));
+  // debug removed
 
   if(!raw || raw.trim().length < 50) {
     throw new Error('Gemini לא החזיר תשובה (אורך: ' + (raw||'').length + ') — נסה שוב');
@@ -823,8 +822,7 @@ JSON format ONLY:
   }
 
   dbg('jsonStart: ' + jsonStart + ', jsonEnd: ' + jsonEnd);
-  dbg('clean first 100: ' + clean.substring(0,100).replace(/
-/g,' '));
+  // debug removed
 
   try {
     parsed = JSON.parse(clean);
