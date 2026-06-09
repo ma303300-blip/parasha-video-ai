@@ -451,7 +451,55 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
     <video id="mergedVideo" controls style="width:100%;border-radius:8px;margin-bottom:12px;"></video>
     <div class="row-c">
       <button class="btn btn-green" onclick="downloadMerged()">⬇️ שמור לגלריה</button>
+      <button class="btn btn-gold" onclick="showNarration()">🎙️ הוסף קריינות</button>
       <button class="btn btn-ghost" onclick="mergAgain()">🔄 מזג שוב</button>
+    </div>
+  </div>
+
+  <!-- NARRATION -->
+  <div class="card" id="narrationCard" style="display:none;">
+    <div class="ch">🎙️ קריינות AI</div>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:12px;">Gemini כותב קריינות ← Google TTS ממיר לקול ← מוזג על הסרטון</p>
+
+    <div id="narStep1">
+      <div style="font-size:.84rem;font-weight:600;color:var(--glt);margin-bottom:8px;">שלב 1 — טקסט קריינות</div>
+      <div class="row-c" style="justify-content:flex-start;margin-bottom:10px;">
+        <button class="btn btn-ghost" onclick="generateNarText()" id="btnGenNar">✨ צור קריינות עם Gemini</button>
+      </div>
+      <textarea id="narText" style="width:100%;min-height:180px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Heebo',sans-serif;font-size:.84rem;line-height:1.8;padding:12px;outline:none;resize:vertical;direction:rtl;" placeholder="הטקסט יופיע כאן — ניתן לערוך לפני יצירת הקול..."></textarea>
+    </div>
+
+    <div id="narStep2" style="display:none;margin-top:14px;">
+      <div style="font-size:.84rem;font-weight:600;color:var(--glt);margin-bottom:8px;">שלב 2 — יצירת קול</div>
+      <div class="fld" style="margin-bottom:10px;">
+        <label>קול</label>
+        <select id="narVoice" style="direction:rtl;">
+          <option value="he-IL-Wavenet-A">עברית — נשי (A)</option>
+          <option value="he-IL-Wavenet-B">עברית — גברי (B)</option>
+          <option value="he-IL-Wavenet-C">עברית — נשי (C)</option>
+          <option value="he-IL-Wavenet-D" selected>עברית — גברי (D)</option>
+        </select>
+      </div>
+      <button class="btn btn-ghost btn-full" onclick="generateTTS()" id="btnTTS">🎙️ צור קול</button>
+      <audio id="narAudio" controls style="width:100%;margin-top:10px;display:none;"></audio>
+    </div>
+
+    <div id="narStep3" style="display:none;margin-top:14px;">
+      <div style="font-size:.84rem;font-weight:600;color:var(--glt);margin-bottom:8px;">שלב 3 — מיזוג</div>
+      <div class="fld" style="margin-bottom:10px;">
+        <label>עוצמת מוזיקה בזמן קריינות</label>
+        <input type="range" id="duckLevel" min="10" max="80" value="30" style="width:100%;accent-color:var(--gold);">
+        <div style="font-size:.72rem;color:var(--muted);">המוזיקה תרד ל-<span id="duckVal">30</span>% בזמן הקריינות</div>
+      </div>
+      <button class="btn btn-green btn-full" onclick="mergeNarration()" id="btnMergeNar">🎬 מזג קריינות לסרטון</button>
+    </div>
+
+    <div id="narFinalResult" style="display:none;margin-top:14px;">
+      <div class="ch">✅ הסרטון עם קריינות מוכן!</div>
+      <video id="narFinalVideo" controls style="width:100%;border-radius:8px;margin-bottom:10px;"></video>
+      <div class="row-c">
+        <button class="btn btn-green" onclick="downloadFinal()">⬇️ שמור לגלריה</button>
+      </div>
     </div>
   </div>
 </div>
@@ -826,8 +874,8 @@ IMPORTANT: Return ONLY a JSON array. No markdown. No explanation. Start with { i
 [STYLE]: High-budget 3D animated film, photorealistic CGI 4K. Prince of Egypt meets Pixar. FULLY RENDERED 3D ANIMATION. 10 seconds.
 [CHARACTERS]: Full detail — name, age, face, beard, hair, exact clothing. Consistent across scenes.
 [ACTION]: Precise movements and micro-expressions.
-[DIALOGUE]: Hebrew only from script. Format: "טקסט" (phonetic). NO repetition.
-[SUBTITLES]: White Hebrew subtitles at bottom with black outline.
+[DIALOGUE]: NO spoken dialogue. NO character voices. NO narration. Complete silence on voices — only ambient sound and music.
+[SUBTITLES]: NO subtitles. NO text overlays. Clean screen.
 [SETTING]: Detailed environment. Massive crowds when script mentions בני ישראל.
 [CAMERA]: Shot + movement + DOF + angle. Vary across scenes.
 [LIGHTING]: Match scene emotion. Include color grade.
@@ -1398,6 +1446,194 @@ function mergAgain(){
   document.getElementById('mergeResult').style.display = 'none';
   document.getElementById('mergeProgress').style.display = 'none';
   document.getElementById('btnMerge').disabled = false;
+}
+
+// ════════════════════════════════════════
+// NARRATION
+// ════════════════════════════════════════
+let narBlob = null;
+let finalBlob = null;
+
+function showNarration(){
+  document.getElementById('narrationCard').style.display = 'block';
+  document.getElementById('narrationCard').scrollIntoView({behavior:'smooth'});
+  // Update duck value display
+  document.getElementById('duckLevel').oninput = function(){
+    document.getElementById('duckVal').textContent = this.value;
+  };
+}
+
+async function generateNarText(){
+  const btn = document.getElementById('btnGenNar');
+  btn.disabled = true;
+  btn.textContent = '⏳ כותב...';
+  try{
+    const dur = S.durSec || 240;
+    const script = S.hebrewScript || '';
+    const parasha = S.parasha?.h || '';
+
+    const scriptSection = script ? ('תסריט הסרטון:\n---\n'+script.substring(0,3000)+'\n---\n') : '';
+    const wordCount = Math.round(dur*2.5);
+    const prompt = 'כתוב קריינות עברית לסרטון של '+dur+' שניות על פרשת '+parasha+'.\n\n'+
+      'הקריינות תרוץ מעל הסרטון — קול אחד רציף שמספר את סיפור הפרשה.\n\n'+
+      scriptSection+
+      'כללים:\n'+
+      '• זמן קריאה: '+dur+' שניות ('+wordCount+' מילים)\n'+
+      '• שפה: עברית ספרותית יפה, כמו קריין סרט תיעודי\n'+
+      '• טון: חגיגי, מרגש, קולנועי\n'+
+      '• ללא הוראות במאי — רק הטקסט\n'+
+      'כתוב רק את הטקסט:';
+
+    const raw = await callGemini(prompt, 4000);
+    document.getElementById('narText').value = raw.trim();
+    document.getElementById('narStep2').style.display = 'block';
+  }catch(e){
+    toast('שגיאה: '+e.message);
+  }
+  btn.disabled = false;
+  btn.textContent = '✨ צור קריינות עם Gemini';
+}
+
+async function generateTTS(){
+  const text = document.getElementById('narText').value.trim();
+  if(!text){ toast('אין טקסט'); return; }
+
+  const btn = document.getElementById('btnTTS');
+  btn.disabled = true;
+  btn.textContent = '⏳ יוצר קול...';
+
+  try{
+    const voice = document.getElementById('narVoice').value;
+    const resp = await fetch(
+      'https://texttospeech.googleapis.com/v1/text:synthesize?key='+S.apiKey,
+      {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          input: { text },
+          voice: { languageCode:'he-IL', name: voice },
+          audioConfig: { audioEncoding:'MP3', speakingRate: 0.95, pitch: -1.0 }
+        })
+      }
+    );
+    if(!resp.ok){ const e=await resp.json(); throw new Error(e.error?.message||'שגיאת TTS'); }
+    const data = await resp.json();
+    const bytes = atob(data.audioContent);
+    const arr = new Uint8Array(bytes.length);
+    for(let i=0;i<bytes.length;i++) arr[i]=bytes.charCodeAt(i);
+    narBlob = new Blob([arr], {type:'audio/mp3'});
+    const url = URL.createObjectURL(narBlob);
+    const audio = document.getElementById('narAudio');
+    audio.src = url;
+    audio.style.display = 'block';
+    document.getElementById('narStep3').style.display = 'block';
+    toast('הקול מוכן — האזן לפני מיזוג');
+  }catch(e){
+    toast('שגיאת TTS: '+e.message);
+  }
+  btn.disabled = false;
+  btn.textContent = '🎙️ צור קול';
+}
+
+async function mergeNarration(){
+  if(!mergedBlob){ toast('אין סרטון — מזג קליפים קודם'); return; }
+  if(!narBlob){ toast('אין קריינות — צור קול קודם'); return; }
+
+  const btn = document.getElementById('btnMergeNar');
+  btn.disabled = true;
+  btn.textContent = '⏳ ממזג...';
+
+  try{
+    const duckPct = parseInt(document.getElementById('duckLevel').value) / 100;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 1280; canvas.height = 720;
+    const ctx = canvas.getContext('2d');
+
+    const vid = document.createElement('video');
+    vid.src = URL.createObjectURL(mergedBlob);
+    vid.muted = true;
+    vid.playsInline = true;
+    await new Promise(r => { vid.onloadeddata = r; vid.load(); });
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const audioDest = audioCtx.createMediaStreamDestination();
+
+    // Video audio (music)
+    const vidSrc = audioCtx.createMediaElementSource(vid);
+    const musicGain = audioCtx.createGain();
+    musicGain.gain.value = 1;
+    vidSrc.connect(musicGain);
+    musicGain.connect(audioDest);
+
+    // Narration audio
+    const narAudio = new Audio(URL.createObjectURL(narBlob));
+    narAudio.muted = false;
+    const narSrc = audioCtx.createMediaElementSource(narAudio);
+    const narGain = audioCtx.createGain();
+    narGain.gain.value = 1.4; // boost narration
+    narSrc.connect(narGain);
+    narGain.connect(audioDest);
+
+    // Ducking: lower music when narration plays
+    narAudio.onplay = () => {
+      musicGain.gain.cancelScheduledValues(audioCtx.currentTime);
+      musicGain.gain.linearRampToValueAtTime(duckPct, audioCtx.currentTime + 0.3);
+    };
+    narAudio.onended = () => {
+      musicGain.gain.cancelScheduledValues(audioCtx.currentTime);
+      musicGain.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 0.5);
+    };
+
+    const videoStream = canvas.captureStream(30);
+    const combined = new MediaStream([
+      ...videoStream.getVideoTracks(),
+      ...audioDest.stream.getAudioTracks()
+    ]);
+
+    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
+      ? 'video/webm;codecs=vp9,opus' : 'video/webm';
+    const rec = new MediaRecorder(combined, { mimeType, videoBitsPerSecond:8000000 });
+    const chunks = [];
+    rec.ondataavailable = e => { if(e.data.size>0) chunks.push(e.data); };
+    rec.start(100);
+
+    await vid.play();
+    await narAudio.play();
+
+    // Draw video frames
+    await new Promise(resolve => {
+      function frame(){
+        ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
+        if(!vid.ended && !vid.paused) requestAnimationFrame(frame);
+        else resolve();
+      }
+      requestAnimationFrame(frame);
+    });
+
+    await new Promise(r => { rec.onstop = r; rec.stop(); });
+    audioCtx.close();
+
+    finalBlob = new Blob(chunks, {type: mimeType});
+    const url = URL.createObjectURL(finalBlob);
+    document.getElementById('narFinalVideo').src = url;
+    document.getElementById('narFinalResult').style.display = 'block';
+    toast('הסרטון עם קריינות מוכן!');
+
+  }catch(e){
+    toast('שגיאה: '+e.message);
+  }
+  btn.disabled = false;
+  btn.textContent = '🎬 מזג קריינות לסרטון';
+}
+
+function downloadFinal(){
+  if(!finalBlob){ toast('אין סרטון'); return; }
+  const a = document.createElement('a');
+  const ext = finalBlob.type.includes('mp4') ? '.mp4' : '.webm';
+  a.href = URL.createObjectURL(finalBlob);
+  a.download = (S.parasha?.h||'video') + '_עם_קריינות' + ext;
+  a.click();
 }
 
 // ════════════════════════════════════════
