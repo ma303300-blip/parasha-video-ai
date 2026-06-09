@@ -1734,68 +1734,97 @@ async function mergeNarration(){
 
   const btn = document.getElementById('btnMergeNar');
   btn.disabled = true;
-  btn.textContent = '⏳ ממזג...';
+  btn.textContent = '⏳ ממזג אודיו...';
 
   try{
     const duckPct = parseInt(document.getElementById('duckLevel').value) / 100;
 
+    // שלב 1 — decode שני האודיו
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    btn.textContent = '⏳ טוען מוזיקה...';
+    const vidArrayBuf = await (await fetch(URL.createObjectURL(mergedBlob))).arrayBuffer();
+    const musicBuf = await audioCtx.decodeAudioData(vidArrayBuf);
+
+    btn.textContent = '⏳ טוען קריינות...';
+    const narArrayBuf = await (await fetch(URL.createObjectURL(narBlob))).arrayBuffer();
+    const narBuf = await audioCtx.decodeAudioData(narArrayBuf);
+
+    audioCtx.close();
+
+    // שלב 2 — מיזוג ב-OfflineAudioContext
+    btn.textContent = '⏳ מעבד אודיו...';
+    const sampleRate = musicBuf.sampleRate;
+    const totalDur = musicBuf.duration;
+    const offCtx = new OfflineAudioContext(2, Math.ceil(sampleRate * totalDur), sampleRate);
+
+    // מוזיקה עם ducking
+    const musicSrc = offCtx.createBufferSource();
+    musicSrc.buffer = musicBuf;
+    const musicGain = offCtx.createGain();
+    musicGain.gain.setValueAtTime(1, 0);
+    // ducking — מוזיקה יורדת בזמן הקריינות
+    const narDur = narBuf.duration;
+    musicGain.gain.setValueAtTime(1, 0);
+    musicGain.gain.linearRampToValueAtTime(duckPct, 0.3);
+    musicGain.gain.setValueAtTime(duckPct, narDur - 0.3);
+    musicGain.gain.linearRampToValueAtTime(1, narDur + 0.5);
+    musicSrc.connect(musicGain);
+    musicGain.connect(offCtx.destination);
+    musicSrc.start(0);
+
+    // קריינות
+    const narSrc = offCtx.createBufferSource();
+    narSrc.buffer = narBuf;
+    const narGain = offCtx.createGain();
+    narGain.gain.value = 1.4;
+    narSrc.connect(narGain);
+    narGain.connect(offCtx.destination);
+    narSrc.start(0);
+
+    const mixedBuf = await offCtx.startRendering();
+
+    // שלב 3 — המרה ל-WAV blob
+    btn.textContent = '⏳ מכין וידאו...';
+    const wavBlob = audioBufferToWav(mixedBuf);
+
+    // שלב 4 — וידאו + אודיו ממוזג דרך MediaRecorder
     const canvas = document.createElement('canvas');
     canvas.width = 1280; canvas.height = 720;
     const ctx = canvas.getContext('2d');
 
     const vid = document.createElement('video');
     vid.src = URL.createObjectURL(mergedBlob);
-    vid.crossOrigin = 'anonymous';
     vid.muted = true;
     vid.playsInline = true;
     await new Promise(r => { vid.onloadeddata = r; vid.load(); });
 
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const audioDest = audioCtx.createMediaStreamDestination();
-
-    // Video audio (music)
-    const vidSrc = audioCtx.createMediaElementSource(vid);
-    const musicGain = audioCtx.createGain();
-    musicGain.gain.value = 1;
-    vidSrc.connect(musicGain);
-    musicGain.connect(audioDest);
-
-    // Narration audio
-    const narAudio = new Audio(URL.createObjectURL(narBlob));
-    narAudio.muted = false;
-    const narSrc = audioCtx.createMediaElementSource(narAudio);
-    const narGain = audioCtx.createGain();
-    narGain.gain.value = 1.4; // boost narration
-    narSrc.connect(narGain);
-    narGain.connect(audioDest);
-
-    // Ducking: lower music when narration plays
-    narAudio.onplay = () => {
-      musicGain.gain.cancelScheduledValues(audioCtx.currentTime);
-      musicGain.gain.linearRampToValueAtTime(duckPct, audioCtx.currentTime + 0.3);
-    };
-    narAudio.onended = () => {
-      musicGain.gain.cancelScheduledValues(audioCtx.currentTime);
-      musicGain.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 0.5);
-    };
+    const mixedAudio = new Audio(URL.createObjectURL(wavBlob));
+    const liveCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const mixedSrc = liveCtx.createMediaElementSource(mixedAudio);
+    const liveGain = liveCtx.createGain();
+    liveGain.gain.value = 1;
+    const liveDest = liveCtx.createMediaStreamDestination();
+    mixedSrc.connect(liveGain);
+    liveGain.connect(liveDest);
 
     const videoStream = canvas.captureStream(30);
     const combined = new MediaStream([
       ...videoStream.getVideoTracks(),
-      ...audioDest.stream.getAudioTracks()
+      ...liveDest.stream.getAudioTracks()
     ]);
 
     const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
       ? 'video/webm;codecs=vp9,opus' : 'video/webm';
-    const rec = new MediaRecorder(combined, { mimeType, videoBitsPerSecond:8000000 });
+    const rec = new MediaRecorder(combined, { mimeType, videoBitsPerSecond: 8000000 });
     const chunks = [];
-    rec.ondataavailable = e => { if(e.data.size>0) chunks.push(e.data); };
+    rec.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
     rec.start(100);
 
+    btn.textContent = '⏳ מקליט...';
     await vid.play();
-    await narAudio.play();
+    await mixedAudio.play();
 
-    // Draw video frames
     await new Promise(resolve => {
       function frame(){
         ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
@@ -1806,19 +1835,50 @@ async function mergeNarration(){
     });
 
     await new Promise(r => { rec.onstop = r; rec.stop(); });
-    audioCtx.close();
+    liveCtx.close();
 
-    finalBlob = new Blob(chunks, {type: mimeType});
+    finalBlob = new Blob(chunks, { type: mimeType });
     const url = URL.createObjectURL(finalBlob);
     document.getElementById('narFinalVideo').src = url;
     document.getElementById('narFinalResult').style.display = 'block';
     toast('הסרטון עם קריינות מוכן!');
 
   }catch(e){
-    toast('שגיאה: '+e.message);
+    toast('שגיאה: ' + e.message);
   }
   btn.disabled = false;
   btn.textContent = '🎬 מזג קריינות לסרטון';
+}
+
+function audioBufferToWav(buffer){
+  const numCh = buffer.numberOfChannels;
+  const sampleRate = buffer.sampleRate;
+  const length = buffer.length * numCh * 2;
+  const ab = new ArrayBuffer(44 + length);
+  const view = new DataView(ab);
+  const writeStr = (o, s) => { for(let i=0;i<s.length;i++) view.setUint8(o+i, s.charCodeAt(i)); };
+  writeStr(0,'RIFF');
+  view.setUint32(4, 36+length, true);
+  writeStr(8,'WAVE');
+  writeStr(12,'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, numCh, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate*numCh*2, true);
+  view.setUint16(32, numCh*2, true);
+  view.setUint16(34, 16, true);
+  writeStr(36,'data');
+  view.setUint32(40, length, true);
+  let offset = 44;
+  for(let i=0;i<buffer.length;i++){
+    for(let ch=0;ch<numCh;ch++){
+      const s = Math.max(-1, Math.min(1, buffer.getChannelData(ch)[i]));
+      view.setInt16(offset, s < 0 ? s*0x8000 : s*0x7FFF, true);
+      offset += 2;
+    }
+  }
+  return new Blob([ab], { type: 'audio/wav' });
 }
 
 function downloadFinal(){
