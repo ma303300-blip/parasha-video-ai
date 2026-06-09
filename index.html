@@ -1633,6 +1633,10 @@ async function generateNarText(){
   const btn = document.getElementById('btnGenNar');
   btn.disabled = true;
   btn.textContent = '⏳ כותב...';
+  // אפס כפתור TTS לקריינות רגילה
+  const ttsBtn = document.getElementById('btnTTS');
+  ttsBtn.textContent = '🎙️ צור קול';
+  ttsBtn.onclick = generateTTS;
   try{
     const clips = parseInt(document.getElementById('narClips').value) || 24;
     const dur = clips * 10;
