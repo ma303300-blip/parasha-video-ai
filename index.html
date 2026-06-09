@@ -451,7 +451,34 @@ document.addEventListener('DOMContentLoaded', () => {
   calcDur();
   renderParshiot();
   fetchThisWeek();
+
+  // Restore saved state
+  if(loadState() && S.scenes.length > 0){
+    // Restore duration and model UI
+    if(S.durSec){
+      const m = Math.floor(S.durSec/60);
+      const s = S.durSec % 60;
+      document.getElementById('durM').value = m;
+      document.getElementById('durS').value = s;
+      calcDur();
+    }
+    if(S.model) setModel(S.model);
+
+    // Show restore banner
+    const banner = document.createElement('div');
+    banner.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0f0f1c;border:1px solid #c8a44a;border-radius:12px;padding:11px 16px;display:flex;align-items:center;gap:10px;z-index:9999;max-width:320px;width:calc(100% - 32px);box-shadow:0 8px 24px rgba(0,0,0,.6);font-family:Heebo,sans-serif;';
+    banner.innerHTML = '<div style="flex:1;"><div style="font-size:.82rem;font-weight:700;color:#e8cc80;">📂 יש סצנות שמורות מפרשת '+(S.parasha?.h||'')+'</div><div style="font-size:.72rem;color:#7a7568;">'+S.scenes.length+' סצנות</div></div><button onclick="restoreScenes()" style="background:linear-gradient(135deg,#c8a44a,#9a7828);border:none;border-radius:7px;color:#07070f;font-family:Heebo,sans-serif;font-size:.78rem;font-weight:700;padding:7px 11px;cursor:pointer;flex-shrink:0;">שחזר</button><button onclick="this.parentElement.remove()" style="background:none;border:none;color:#7a7568;cursor:pointer;font-size:1rem;flex-shrink:0;">✕</button>';
+    document.body.appendChild(banner);
+    setTimeout(()=>{ if(banner.parentElement) banner.remove(); }, 8000);
+  }
 });
+
+function restoreScenes(){
+  if(!S.scenes.length) return;
+  document.querySelector('[onclick="this.parentElement.remove()"]')?.closest('div[style]')?.remove();
+  showScreen(2);
+  renderS2();
+}
 
 // ════════════════════════════════════════
 // NAVIGATION
@@ -516,6 +543,7 @@ function selParasha(heb){
   document.getElementById('selCard').style.display='block';
   document.getElementById('selName').textContent='פרשת '+heb;
   document.getElementById('selRef').textContent=S.parasha.r;
+  localStorage.setItem('last_parasha', heb);
 }
 async function fetchThisWeek(){
   try{
@@ -664,6 +692,8 @@ Return ONLY this JSON, nothing else:
     return {...sc, checks, score};
   });
 
+  // Save to localStorage
+  saveState();
   renderS2();
 }
 
@@ -911,6 +941,32 @@ function toast(msg,dur=2500){
   const t=document.getElementById('toast');
   t.textContent=msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),dur);
+}
+
+// ════════════════════════════════════════
+// STATE PERSISTENCE
+// ════════════════════════════════════════
+function saveState(){
+  try{
+    localStorage.setItem('saved_scenes', JSON.stringify(S.scenes));
+    localStorage.setItem('saved_parasha', JSON.stringify(S.parasha));
+    localStorage.setItem('saved_durSec', S.durSec);
+    localStorage.setItem('saved_model', S.model);
+  }catch(e){ console.log('save error',e); }
+}
+
+function loadState(){
+  try{
+    const scenes = localStorage.getItem('saved_scenes');
+    const parasha = localStorage.getItem('saved_parasha');
+    const dur = localStorage.getItem('saved_durSec');
+    const model = localStorage.getItem('saved_model');
+    if(scenes) S.scenes = JSON.parse(scenes);
+    if(parasha) S.parasha = JSON.parse(parasha);
+    if(dur) S.durSec = parseInt(dur);
+    if(model) S.model = model;
+    return !!(scenes && parasha);
+  }catch(e){ return false; }
 }
 
 // ════════════════════════════════════════
