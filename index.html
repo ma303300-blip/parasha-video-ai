@@ -244,7 +244,7 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
     <div class="ch">🔑 Google AI API Key</div>
     <div class="row">
       <div style="position:relative;flex:1;">
-        <input type="password" id="apiKey" placeholder="AIza... — נדרש רק לאימות סצנות וליצירת סרטון" autocomplete="off" style="padding-left:36px;">
+        <input type="password" id="apiKey" placeholder="AIza... — נדרש לבניית פרומפטים וליצירת סרטון" autocomplete="off" style="padding-left:36px;">
         <button onclick="toggleKey()" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:0;">👁</button>
       </div>
       <button class="btn btn-ghost" onclick="saveKey()" style="flex-shrink:0;">שמור</button>
@@ -570,6 +570,8 @@ async function fetchAndBuild(){
   document.getElementById('s2content').style.display='none';
 
   try{
+    // Show which key we're using
+    console.log('Using API key:', S.apiKey ? S.apiKey.substring(0,8)+'...' : 'NONE');
     // STEP 1: Fetch parasha text from Sefaria (free, no API)
     setMsg('שולף פרשה מ-Sefaria...');
     const ref = encodeURIComponent(S.parasha.r.replace(/ /g,'.'));
@@ -587,9 +589,10 @@ async function fetchAndBuild(){
     await buildPromptsWithGemini();
 
   }catch(e){
-    setMsg('שגיאה: '+e.message);
+    console.error('fetchAndBuild error:', e);
+    document.getElementById('s2loading').style.display='block';
     document.getElementById('s2loading').innerHTML =
-      '<div class="msg error">❌ '+e.message+'<br><button class="btn btn-ghost" style="margin-top:9px;" onclick="showScreen(1)">← חזור</button></div>';
+      '<div class="msg error" style="font-size:.85rem;">❌ '+e.message+'<br><br><small style="color:var(--muted)">פרטים: '+e.toString()+'</small><br><button class="btn btn-ghost" style="margin-top:9px;" onclick="showScreen(1)">← חזור</button></div>';
   }
 }
 
@@ -609,75 +612,48 @@ function flatText(arr){
 async function buildPromptsWithGemini(){
   const numClips = Math.ceil(S.durSec/8);
 
-  // This is the master prompt that teaches Gemini exactly how to write
-  // professional Veo 3 prompts — based on Google's official prompt guide (updated March 2026)
-  const masterPrompt = `You are an expert at writing video generation prompts for Google Veo 3.
-You will read a Torah portion (Parasha) and create ${numClips} sequential video scene prompts.
+  const prompt = `You are creating ${numClips} video scene prompts for Google Veo 3.
 
-=== OFFICIAL VEO 3 PROMPT STRUCTURE (Google's guidelines, March 2026) ===
-Each prompt MUST contain these elements in this order:
+Torah portion: "${S.parasha.h}"
+Total duration: ${S.durSec} seconds (${numClips} clips x 8 seconds each)
 
-1. SUBJECT — Who/what is the main focus? Be specific. Name the character, describe appearance.
-2. ACTION — What is happening right now? Use active verbs. Be precise and physical.
-3. SCENE/CONTEXT — Where? What time of day? What environment surrounds them?
-4. CAMERA — Shot type + movement. Must choose from:
-   [extreme wide shot / wide shot / medium shot / close-up / extreme close-up]
-   + [static / slow pan / tracking shot / drone pullback / push-in / tilt up/down]
-5. VISUAL STYLE — Always include: "cinematic 3D biblical animation, Pixar-quality photorealistic render, ancient Middle East setting"
-6. LIGHTING — Be specific: golden hour sunlight / dramatic storm light / firelight / dawn mist / harsh midday sun
-7. AUDIO — Describe ambient sounds: wind, crowd murmur, silence, footsteps, water
-8. NEGATIVE PROMPT — End with: "No text overlays. No subtitles. No modern elements."
-
-=== CRITICAL RULES ===
-- Each scene must be COMPLETELY DIFFERENT from the previous — different location, camera, lighting, action
-- Maintain NARRATIVE CONTINUITY — each scene flows from the previous one
-- Be SPECIFIC to the actual Torah text — describe what literally happens in that passage
-- Write in PRESENT TENSE — "Moses raises his staff" not "Moses raised his staff"
-- Keep prompts to 80-120 words — not too short (vague) not too long (confused)
-- The 8-second duration means ONE clear action — not multiple events
-- Characters must be CONSISTENT across scenes — same description each time they appear
-
-=== PARASHA ===
-Name: ${S.parasha.h}
-Duration: ${S.durSec} seconds total / ${numClips} scenes of 8 seconds each
-
-Full text:
+Torah text:
 ---
 ${S.parashaText}
 ---
 
-=== YOUR TASK ===
-1. Read the full parasha text above
-2. Divide it into ${numClips} equal narrative segments with clear story progression
-3. For each segment write one professional Veo 3 prompt following the structure above
-4. The ${numClips} scenes together should tell the complete story of the parasha
+TASK:
+Read the Torah text above carefully. Divide it into ${numClips} sequential narrative segments.
+For EACH segment, write a unique Veo 3 prompt describing EXACTLY what happens in THAT part of the story.
 
-Return ONLY valid JSON, no markdown, no explanation:
-{
-  "scenes": [
-    {
-      "id": 1,
-      "hebrewDesc": "one sentence in Hebrew describing what happens in this scene",
-      "prompt": "full English Veo 3 prompt here following the official structure",
-      "duration": 8
-    }
-  ]
-}`;
+STRICT RULES for each prompt:
+- MUST describe the SPECIFIC event from that part of the Torah text (not generic)
+- MUST be completely different from all other prompts
+- MUST follow this exact structure:
+  [Subject doing Action]. [Specific environment]. [Lighting type]. [Camera movement]. Cinematic 3D biblical animation, Pixar-quality render, ancient Middle East. [Ambient sound]. No text overlays. No subtitles. 8 seconds.
+- Each prompt: 60-100 words maximum
+- English only
 
-  const raw = await callGemini(masterPrompt, 8000);
+Example of a GOOD prompt:
+"Abraham, elderly bearded patriarch in rough brown robes, raises his hand toward the night sky as God speaks. Vast Mesopotamian desert, rolling sand dunes stretching to horizon, a small campfire crackling nearby. Warm golden firelight from below, deep blue starlit sky above. Slow tilt up from Abraham's face to the star-filled heavens. Cinematic 3D biblical animation, Pixar-quality render, ancient Middle East. Crackling fire, desert wind. No text overlays. No subtitles. 8 seconds."
+
+Return ONLY this JSON, nothing else:
+{"scenes":[{"id":1,"hebrewDesc":"תיאור קצר של הסצנה בעברית","prompt":"unique scene-specific Veo 3 prompt","duration":8}]}`;
+
+  const raw = await callGemini(prompt, 8000);
   const clean = raw.replace(/```json|```/g,'').trim();
 
   let parsed;
   try{
     parsed = JSON.parse(clean);
   }catch(e){
-    const match = clean.match(/\{[\s\S]*\}/);
+    const match = clean.match(/\{[\s\S]*"scenes"[\s\S]*\}/);
     if(match) parsed = JSON.parse(match[0]);
-    else throw new Error('Gemini לא החזיר JSON תקין — נסה שוב');
+    else throw new Error('Gemini לא החזיר JSON תקין. תשובה: '+clean.substring(0,200));
   }
 
   if(!parsed.scenes||!parsed.scenes.length)
-    throw new Error('לא התקבלו סצנות מ-Gemini');
+    throw new Error('לא התקבלו סצנות');
 
   S.scenes = parsed.scenes.map(sc=>{
     const checks = scorePrompt(sc.prompt);
