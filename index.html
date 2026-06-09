@@ -1997,7 +1997,11 @@ async function generateVoiceAct(){
 }
 
 async function generateTTSMultiVoice(){
-  const lines = window._voiceLines;
+  // קרא את הטקסט הנוכחי מה-textarea — כולל עריכות של המשתמש
+  const currentText = document.getElementById('narText').value.trim();
+  const lines = currentText
+    ? currentText.split('\n').filter(l => l.trim() && l.match(/^\[/))
+    : window._voiceLines;
   if(!lines || !lines.length){ toast('אין תסריט דיבוב'); return; }
 
   const btn = document.getElementById('btnTTS');
