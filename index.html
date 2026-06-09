@@ -437,7 +437,7 @@ function scorePrompt(p){
     if(c.k==='camera')   pass=/camera|shot|angle|pan|zoom|close.up|wide|tracking|drone|tilt|crane/i.test(p);
     if(c.k==='lighting') pass=/light|shadow|golden|dramatic|warm|cool|sun|glow|dawn|dusk|bright|dark|beam/i.test(p);
     if(c.k==='style')    pass=/cinematic|animation|render|quality|Pixar|biblical|3D|CGI/i.test(p);
-    if(c.k==='no_text')  pass=/no text|no subtitle/i.test(p);
+    if(c.k==='no_text')  pass=/\[SUBTITLES\]/i.test(p); // now we WANT subtitles
     if(c.k==='duration') pass=/10 second/i.test(p);
     if(c.k==='emotion')  pass=/atmosphere|emotion|dramatic|feeling|tension|epic|grand|solemn|joyful|fearful|mood/i.test(p);
     return {...c,pass};
@@ -671,7 +671,13 @@ CRITICAL RULES:
 1. Prompts in English only (except dialogue/subtitles which MUST be in Hebrew)
 2. Each scene COMPLETELY DIFFERENT — different location, camera, lighting, mood, color grade
 3. NARRATIVE CONTINUITY — all scenes together tell ONE complete flowing story
-4. DIALOGUE CONTINUITY — each scene's narration continues exactly from previous, no repetition
+4. DIALOGUE CONTINUITY — STRICT RULES:
+   - The entire narration across ALL scenes is like ONE long book divided into chapters
+   - Each scene picks up EXACTLY where the previous scene ENDED — not from the beginning
+   - FORBIDDEN: repeating ANY word, phrase or sentence from a previous scene
+   - FORBIDDEN: summarizing what already happened
+   - Each scene covers ONLY the NEW events happening in that specific part of the Torah
+   - Think of it as a narrator reading the Torah straight through — never going back
 5. DRAMA — emotional weight must match each Torah moment precisely
 6. Think like a Hollywood director — every cinematic detail matters
 7. CROWD & SCALE — The Torah is about a nation. Most scenes must include:
@@ -692,7 +698,7 @@ MANDATORY structure — ALL 11 sections required in every prompt:
 
 [DIALOGUE]: MANDATORY Hebrew only. Unique narration continuing from previous scene. Advances story with new information. Format: "טֶקסְט עִבְרִי" (phonetic). NO English. NO repetition from other scenes.
 
-[SUBTITLES]: White Hebrew subtitles with black outline at bottom of screen. Exact text: write the full Hebrew subtitle text here.
+[SUBTITLES]: On-screen Hebrew text overlay at bottom of screen. Display as white bold text with black shadow. The exact Hebrew words to show on screen as subtitle: write them here. Example: subtitle text "בְּרֵאשִׁית בָּרָא אֱלֹהִים".
 
 [SETTING]: Detailed location — environment, architecture, vegetation, specific objects, weather conditions (storm clouds, blowing sand, rain, fire, smoke), time of day. Different each scene.
 
