@@ -15,15 +15,36 @@
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;900&family=Frank+Ruhl+Libre:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#07070f;--s1:#0f0f1c;--s2:#161626;--s3:#1e1e30;
-  --border:#2c2c44;--gold:#c8a44a;--glt:#e8cc80;
-  --gdim:rgba(200,164,74,.13);--gglow:rgba(200,164,74,.22);
-  --text:#ede8d8;--muted:#7a7568;
+  --bg:#07070f;--s1:rgba(15,15,28,.92);--s2:rgba(22,22,38,.92);--s3:rgba(30,30,48,.92);
+  --border:rgba(44,44,68,.8);--gold:#c8a44a;--glt:#e8cc80;
+  --gdim:rgba(200,164,74,.15);--gglow:rgba(200,164,74,.28);
+  --text:#ede8d8;--muted:#9a9488;
   --red:#d95f5f;--green:#4fbf96;--blue:#5a8ad4;--orange:#d4894a;
   --r:13px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:'Heebo',sans-serif;min-height:100vh;direction:rtl;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Heebo',sans-serif;
+  min-height:100vh;
+  direction:rtl;
+  background-image:url('bg.jpg');
+  background-size:cover;
+  background-position:center top;
+  background-attachment:fixed;
+  background-repeat:no-repeat;
+}
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:rgba(5,5,15,.72);
+  z-index:0;
+  pointer-events:none;
+}
+main,nav,.filmstrip,#toast{position:relative;z-index:1;}
+.steps{position:relative;z-index:1;}
 
 /* FILM STRIP */
 .filmstrip{height:20px;background:var(--s1);border-bottom:1px solid var(--border);overflow:hidden;display:flex;align-items:center;}
@@ -32,7 +53,7 @@ body{background:var(--bg);color:var(--text);font-family:'Heebo',sans-serif;min-h
 @keyframes fs{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
 /* NAV */
-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);background:rgba(7,7,15,.92);}
+nav{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);background:rgba(5,5,15,.96);backdrop-filter:blur(8px);}
 .logo{display:flex;align-items:center;gap:9px;font-family:'Frank Ruhl Libre',serif;font-size:1.1rem;font-weight:700;color:var(--gold);}
 .logo-mark{width:30px;height:30px;background:var(--gdim);border:1px solid var(--gold);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.9rem;}
 .nbadge{font-size:.68rem;font-weight:600;background:var(--gdim);border:1px solid rgba(200,164,74,.35);color:var(--gold);padding:3px 9px;border-radius:20px;}
@@ -60,7 +81,7 @@ main{max-width:840px;margin:0 auto;padding:24px 16px 80px;}
 .sh p{color:var(--muted);font-size:.84rem;}
 
 /* CARD */
-.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:13px;}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:13px;backdrop-filter:blur(4px);}
 .ch{font-size:.67rem;font-weight:600;text-transform:uppercase;letter-spacing:1.8px;color:var(--gold);margin-bottom:11px;display:flex;align-items:center;gap:7px;}
 .ch::after{content:'';flex:1;height:1px;background:var(--border);}
 
@@ -233,6 +254,7 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
   <div class="logo"><div class="logo-mark">📜</div>פרשת השבוע — AI</div>
   <div style="display:flex;gap:8px;align-items:center;">
     <button class="btn btn-ghost" onclick="showScreen(5)" style="padding:6px 12px;font-size:.76rem;">🎬 מיזוג</button>
+    <button class="btn btn-ghost" onclick="openNarDirect()" style="padding:6px 12px;font-size:.76rem;">🎙️ קריינות</button>
     <span class="nbadge">Veo 3 · Sefaria</span>
   </div>
 </nav>
@@ -794,6 +816,9 @@ ${S.parashaText}
 • כל סצנה ממשיכה ישירות מהקודמת — ללא חזרות
 • כתוב כמו תסריטאי הוליוודי — דרמה, רגש, מתח
 • כאשר יש המוני בני ישראל — תאר אלפי אנשים
+• ללא אלימות בשום צורה — ללא דם, ללא פצעים, ללא קרבות אלימים
+• מותאם לכל הגילאים כולל ילדים — תיאורים חיוביים ומעוררי השראה
+• קרבות ומלחמות — תאר מרחוק כתנועת צבאות, ללא אלימות ישירה
 
 לכל סצנה כתוב בפורמט הזה:
 
@@ -871,7 +896,7 @@ Convert EACH of the ${numClips} scenes into a Veo 3.1 prompt with ALL 11 section
 
 IMPORTANT: Return ONLY a JSON array. No markdown. No explanation. Start with { immediately.
 
-[STYLE]: High-budget 3D animated film, photorealistic CGI 4K. Prince of Egypt meets Pixar. FULLY RENDERED 3D ANIMATION. 10 seconds.
+[STYLE]: High-budget 3D animated film, photorealistic CGI 4K. Prince of Egypt meets Pixar. FULLY RENDERED 3D ANIMATION. 10 seconds. FAMILY FRIENDLY — suitable for all ages including young children. NO violence, NO blood, NO gore, NO weapons used harmfully. War or conflict shown only as distant movement of crowds, never up-close violence.
 [CHARACTERS]: Full detail — name, age, face, beard, hair, exact clothing. Consistent across scenes.
 [ACTION]: Precise movements and micro-expressions.
 [DIALOGUE]: NO spoken dialogue. NO character voices. NO narration. Complete silence on voices — only ambient sound and music.
@@ -1453,6 +1478,21 @@ function mergAgain(){
 // ════════════════════════════════════════
 let narBlob = null;
 let finalBlob = null;
+
+function openNarDirect(){
+  showScreen(5);
+  // Hide merge cards, show only narration
+  document.getElementById('importCard').style.display = 'none';
+  document.getElementById('clipListCard').style.display = 'none';
+  document.getElementById('mergeCard').style.display = 'none';
+  document.getElementById('mergeResult').style.display = 'none';
+  document.getElementById('narrationCard').style.display = 'block';
+  // Update duck slider
+  document.getElementById('duckLevel').oninput = function(){
+    document.getElementById('duckVal').textContent = this.value;
+  };
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 
 function showNarration(){
   document.getElementById('narrationCard').style.display = 'block';
