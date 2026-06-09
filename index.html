@@ -529,11 +529,9 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
       <div class="fld" style="margin-bottom:10px;">
         <label>קול</label>
         <select id="narVoice" style="direction:rtl;">
-          <optgroup label="⭐ Neural2 — הכי טבעי">
-            <option value="he-IL-Neural2-A">Neural2 — נשי (A)</option>
-            <option value="he-IL-Neural2-B" selected>Neural2 — גברי (B) ★ מומלץ לקריינות</option>
-            <option value="he-IL-Neural2-C">Neural2 — נשי (C)</option>
-            <option value="he-IL-Neural2-D">Neural2 — גברי (D)</option>
+          <optgroup label="🌟 Gemini TTS — הכי טבעי">
+            <option value="gemini-tts-male" selected>Gemini TTS — גברי ★ מומלץ לקריינות</option>
+            <option value="gemini-tts-female">Gemini TTS — נשי</option>
           </optgroup>
           <optgroup label="WaveNet — טבעי">
             <option value="he-IL-Wavenet-A">WaveNet — נשי (A)</option>
@@ -1736,33 +1734,69 @@ async function generateTTS(){
   try{
     const voice = document.getElementById('narVoice').value;
 
-    // בניית SSML — הפסקות דרמטיות, קצב אטי, צליל עמוק
-    const sentences = text.split(/(?<=[.!?])\s+/).filter(s => s.trim());
-    let ssmlBody = '';
-    for(const sentence of sentences){
-      const clean = sentence.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      ssmlBody += '<s>' + clean + '</s><break time="600ms"/>';
-    }
-    const ssml = '<speak><prosody rate="slow" pitch="-2st">' + ssmlBody + '</prosody></speak>';
+    if(voice.startsWith('gemini-tts')){
+      // ── Gemini TTS ──
+      const isFemale = voice === 'gemini-tts-female';
+      const voiceName = isFemale ? 'Aoede' : 'Charon';
+      const stylePrompt = 'דבר כמו קריין סרט תנכי סיפורי — עברית ברורה, קצב איטי ומרגש, טון עמוק וסמכותי, כמו Testament של Netflix.';
 
-    const resp = await fetch(
-      'https://texttospeech.googleapis.com/v1/text:synthesize?key='+(S.ttsKey||S.apiKey),
-      {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          input: { ssml },
-          voice: { languageCode:'he-IL', name: voice },
-          audioConfig: { audioEncoding:'MP3', speakingRate: 0.9, pitch: -2.0 }
-        })
+      const resp = await fetch(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key='+S.apiKey,
+        {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            contents:[{ parts:[{ text: stylePrompt + '\n\n' + text }] }],
+            generationConfig:{
+              responseModalities:['AUDIO'],
+              speechConfig:{
+                voiceConfig:{
+                  prebuiltVoiceConfig:{ voiceName }
+                }
+              }
+            }
+          })
+        }
+      );
+      if(!resp.ok){ const e=await resp.json(); throw new Error(e.error?.message||'שגיאת Gemini TTS'); }
+      const data = await resp.json();
+      const b64 = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+      if(!b64) throw new Error('לא התקבל אודיו מ-Gemini TTS');
+      const bytes = atob(b64);
+      const arr = new Uint8Array(bytes.length);
+      for(let i=0;i<bytes.length;i++) arr[i]=bytes.charCodeAt(i);
+      narBlob = new Blob([arr], {type:'audio/wav'});
+
+    } else {
+      // ── Google Cloud TTS (WaveNet) ──
+      const sentences = text.split(/(?<=[.!?])\s+/).filter(s => s.trim());
+      let ssmlBody = '';
+      for(const sentence of sentences){
+        const clean = sentence.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        ssmlBody += '<s>' + clean + '</s><break time="600ms"/>';
       }
-    );
-    if(!resp.ok){ const e=await resp.json(); throw new Error(e.error?.message||'שגיאת TTS'); }
-    const data = await resp.json();
-    const bytes = atob(data.audioContent);
-    const arr = new Uint8Array(bytes.length);
-    for(let i=0;i<bytes.length;i++) arr[i]=bytes.charCodeAt(i);
-    narBlob = new Blob([arr], {type:'audio/mp3'});
+      const ssml = '<speak><prosody rate="slow" pitch="-2st">' + ssmlBody + '</prosody></speak>';
+
+      const resp = await fetch(
+        'https://texttospeech.googleapis.com/v1/text:synthesize?key='+(S.ttsKey||S.apiKey),
+        {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            input: { ssml },
+            voice: { languageCode:'he-IL', name: voice },
+            audioConfig: { audioEncoding:'MP3', speakingRate: 0.9, pitch: -2.0 }
+          })
+        }
+      );
+      if(!resp.ok){ const e=await resp.json(); throw new Error(e.error?.message||'שגיאת TTS'); }
+      const data = await resp.json();
+      const bytes = atob(data.audioContent);
+      const arr = new Uint8Array(bytes.length);
+      for(let i=0;i<bytes.length;i++) arr[i]=bytes.charCodeAt(i);
+      narBlob = new Blob([arr], {type:'audio/mp3'});
+    }
+
     const url = URL.createObjectURL(narBlob);
     const audio = document.getElementById('narAudio');
     audio.src = url;
