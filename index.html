@@ -4,276 +4,229 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>פרשת השבוע — יוצר סרטונים AI</title>
-
-<!-- PWA -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#c8a44a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="פרשה AI">
-
-<!-- Apple Icons -->
-<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
-
-<!-- Favicon -->
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="icon" type="image/png" sizes="96x96" href="icon-96.png">
-
-<!-- SEO -->
-<meta name="description" content="צור סרטוני וידאו מפרשת השבוע עם Veo 3 AI">
-
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;900&family=Frank+Ruhl+Libre:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg:#07070f; --s1:#0f0f1c; --s2:#161626; --s3:#1e1e30;
-  --border:#2c2c44; --gold:#c8a44a; --glt:#e8cc80; --gdim:rgba(200,164,74,.13);
-  --gglow:rgba(200,164,74,.22); --text:#ede8d8; --muted:#7a7568;
+  --border:#2c2c44; --gold:#c8a44a; --glt:#e8cc80;
+  --gdim:rgba(200,164,74,.13); --gglow:rgba(200,164,74,.22);
+  --text:#ede8d8; --muted:#7a7568;
   --red:#d95f5f; --green:#4fbf96; --blue:#5a8ad4; --orange:#d4894a;
   --r:13px;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--text);font-family:'Heebo',sans-serif;min-height:100vh;direction:rtl;}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 40% at 50% 0%,rgba(200,164,74,.05) 0%,transparent 70%);pointer-events:none;z-index:0;}
 
 /* FILM STRIP */
-.filmstrip{position:relative;z-index:1;height:22px;background:var(--s1);border-bottom:1px solid var(--border);overflow:hidden;display:flex;align-items:center;}
-.fi{display:flex;animation:fs 10s linear infinite;white-space:nowrap;}
+.filmstrip{height:22px;background:var(--s1);border-bottom:1px solid var(--border);overflow:hidden;display:flex;align-items:center;}
+.fi-inner{display:flex;animation:filmscroll 10s linear infinite;white-space:nowrap;}
 .fh{width:14px;height:10px;border:1.5px solid var(--border);border-radius:2px;margin:0 7px;flex-shrink:0;background:var(--bg);}
-@keyframes fs{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes filmscroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
 /* NAV */
-nav{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;padding:16px 28px;border-bottom:1px solid var(--border);background:rgba(7,7,15,.85);backdrop-filter:blur(10px);}
-.logo{display:flex;align-items:center;gap:10px;font-family:'Frank Ruhl Libre',serif;font-size:1.2rem;font-weight:700;color:var(--gold);}
-.logo-mark{width:32px;height:32px;background:var(--gdim);border:1px solid var(--gold);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.95rem;}
-.nav-right{display:flex;align-items:center;gap:10px;}
-.nbadge{font-size:.68rem;font-weight:600;background:var(--gdim);border:1px solid rgba(200,164,74,.35);color:var(--gold);padding:3px 9px;border-radius:20px;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);background:rgba(7,7,15,.9);}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Frank Ruhl Libre',serif;font-size:1.15rem;font-weight:700;color:var(--gold);}
+.logo-mark{width:32px;height:32px;background:var(--gdim);border:1px solid var(--gold);border-radius:7px;display:flex;align-items:center;justify-content:center;}
 .mode-pill{display:flex;background:var(--s2);border:1px solid var(--border);border-radius:20px;padding:3px;gap:2px;}
-.mode-btn{padding:4px 12px;border-radius:16px;border:none;font-family:'Heebo',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer;transition:all .2s;color:var(--muted);background:none;}
-.mode-btn.active{background:var(--gdim);color:var(--gold);border:1px solid rgba(200,164,74,.3);}
+.mpb{padding:4px 11px;border-radius:16px;border:none;font-family:'Heebo',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer;color:var(--muted);background:none;transition:all .2s;}
+.mpb.active{background:var(--gdim);color:var(--gold);border:1px solid rgba(200,164,74,.3);}
 
 /* STEPS */
-.steps{position:relative;z-index:1;display:flex;justify-content:center;padding:24px 24px 0;gap:0;}
-.sn{display:flex;flex-direction:column;align-items:center;min-width:72px;position:relative;}
-.sn:not(:last-child)::after{content:'';position:absolute;top:15px;left:50%;width:100%;height:1px;background:var(--border);z-index:0;}
-.sdot{width:30px;height:30px;border-radius:50%;border:2px solid var(--border);background:var(--s1);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--muted);position:relative;z-index:1;transition:all .3s;}
+.steps{display:flex;justify-content:center;padding:22px 20px 0;gap:0;}
+.sn{display:flex;flex-direction:column;align-items:center;min-width:64px;position:relative;}
+.sn:not(:last-child)::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:1px;background:var(--border);z-index:0;}
+.sdot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);background:var(--s1);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:var(--muted);position:relative;z-index:1;transition:all .3s;}
 .sn.active .sdot{border-color:var(--gold);background:var(--gdim);color:var(--gold);box-shadow:0 0 10px var(--gglow);}
 .sn.done .sdot{border-color:var(--green);background:rgba(79,191,150,.12);color:var(--green);}
-.slabel{font-size:.65rem;color:var(--muted);margin-top:5px;text-align:center;transition:color .3s;}
+.slabel{font-size:.62rem;color:var(--muted);margin-top:5px;text-align:center;transition:color .3s;}
 .sn.active .slabel{color:var(--gold);}
 .sn.done .slabel{color:var(--green);}
 
 /* MAIN */
-main{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:32px 20px 100px;}
+main{max-width:860px;margin:0 auto;padding:28px 18px 80px;}
+
+/* SCREENS */
 .screen{display:none;}
-.screen.active{display:block;animation:fadein .35s ease;}
+.screen.active{display:block;animation:fadein .3s ease;}
 @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
 /* SECTION HEADER */
-.sh{margin-bottom:24px;}
-.sh h2{font-family:'Frank Ruhl Libre',serif;font-size:1.75rem;font-weight:900;background:linear-gradient(135deg,var(--glt),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
-.sh p{color:var(--muted);font-size:.88rem;}
+.sh{margin-bottom:22px;}
+.sh h2{font-family:'Frank Ruhl Libre',serif;font-size:1.7rem;font-weight:900;background:linear-gradient(135deg,var(--glt),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
+.sh p{color:var(--muted);font-size:.86rem;}
 
 /* CARD */
-.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:16px;}
-.ch{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:1.8px;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:14px;}
+.ch{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:1.8px;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
 .ch::after{content:'';flex:1;height:1px;background:var(--border);}
 
 /* INPUTS */
 input[type=text],input[type=password],input[type=number],textarea,select{
   background:var(--s2);border:1px solid var(--border);border-radius:8px;
   color:var(--text);font-family:'Heebo',sans-serif;font-size:.92rem;
-  padding:10px 13px;outline:none;transition:border-color .2s;
+  padding:10px 13px;outline:none;transition:border-color .2s;width:100%;
 }
-input:focus,textarea:focus,select:focus{border-color:var(--gold);}
+input:focus,textarea:focus{border-color:var(--gold);}
 input::placeholder,textarea::placeholder{color:var(--muted);}
 
 /* BUTTONS */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:9px;font-family:'Heebo',sans-serif;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;}
 .btn:disabled{opacity:.4;cursor:not-allowed;}
-.btn-gold{background:linear-gradient(135deg,var(--gold),#9a7828);color:#07070f;font-size:1rem;padding:13px 24px;}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#9a7828);color:#07070f;font-size:.95rem;padding:13px 22px;}
 .btn-gold:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 22px rgba(200,164,74,.28);}
-.btn-ghost{background:var(--s2);border:1px solid var(--border);color:var(--text);font-size:.88rem;padding:9px 18px;}
-.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
-.btn-green{background:linear-gradient(135deg,#3a9e74,#2a7a58);color:white;font-size:.95rem;padding:13px 24px;}
-.btn-green:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 18px rgba(79,191,150,.25);}
-.btn-blue{background:linear-gradient(135deg,#4a7ac8,#2a4a90);color:white;font-size:.88rem;padding:9px 18px;}
-.btn-blue:hover{transform:translateY(-1px);}
-.btn-red{background:rgba(217,95,95,.15);border:1px solid rgba(217,95,95,.4);color:#f09090;font-size:.82rem;padding:7px 14px;}
-.btn-red:hover{background:rgba(217,95,95,.25);}
 .btn-full{width:100%;}
+.btn-ghost{background:var(--s2);border:1px solid var(--border);color:var(--text);font-size:.86rem;padding:9px 16px;}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+.btn-green{background:linear-gradient(135deg,#3a9e74,#2a7a58);color:white;font-size:.9rem;padding:13px 22px;}
+.btn-green:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 18px rgba(79,191,150,.25);}
+.btn-blue{background:linear-gradient(135deg,#4a7ac8,#2a4a90);color:white;font-size:.84rem;padding:8px 16px;}
 
 /* PARASHA GRID */
-.par-search{display:flex;gap:8px;margin-bottom:12px;}
-.par-search input{flex:1;direction:rtl;}
-.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:7px;max-height:300px;overflow-y:auto;padding-left:2px;}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:7px;max-height:290px;overflow-y:auto;padding-left:2px;}
 .pgrid::-webkit-scrollbar{width:3px;}
 .pgrid::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
-.pbtn{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;color:var(--text);font-family:'Heebo',sans-serif;font-size:.8rem;cursor:pointer;text-align:right;transition:all .18s;display:flex;flex-direction:column;gap:2px;}
+.pbtn{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:9px 10px;color:var(--text);font-family:'Heebo',sans-serif;font-size:.8rem;cursor:pointer;text-align:right;transition:all .18s;display:flex;flex-direction:column;gap:2px;width:100%;}
 .pbtn:hover{border-color:var(--gold);color:var(--gold);}
 .pbtn.active{background:var(--gdim);border-color:var(--gold);color:var(--glt);}
-.pbtn .ph{font-weight:700;font-size:.85rem;}
-.pbtn .pp{color:var(--muted);font-size:.68rem;}
+.pbtn .ph{font-weight:700;font-size:.84rem;}
+.pbtn .pp{color:var(--muted);font-size:.66rem;}
 .pbtn.active .pp{color:rgba(232,204,128,.55);}
 
 /* SCRIPT BOX */
 .script-wrap{background:var(--s2);border:1px solid var(--border);border-radius:9px;overflow:hidden;}
 .script-toolbar{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;border-bottom:1px solid var(--border);background:var(--s3);}
-.script-toolbar span{font-size:.75rem;color:var(--muted);}
-.script-body{padding:18px;font-family:'Frank Ruhl Libre',serif;font-size:1rem;line-height:2;direction:rtl;white-space:pre-wrap;max-height:380px;overflow-y:auto;}
+.script-toolbar span{font-size:.73rem;color:var(--muted);}
+.script-body{padding:16px;font-family:'Frank Ruhl Libre',serif;font-size:1rem;line-height:2;direction:rtl;white-space:pre-wrap;max-height:360px;overflow-y:auto;}
 .script-body::-webkit-scrollbar{width:3px;}
 .script-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
-textarea.sedit{width:100%;min-height:300px;background:var(--s2);border:none;color:var(--text);font-family:'Frank Ruhl Libre',serif;font-size:1rem;line-height:2;padding:18px;outline:none;resize:vertical;direction:rtl;display:block;}
+textarea.sedit{width:100%;min-height:280px;background:var(--s2);border:none;color:var(--text);font-family:'Frank Ruhl Libre',serif;font-size:1rem;line-height:2;padding:16px;outline:none;resize:vertical;direction:rtl;}
 
-/* SCENE VALIDATION CARDS */
-.scene-val-card{background:var(--s2);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;transition:border-color .3s;}
-.scene-val-card.grade-a{border-color:rgba(79,191,150,.5);}
-.scene-val-card.grade-b{border-color:rgba(90,138,212,.5);}
-.scene-val-card.grade-c{border-color:rgba(212,137,74,.5);}
-.scene-val-card.grade-d{border-color:rgba(217,95,95,.5);}
-
-.svc-header{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;user-select:none;}
-.svc-header:hover{background:rgba(255,255,255,.02);}
-.svc-num{min-width:28px;height:28px;border-radius:6px;background:var(--gdim);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:var(--gold);flex-shrink:0;}
-.svc-title{flex:1;font-size:.88rem;font-weight:600;line-height:1.4;}
-.svc-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.score-badge{padding:4px 10px;border-radius:20px;font-size:.72rem;font-weight:700;}
-.sb-a{background:rgba(79,191,150,.15);border:1px solid rgba(79,191,150,.4);color:#80d4b0;}
-.sb-b{background:rgba(90,138,212,.15);border:1px solid rgba(90,138,212,.4);color:#90b4e8;}
-.sb-c{background:rgba(212,137,74,.15);border:1px solid rgba(212,137,74,.4);color:#e8a870;}
-.sb-d{background:rgba(217,95,95,.15);border:1px solid rgba(217,95,95,.4);color:#f09090;}
-.expand-arrow{font-size:.75rem;color:var(--muted);transition:transform .2s;}
-.expand-arrow.open{transform:rotate(180deg);}
-
-.svc-body{display:none;padding:0 16px 16px;}
+/* VALIDATION CARDS */
+.svc{background:var(--s2);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;}
+.svc.ga{border-color:rgba(79,191,150,.5);}
+.svc.gb{border-color:rgba(90,138,212,.5);}
+.svc.gc{border-color:rgba(212,137,74,.5);}
+.svc.gd{border-color:rgba(217,95,95,.5);}
+.svc-head{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;}
+.svc-num{min-width:26px;height:26px;border-radius:6px;background:var(--gdim);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--gold);flex-shrink:0;}
+.svc-title{flex:1;font-size:.86rem;font-weight:600;line-height:1.4;}
+.sbadge{padding:3px 9px;border-radius:20px;font-size:.7rem;font-weight:700;white-space:nowrap;}
+.sba{background:rgba(79,191,150,.15);border:1px solid rgba(79,191,150,.4);color:#80d4b0;}
+.sbb{background:rgba(90,138,212,.15);border:1px solid rgba(90,138,212,.4);color:#90b4e8;}
+.sbc{background:rgba(212,137,74,.15);border:1px solid rgba(212,137,74,.4);color:#e8a870;}
+.sbd{background:rgba(217,95,95,.15);border:1px solid rgba(217,95,95,.4);color:#f09090;}
+.arr{font-size:.7rem;color:var(--muted);transition:transform .2s;flex-shrink:0;}
+.arr.open{transform:rotate(180deg);}
+.svc-body{display:none;padding:0 14px 14px;}
 .svc-body.open{display:block;}
-
-/* PROMPT SECTION */
-.prompt-section{margin-bottom:14px;}
-.prompt-label{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:8px;}
-.prompt-text{background:var(--s3);border:1px solid var(--border);border-radius:7px;padding:12px;font-size:.82rem;line-height:1.7;color:var(--text);direction:ltr;text-align:left;font-family:'Courier New',monospace;}
-textarea.prompt-edit{width:100%;min-height:80px;background:var(--s3);border:1px solid var(--gold);border-radius:7px;color:var(--text);font-family:'Courier New',monospace;font-size:.82rem;line-height:1.7;padding:12px;outline:none;resize:vertical;direction:ltr;}
-
-/* CHECKS LIST */
-.checks-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;}
-@media(max-width:580px){.checks-grid{grid-template-columns:1fr;}}
-.check-item{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--s1);border-radius:6px;font-size:.78rem;line-height:1.4;}
-.ci-icon{flex-shrink:0;font-size:.85rem;margin-top:1px;}
-.ci-text{flex:1;}
-.ci-text strong{display:block;color:var(--text);margin-bottom:2px;}
-.ci-text span{color:var(--muted);}
-.check-item.pass .ci-icon::before{content:'✅';}
-.check-item.warn .ci-icon::before{content:'⚠️';}
-.check-item.fail .ci-icon::before{content:'❌';}
-
-/* IMPROVE SUGGESTIONS */
-.suggestions{background:rgba(90,138,212,.08);border:1px solid rgba(90,138,212,.25);border-radius:7px;padding:12px;margin-bottom:12px;}
-.sug-title{font-size:.75rem;font-weight:600;color:var(--blue);margin-bottom:8px;}
-.sug-item{font-size:.78rem;color:var(--text);line-height:1.5;margin-bottom:4px;padding-right:12px;position:relative;}
-.sug-item::before{content:'→';position:absolute;right:0;color:var(--blue);}
+.plabel{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:7px;}
+.ptext{background:var(--s3);border:1px solid var(--border);border-radius:7px;padding:11px;font-size:.8rem;line-height:1.7;color:var(--text);direction:ltr;text-align:left;font-family:monospace;}
+textarea.pedit{width:100%;min-height:75px;background:var(--s3);border:1px solid var(--gold);border-radius:7px;color:var(--text);font-family:monospace;font-size:.8rem;line-height:1.7;padding:11px;outline:none;resize:vertical;direction:ltr;}
+.checks-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:10px 0;}
+.ci{display:flex;align-items:flex-start;gap:7px;padding:7px 9px;background:var(--s1);border-radius:6px;font-size:.75rem;line-height:1.4;}
+.ci strong{display:block;color:var(--text);margin-bottom:1px;}
+.ci span{color:var(--muted);}
+.sugg{background:rgba(90,138,212,.08);border:1px solid rgba(90,138,212,.2);border-radius:7px;padding:10px;margin:8px 0;}
+.sugg-title{font-size:.72rem;font-weight:600;color:var(--blue);margin-bottom:6px;}
+.sugg-item{font-size:.76rem;color:var(--text);line-height:1.5;margin-bottom:3px;padding-right:12px;position:relative;}
+.sugg-item::before{content:'→';position:absolute;right:0;color:var(--blue);}
 
 /* SCORE OVERVIEW */
-.score-overview{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:16px;}
-.so-card{background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:14px;text-align:center;}
-.so-val{font-size:1.8rem;font-weight:900;line-height:1;}
-.so-label{font-size:.72rem;color:var(--muted);margin-top:4px;}
-.so-card.good .so-val{color:var(--green);}
-.so-card.ok .so-val{color:var(--blue);}
-.so-card.warn .so-val{color:var(--orange);}
-.so-card.bad .so-val{color:var(--red);}
+.score-ov{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:14px;}
+.so{background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px;text-align:center;}
+.so-val{font-size:1.7rem;font-weight:900;line-height:1;}
+.so-lbl{font-size:.68rem;color:var(--muted);margin-top:3px;}
+.so.good .so-val{color:var(--green);}
+.so.ok .so-val{color:var(--blue);}
+.so.warn .so-val{color:var(--orange);}
+.so.bad .so-val{color:var(--red);}
 
 /* PROGRESS */
-.prog-wrap{margin-bottom:20px;}
 .prog-top{display:flex;justify-content:space-between;margin-bottom:10px;}
 .prog-title{font-weight:700;}
 .prog-pct{color:var(--gold);font-weight:700;font-size:1.1rem;}
-.prog-track{width:100%;height:4px;background:var(--s2);border-radius:2px;overflow:hidden;}
+.prog-track{width:100%;height:4px;background:var(--s2);border-radius:2px;overflow:hidden;margin-bottom:18px;}
 .prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--glt));border-radius:2px;width:0%;transition:width .5s ease;}
-
-/* SP ROWS */
 .sp-list{display:flex;flex-direction:column;gap:7px;max-height:300px;overflow-y:auto;}
-.sp-list::-webkit-scrollbar{width:3px;}
-.sp-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
-.sp-row{display:flex;align-items:center;gap:11px;padding:9px 13px;background:var(--s2);border-radius:7px;font-size:.82rem;border:1px solid transparent;transition:all .3s;}
-.sp-row.sp-act{border-color:var(--gold);}
-.sp-row.sp-done{border-color:rgba(79,191,150,.35);}
-.sp-row.sp-err{border-color:rgba(217,95,95,.35);}
-.sp-ic{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--muted);flex-shrink:0;transition:all .3s;}
-.sp-row.sp-act .sp-ic{border-color:var(--gold);color:var(--gold);animation:bl 1s infinite;}
-.sp-row.sp-done .sp-ic{background:var(--green);border-color:var(--green);color:#07070f;}
-.sp-row.sp-err .sp-ic{background:var(--red);border-color:var(--red);color:white;}
+.sp-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--s2);border-radius:7px;font-size:.82rem;border:1px solid transparent;transition:all .3s;}
+.sp-row.act{border-color:var(--gold);}
+.sp-row.done{border-color:rgba(79,191,150,.35);}
+.sp-row.err{border-color:rgba(217,95,95,.35);}
+.sp-ic{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--muted);flex-shrink:0;transition:all .3s;}
+.sp-row.act .sp-ic{border-color:var(--gold);color:var(--gold);animation:bl 1s infinite;}
+.sp-row.done .sp-ic{background:var(--green);border-color:var(--green);color:#07070f;}
+.sp-row.err .sp-ic{background:var(--red);border-color:var(--red);color:white;}
 @keyframes bl{0%,100%{opacity:1}50%{opacity:.25}}
 .sp-txt{flex:1;color:var(--muted);}
-.sp-row.sp-act .sp-txt,.sp-row.sp-done .sp-txt{color:var(--text);}
+.sp-row.act .sp-txt,.sp-row.done .sp-txt{color:var(--text);}
 .sp-tm{font-size:.7rem;color:var(--muted);white-space:nowrap;}
 
-/* RESULTS GRID */
-.res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
-.res-card{background:var(--s2);border:1px solid var(--border);border-radius:9px;overflow:hidden;transition:border-color .2s;}
+/* RESULTS */
+.res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:11px;}
+.res-card{background:var(--s2);border:1px solid var(--border);border-radius:9px;overflow:hidden;}
 .res-card:hover{border-color:var(--gold);}
 .res-thumb{width:100%;aspect-ratio:16/9;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:1.8rem;overflow:hidden;}
 .res-thumb video{width:100%;height:100%;object-fit:cover;}
-.res-foot{padding:9px 11px;display:flex;justify-content:space-between;}
-.res-label{font-size:.75rem;color:var(--muted);}
-.res-dur{font-size:.72rem;color:var(--gold);font-weight:700;}
+.res-foot{padding:8px 11px;display:flex;justify-content:space-between;}
+.res-lbl{font-size:.75rem;color:var(--muted);}
+.res-dur{font-size:.7rem;color:var(--gold);font-weight:700;}
 
 /* MISC */
-.msg{padding:10px 15px;border-radius:7px;font-size:.83rem;line-height:1.5;margin-top:10px;}
+.msg{padding:10px 14px;border-radius:7px;font-size:.82rem;line-height:1.5;margin-top:10px;}
 .msg.info{background:var(--gdim);border:1px solid rgba(200,164,74,.35);color:var(--glt);}
 .msg.error{background:rgba(217,95,95,.1);border:1px solid rgba(217,95,95,.4);color:#f09090;}
 .msg.success{background:rgba(79,191,150,.1);border:1px solid var(--green);color:#80d4b0;}
 .msg.warn{background:rgba(212,137,74,.1);border:1px solid rgba(212,137,74,.4);color:#e8a870;}
-.divider{height:1px;background:var(--border);margin:18px 0;}
-.spin{width:16px;height:16px;border:2px solid rgba(7,7,15,.25);border-top-color:currentColor;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;flex-shrink:0;}
+.spin{width:15px;height:15px;border:2px solid rgba(255,255,255,.2);border-top-color:currentColor;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;flex-shrink:0;}
 @keyframes spin{to{transform:rotate(360deg)}}
-.row{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;}
-.row-center{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:18px;}
-.badge-week{display:inline-flex;align-items:center;gap:6px;background:var(--gdim);border:1px solid var(--gold);border-radius:20px;padding:5px 13px;font-size:.75rem;color:var(--glt);font-weight:600;}
-.dur-info{flex:1;min-width:180px;background:var(--gdim);border:1px solid rgba(200,164,74,.25);border-radius:8px;padding:10px 14px;font-size:.83rem;color:var(--glt);line-height:1.6;}
-.dur-info strong{display:block;font-size:.95rem;}
+.row{display:flex;gap:9px;align-items:flex-start;flex-wrap:wrap;}
+.row-c{display:flex;gap:9px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+.badge-week{display:inline-flex;align-items:center;gap:6px;background:var(--gdim);border:1px solid var(--gold);border-radius:20px;padding:5px 12px;font-size:.74rem;color:var(--glt);font-weight:600;}
 .fld{display:flex;flex-direction:column;gap:5px;}
-.fld label{font-size:.78rem;color:var(--muted);font-weight:500;}
-.fld input[type=number]{width:82px;text-align:center;direction:ltr;}
-.model-row{display:flex;gap:9px;}
+.fld label{font-size:.76rem;color:var(--muted);font-weight:500;}
+.fld input[type=number]{width:80px;text-align:center;direction:ltr;}
+.dur-info{flex:1;min-width:170px;background:var(--gdim);border:1px solid rgba(200,164,74,.25);border-radius:8px;padding:10px 14px;font-size:.82rem;color:var(--glt);line-height:1.6;}
+.dur-info strong{display:block;font-size:.92rem;}
+.mrow{display:flex;gap:9px;}
 .mopt{flex:1;padding:11px;background:var(--s2);border:1px solid var(--border);border-radius:8px;cursor:pointer;text-align:center;transition:all .2s;}
 .mopt:hover{border-color:var(--gold);}
 .mopt.active{background:var(--gdim);border-color:var(--gold);}
-.mopt .mn{font-weight:700;font-size:.85rem;}
-.mopt .md{font-size:.7rem;color:var(--muted);margin-top:2px;}
+.mopt .mn{font-weight:700;font-size:.84rem;}
+.mopt .md{font-size:.68rem;color:var(--muted);margin-top:2px;}
 .mopt.active .mn{color:var(--glt);}
-.cost-box{display:flex;justify-content:space-between;align-items:center;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:11px 16px;font-size:.85rem;margin:14px 0;}
+.cost-box{display:flex;justify-content:space-between;align-items:center;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:11px 15px;font-size:.84rem;margin:12px 0;}
 .cost-box span{color:var(--muted);}
-.cost-val{color:var(--gold);font-weight:700;font-size:1rem;}
-#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--s2);border:1px solid var(--border);border-radius:22px;padding:9px 20px;font-size:.85rem;color:var(--text);opacity:0;transition:all .3s;z-index:999;white-space:nowrap;}
+.cost-val{color:var(--gold);font-weight:700;font-size:.98rem;}
+.prev-banner{background:rgba(90,138,212,.1);border:1px solid rgba(90,138,212,.3);border-radius:9px;padding:11px 14px;margin-bottom:14px;display:flex;align-items:center;gap:9px;font-size:.8rem;color:#90b4e8;}
+.prev-banner strong{color:var(--blue);}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--s2);border:1px solid var(--border);border-radius:22px;padding:8px 18px;font-size:.84rem;color:var(--text);opacity:0;transition:all .3s;z-index:9999;white-space:nowrap;pointer-events:none;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* PREVIEW MODE BANNER */
-.preview-banner{background:rgba(90,138,212,.1);border:1px solid rgba(90,138,212,.3);border-radius:9px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:.83rem;color:#90b4e8;}
-.preview-banner strong{color:var(--blue);}
-
-@media(max-width:600px){
-  nav{padding:12px 14px;}
-  main{padding:20px 13px 80px;}
-  .sh h2{font-size:1.4rem;}
-  .model-row{flex-direction:column;}
+@media(max-width:580px){
+  .score-ov{grid-template-columns:1fr 1fr;}
   .checks-grid{grid-template-columns:1fr;}
-  .score-overview{grid-template-columns:1fr 1fr;}
+  .mrow{flex-direction:column;}
 }
 </style>
 </head>
 <body>
 
-<div class="filmstrip"><div class="fi" id="fi"></div></div>
+<div class="filmstrip"><div class="fi-inner" id="fiInner"></div></div>
 
 <nav>
   <div class="logo"><div class="logo-mark">📜</div>פרשת השבוע — AI</div>
-  <div class="nav-right">
-    <div class="mode-pill">
-      <button class="mode-btn active" id="mPreview" onclick="setMode('preview')">🔍 תצוגה מקדימה</button>
-      <button class="mode-btn" id="mProd" onclick="setMode('production')">🎬 יצירה</button>
-    </div>
-    <span class="nbadge">Veo 3.1</span>
+  <div class="mode-pill">
+    <button class="mpb active" id="mPrev" onclick="setMode('preview')">🔍 תצוגה מקדימה</button>
+    <button class="mpb" id="mProd" onclick="setMode('production')">🎬 יצירה</button>
   </div>
 </nav>
 
@@ -287,159 +240,132 @@ textarea.prompt-edit{width:100%;min-height:80px;background:var(--s3);border:1px 
 
 <main>
 
-<!-- ══ S0: SETTINGS ══ -->
+<!-- SCREEN 0: SETTINGS -->
 <div class="screen active" id="s0">
-  <div class="sh"><h2>הגדרות</h2><p>הכנס API key, בחר אורך ומודל</p></div>
-
-  <div id="previewBanner0" class="preview-banner">
-    <span>🔍</span>
-    <div><strong>מצב תצוגה מקדימה:</strong> שלב Veo API key אינו נדרש כעת — תוכל לנתח, לאמת ולערוך הכל לפני שמוציאים כסף</div>
+  <div class="sh"><h2>הגדרות</h2><p>הכנס API key, אורך סרטון ומודל</p></div>
+  <div id="s0-prev-banner" class="prev-banner">
+    <span>🔍</span><div><strong>מצב תצוגה מקדימה:</strong> ניתן לעבור את כל השלבים עד יצירת הסרטון ללא Veo API</div>
   </div>
-
   <div class="card">
-    <div class="ch">🔑 Google AI API Key (Gemini)</div>
+    <div class="ch">🔑 Google AI API Key</div>
     <div class="row">
-      <div style="position:relative;flex:1">
-        <input type="password" id="apiKey" placeholder="AIza... — נדרש לשליפת תסריט ואימות" style="width:100%;padding-left:36px;" autocomplete="off">
-        <button onclick="toggleKey()" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:.95rem;">👁</button>
+      <div style="position:relative;flex:1;">
+        <input type="password" id="apiKey" placeholder="AIza... — לשליפת תסריט (Gemini)" autocomplete="off" style="padding-left:38px;">
+        <button onclick="toggleKey()" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:.95rem;padding:0;">👁</button>
       </div>
-      <button class="btn btn-ghost" onclick="saveKey()">שמור</button>
+      <button class="btn btn-ghost" onclick="saveKey()" style="flex-shrink:0;">שמור</button>
     </div>
-    <div class="msg info" style="font-size:.78rem;margin-top:9px;">
-      🔗 קבל מפתח Gemini חינמי: <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--glt)">aistudio.google.com/apikey</a>
-      &nbsp;|&nbsp; לVeo נדרש גם <a href="https://console.cloud.google.com/billing" target="_blank" style="color:var(--glt)">Google Cloud Billing</a>
+    <div class="msg info" style="font-size:.76rem;margin-top:8px;">
+      🔗 מפתח חינמי: <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--glt)">aistudio.google.com/apikey</a>
     </div>
   </div>
-
   <div class="card">
     <div class="ch">⏱ אורך הסרטון</div>
-    <div class="row">
+    <div class="row" style="align-items:flex-end;">
       <div class="fld"><label>דקות</label><input type="number" id="durM" value="4" min="0" max="10" oninput="calcDur()"></div>
       <div class="fld"><label>שניות</label><input type="number" id="durS" value="0" min="0" max="59" oninput="calcDur()"></div>
-      <div class="dur-info" id="durInfo"><strong>240 שניות</strong>30 קליפים | Fast: $36 · Full: $96</div>
+      <div class="dur-info" id="durInfo"><strong>240 שניות</strong>30 קליפים | Fast: $36</div>
     </div>
   </div>
-
   <div class="card">
     <div class="ch">🤖 מודל Veo</div>
-    <div class="model-row">
+    <div class="mrow">
       <div class="mopt active" id="mFast" onclick="setModel('fast')"><div class="mn">Veo 3 Fast</div><div class="md">$0.15/שנ׳</div></div>
       <div class="mopt" id="mFull" onclick="setModel('full')"><div class="mn">Veo 3 Full</div><div class="md">$0.40/שנ׳</div></div>
     </div>
   </div>
-
-  <button class="btn btn-gold btn-full" onclick="goStep1()">המשך לבחירת פרשה ←</button>
+  <button class="btn btn-gold btn-full" onclick="gotoParasha()">המשך לבחירת פרשה ←</button>
 </div>
 
-<!-- ══ S1: PARASHA ══ -->
+<!-- SCREEN 1: PARASHA -->
 <div class="screen" id="s1">
-  <div class="sh"><h2>בחר פרשת השבוע</h2><p>האפליקציה שולפת את הטקסט המלא מ-Sefaria</p></div>
-
+  <div class="sh"><h2>בחר פרשת השבוע</h2><p>האפליקציה שולפת את הטקסט מ-Sefaria</p></div>
   <div class="card">
     <div class="ch">📅 פרשה נוכחית</div>
-    <div id="thisWeek"><div style="color:var(--muted);font-size:.85rem;">טוען...</div></div>
+    <div id="thisWeek"><div style="color:var(--muted);font-size:.84rem;display:flex;align-items:center;gap:7px;"><span class="spin"></span>טוען מ-Sefaria...</div></div>
   </div>
-
   <div class="card">
     <div class="ch">📚 כל הפרשות</div>
-    <div class="par-search"><input type="text" id="psearch" placeholder="חפש פרשה..." oninput="filterP(this.value)" style="direction:rtl;width:100%;"></div>
+    <input type="text" id="psearch" placeholder="חפש פרשה..." oninput="filterP(this.value)" style="margin-bottom:11px;direction:rtl;">
     <div class="pgrid" id="pgrid"></div>
   </div>
-
-  <div class="card" id="selInfo" style="display:none;">
+  <div class="card" id="selCard" style="display:none;">
     <div class="ch">✅ נבחרה</div>
-    <div class="row" style="justify-content:space-between;align-items:center;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
       <div>
-        <div style="font-family:'Frank Ruhl Libre',serif;font-size:1.25rem;font-weight:700;color:var(--glt)" id="selName"></div>
-        <div style="font-size:.78rem;color:var(--muted)" id="selRef"></div>
+        <div style="font-family:'Frank Ruhl Libre',serif;font-size:1.2rem;font-weight:700;color:var(--glt);" id="selName"></div>
+        <div style="font-size:.76rem;color:var(--muted);" id="selRef"></div>
       </div>
       <button class="btn btn-gold" onclick="fetchParasha()" id="fetchBtn">שלוף פרשה וצור תסריט ←</button>
     </div>
   </div>
 </div>
 
-<!-- ══ S2: SCRIPT ══ -->
+<!-- SCREEN 2: SCRIPT -->
 <div class="screen" id="s2">
   <div class="sh"><h2>תסריט הסרטון</h2><p>Gemini יצר תסריט מתמצת — קרא, ערוך ואשר</p></div>
-
   <div class="card">
     <div class="ch">🔄 סטטוס</div>
-    <div id="scriptStatus" style="color:var(--muted);font-size:.88rem;display:flex;align-items:center;gap:8px;"></div>
+    <div id="scriptStatus" style="color:var(--muted);font-size:.86rem;display:flex;align-items:center;gap:8px;"></div>
   </div>
-
   <div class="card" id="scriptCard" style="display:none;">
     <div class="ch">📝 התסריט</div>
     <div class="script-wrap">
       <div class="script-toolbar">
         <span id="scriptMeta"></span>
         <div style="display:flex;gap:6px;">
-          <button class="btn btn-ghost" style="padding:5px 11px;font-size:.75rem;" onclick="toggleEdit()" id="editBtn">✏️ ערוך</button>
-          <button class="btn btn-ghost" style="padding:5px 11px;font-size:.75rem;" onclick="regenScript()">🔄 מחדש</button>
+          <button class="btn btn-ghost" style="padding:5px 10px;font-size:.73rem;" onclick="toggleEdit()" id="editBtn">✏️ ערוך</button>
+          <button class="btn btn-ghost" style="padding:5px 10px;font-size:.73rem;" onclick="regenScript()">🔄 מחדש</button>
         </div>
       </div>
       <div class="script-body" id="scriptView"></div>
       <textarea class="sedit" id="scriptEdit" style="display:none;"></textarea>
     </div>
-    <div class="row-center">
-      <button class="btn btn-green" onclick="approveScript()">✅ מאשר — המשך לאימות סצנות</button>
-      <button class="btn btn-ghost" onclick="goStep(1)">← חזור לפרשה</button>
+    <div class="row-c">
+      <button class="btn btn-green" onclick="approveScript()">✅ מאשר — המשך לאימות</button>
+      <button class="btn btn-ghost" onclick="showScreen(1)">← חזור</button>
     </div>
   </div>
 </div>
 
-<!-- ══ S3: VALIDATION ══ -->
+<!-- SCREEN 3: VALIDATION -->
 <div class="screen" id="s3">
-  <div class="sh"><h2>אימות סצנות ופרומפטים</h2><p>בדוק כל סצנה, ציון איכות, הצעות שיפור — לפני שליחה ל-Veo</p></div>
-
-  <div id="valBanner" class="preview-banner">
-    <span>🔍</span><div><strong>מצב אימות:</strong> כל פרומפט נבדק מול דרישות Veo 3 — ציון, בעיות, והצעות שיפור</div>
+  <div class="sh"><h2>אימות סצנות</h2><p>ציון, בדיקות ושיפור פרומפטים לפני שליחה ל-Veo</p></div>
+  <div id="s3-prev-banner" class="prev-banner">
+    <span>🔍</span><div><strong>מצב אימות:</strong> כל פרומפט נבדק מול דרישות Veo 3</div>
   </div>
-
-  <!-- SCORE OVERVIEW -->
   <div class="card" id="overviewCard" style="display:none;">
     <div class="ch">📊 סקירה כללית</div>
-    <div class="score-overview" id="scoreOverview"></div>
+    <div class="score-ov" id="scoreOv"></div>
     <div id="overallMsg"></div>
   </div>
-
-  <!-- SCENES LIST -->
-  <div id="scenesValList"></div>
-
-  <!-- ACTIONS -->
+  <div id="scenesList"></div>
   <div id="valActions" style="display:none;">
-    <div class="cost-box">
-      <span>עלות משוערת לסרטון הזה</span>
-      <span class="cost-val" id="costVal">—</span>
-    </div>
-    <div class="row-center">
-      <button class="btn btn-green" onclick="goGenerate()" id="btnGenerate">🎬 צור סרטון עכשיו</button>
-      <button class="btn btn-ghost" onclick="goStep(2)">← חזור לתסריט</button>
-    </div>
-    <div id="veoKeyNeeded" style="display:none;" class="msg warn" style="margin-top:10px;">
-      ⚠️ כדי ליצור את הסרטון נדרש API key עם גישה ל-Veo 3 (Google Cloud Billing)
+    <div class="cost-box"><span>עלות משוערת</span><span class="cost-val" id="costVal">—</span></div>
+    <div class="row-c">
+      <button class="btn btn-green" onclick="goGenerate()">🎬 צור סרטון</button>
+      <button class="btn btn-ghost" onclick="showScreen(2)">← חזור לתסריט</button>
     </div>
   </div>
 </div>
 
-<!-- ══ S4: GENERATION ══ -->
+<!-- SCREEN 4: GENERATION -->
 <div class="screen" id="s4">
-  <div class="sh"><h2>מייצר סרטון...</h2><p>כל קליפ מעובד בנפרד — זה לוקח כמה דקות</p></div>
+  <div class="sh"><h2>מייצר סרטון...</h2><p>כל קליפ מעובד בנפרד — כמה דקות</p></div>
   <div class="card">
-    <div class="prog-wrap">
-      <div class="prog-top"><span class="prog-title">⚙️ עיבוד קליפים</span><span class="prog-pct" id="progPct">0%</span></div>
-      <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
-    </div>
+    <div class="prog-top"><span class="prog-title">⚙️ עיבוד קליפים</span><span class="prog-pct" id="progPct">0%</span></div>
+    <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
     <div class="sp-list" id="spList"></div>
   </div>
 </div>
 
-<!-- ══ S5: RESULTS ══ -->
+<!-- SCREEN 5: RESULTS -->
 <div class="screen" id="s5">
   <div class="sh"><h2>הסרטון מוכן 🎉</h2><p id="s5sub"></p></div>
   <div class="card">
     <div class="ch">🎬 קליפים</div>
     <div class="res-grid" id="resGrid"></div>
-    <div class="row-center" style="margin-top:18px;">
+    <div class="row-c" style="margin-top:16px;">
       <button class="btn btn-green" onclick="dlAll()">⬇️ הורד הכל</button>
       <button class="btn btn-ghost" onclick="newVideo()">🔄 פרשה חדשה</button>
     </div>
@@ -450,8 +376,10 @@ textarea.prompt-edit{width:100%;min-height:80px;background:var(--s3);border:1px 
 <div id="toast"></div>
 
 <script>
-// ══ DATA ══
-const PARSHIOT=[
+// ══════════════════════════════════════
+// DATA
+// ══════════════════════════════════════
+const PARSHIOT = [
   {h:'בראשית',r:'Genesis 1:1-6:8',b:'בראשית'},{h:'נח',r:'Genesis 6:9-11:32',b:'בראשית'},
   {h:'לך לך',r:'Genesis 12:1-17:27',b:'בראשית'},{h:'וירא',r:'Genesis 18:1-22:24',b:'בראשית'},
   {h:'חיי שרה',r:'Genesis 23:1-25:18',b:'בראשית'},{h:'תולדות',r:'Genesis 25:19-28:9',b:'בראשית'},
@@ -481,666 +409,630 @@ const PARSHIOT=[
   {h:'האזינו',r:'Deuteronomy 32:1-32:52',b:'דברים'},{h:'וזאת הברכה',r:'Deuteronomy 33:1-34:12',b:'דברים'},
 ];
 
-// ══ STATE ══
-const S={apiKey:'',durSec:240,model:'fast',mode:'preview',parasha:null,parashaText:'',script:'',scenes:[],validatedScenes:[],clips:[]};
-let editMode=false;
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+const S = {
+  apiKey: '',
+  durSec: 240,
+  model: 'fast',
+  mode: 'preview',
+  parasha: null,
+  parashaText: '',
+  script: '',
+  scenes: [],
+  clips: []
+};
+let editMode = false;
 
-// ══ INIT ══
-document.addEventListener('DOMContentLoaded',()=>{
-  // filmstrip
-  const fi=document.getElementById('fi');
-  let h=''; for(let i=0;i<80;i++) h+='<div class="fh"></div>';
-  fi.innerHTML=h+h;
-  // restore key
-  const k=localStorage.getItem('veo_key');
-  if(k){document.getElementById('apiKey').value=k;S.apiKey=k;}
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  // Film strip
+  const fi = document.getElementById('fiInner');
+  let h = '';
+  for (let i = 0; i < 80; i++) h += '<div class="fh"></div>';
+  fi.innerHTML = h + h;
+
+  // Restore saved API key
+  const saved = localStorage.getItem('veo_key');
+  if (saved) { document.getElementById('apiKey').value = saved; S.apiKey = saved; }
+
   calcDur();
-  renderP();
+  renderParshiot();
   fetchThisWeek();
 });
 
-// ══ MODE ══
-function setMode(m){
-  S.mode=m;
-  document.getElementById('mPreview').classList.toggle('active',m==='preview');
-  document.getElementById('mProd').classList.toggle('active',m==='production');
-  updateModeBanners();
-}
-function updateModeBanners(){
-  const isPrev=S.mode==='preview';
-  document.querySelectorAll('.preview-banner').forEach(b=>{
-    b.style.display=isPrev?'flex':'none';
-  });
-  const vkn=document.getElementById('veoKeyNeeded');
-  if(vkn) vkn.style.display=(!isPrev)?'none':'none'; // shown dynamically
-}
-
-// ══ STEPS ══
-function showScreen(n){
-  document.querySelectorAll('.screen').forEach((s,i)=>s.classList.toggle('active',i===n));
-  for(let i=0;i<5;i++){
-    const el=document.getElementById('sn'+i);
-    el.classList.remove('active','done');
-    if(i<n) el.classList.add('done');
-    else if(i===n) el.classList.add('active');
+// ══════════════════════════════════════
+// SCREEN NAVIGATION
+// ══════════════════════════════════════
+function showScreen(n) {
+  document.querySelectorAll('.screen').forEach((el, i) => el.classList.toggle('active', i === n));
+  for (let i = 0; i < 5; i++) {
+    const sn = document.getElementById('sn' + i);
+    sn.classList.remove('active', 'done');
+    if (i < n) sn.classList.add('done');
+    else if (i === n) sn.classList.add('active');
   }
-  window.scrollTo({top:0,behavior:'smooth'});
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-function goStep(n){ showScreen(n); }
 
-// ══ SETTINGS ══
-function toggleKey(){const i=document.getElementById('apiKey');i.type=i.type==='password'?'text':'password';}
-function saveKey(){
-  const k=document.getElementById('apiKey').value.trim();
-  if(!k){toast('הכנס מפתח');return;}
-  localStorage.setItem('veo_key',k); S.apiKey=k; toast('✓ נשמר');
+// ══════════════════════════════════════
+// MODE
+// ══════════════════════════════════════
+function setMode(m) {
+  S.mode = m;
+  document.getElementById('mPrev').classList.toggle('active', m === 'preview');
+  document.getElementById('mProd').classList.toggle('active', m === 'production');
+  const isPrev = m === 'preview';
+  document.getElementById('s0-prev-banner').style.display = isPrev ? 'flex' : 'none';
+  document.getElementById('s3-prev-banner').style.display = isPrev ? 'flex' : 'none';
 }
-function setModel(m){
-  S.model=m;
-  document.getElementById('mFast').classList.toggle('active',m==='fast');
-  document.getElementById('mFull').classList.toggle('active',m==='full');
+
+// ══════════════════════════════════════
+// SETTINGS (Screen 0)
+// ══════════════════════════════════════
+function toggleKey() {
+  const inp = document.getElementById('apiKey');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function saveKey() {
+  const k = document.getElementById('apiKey').value.trim();
+  if (!k) { toast('הכנס מפתח תחילה'); return; }
+  localStorage.setItem('veo_key', k);
+  S.apiKey = k;
+  toast('✓ מפתח נשמר');
+}
+
+function setModel(m) {
+  S.model = m;
+  document.getElementById('mFast').classList.toggle('active', m === 'fast');
+  document.getElementById('mFull').classList.toggle('active', m === 'full');
   calcDur();
 }
-function calcDur(){
-  const m=parseInt(document.getElementById('durM').value)||0;
-  const s=parseInt(document.getElementById('durS').value)||0;
-  S.durSec=m*60+s;
-  const clips=Math.max(1,Math.ceil(S.durSec/8));
-  const rf=(S.durSec*0.15).toFixed(2), rfl=(S.durSec*0.40).toFixed(2);
-  document.getElementById('durInfo').innerHTML=`<strong>${S.durSec} שניות</strong>${clips} קליפים | Fast: $${rf} · Full: $${rfl}`;
-}
-function goStep1(){
-  S.apiKey=document.getElementById('apiKey').value.trim();
-  if(S.durSec<8){toast('אורך מינימלי 8 שניות');return;}
-  if(S.apiKey) localStorage.setItem('veo_key',S.apiKey);
-  goStep(1);
+
+function calcDur() {
+  const m = parseInt(document.getElementById('durM').value) || 0;
+  const s = parseInt(document.getElementById('durS').value) || 0;
+  S.durSec = m * 60 + s;
+  const clips = Math.max(1, Math.ceil(S.durSec / 8));
+  const rate = S.model === 'fast' ? 0.15 : 0.40;
+  const cost = (S.durSec * rate).toFixed(2);
+  document.getElementById('durInfo').innerHTML =
+    `<strong>${S.durSec} שניות</strong>${clips} קליפים | עלות: $${cost}`;
 }
 
-// ══ PARASHA ══
-function renderP(filter=''){
-  const grid=document.getElementById('pgrid');
-  const list=filter?PARSHIOT.filter(p=>p.h.includes(filter)):PARSHIOT;
-  grid.innerHTML=list.map(p=>`
-    <button class="pbtn ${S.parasha?.h===p.h?'active':''}" onclick="selP('${p.h}')">
+function gotoParasha() {
+  // Save API key if entered
+  const k = document.getElementById('apiKey').value.trim();
+  if (k) { S.apiKey = k; localStorage.setItem('veo_key', k); }
+  if (S.durSec < 8) { toast('אורך מינימלי: 8 שניות'); return; }
+  showScreen(1);
+}
+
+// ══════════════════════════════════════
+// PARASHA (Screen 1)
+// ══════════════════════════════════════
+function renderParshiot(filter = '') {
+  const list = filter ? PARSHIOT.filter(p => p.h.includes(filter)) : PARSHIOT;
+  document.getElementById('pgrid').innerHTML = list.map(p =>
+    `<button class="pbtn ${S.parasha && S.parasha.h === p.h ? 'active' : ''}" onclick="selParasha('${p.h}')">
       <span class="ph">${p.h}</span><span class="pp">${p.b}</span>
-    </button>`).join('');
-}
-function filterP(v){renderP(v);}
-function selP(heb){
-  S.parasha=PARSHIOT.find(p=>p.h===heb);
-  renderP(document.getElementById('psearch').value);
-  document.getElementById('selInfo').style.display='block';
-  document.getElementById('selName').textContent='פרשת '+heb;
-  document.getElementById('selRef').textContent=S.parasha.r;
-}
-async function fetchThisWeek(){
-  try{
-    const r=await fetch('https://www.sefaria.org/api/calendars');
-    const d=await r.json();
-    const pw=(d.calendar_items||[]).find(i=>i.title?.en==='Parashat Hashavua'||i.order==1);
-    if(pw){
-      const hn=pw.displayValue?.he||pw.ref;
-      document.getElementById('thisWeek').innerHTML=`
-        <div class="badge-week">⭐ פרשת השבוע: ${hn}</div>
-        <div style="margin-top:9px;">
-          <button class="btn btn-ghost" onclick="selByRef('${pw.ref}','${hn}')">בחר פרשה זו ←</button>
-        </div>`;
-    }
-  }catch(e){
-    document.getElementById('thisWeek').innerHTML='<div style="color:var(--muted);font-size:.82rem;">לא ניתן לשלוף — בחר ידנית</div>';
-  }
-}
-function selByRef(ref,hn){
-  const m=PARSHIOT.find(p=>hn.includes(p.h)||ref.includes(p.h));
-  if(m) selP(m.h);
-  else{ S.parasha={h:hn,r:ref,b:''}; document.getElementById('selInfo').style.display='block'; document.getElementById('selName').textContent='פרשת '+hn; document.getElementById('selRef').textContent=ref; }
-}
-async function fetchParasha(){
-  if(!S.parasha){toast('בחר פרשה תחילה');return;}
-  S.apiKey=document.getElementById('apiKey').value.trim();
-  if(!S.apiKey){
-    S.apiKey=localStorage.getItem('veo_key')||'';
-  }
-  showScreen(2);
-  const st=document.getElementById('scriptStatus');
-  st.innerHTML='<span class="spin"></span> שולף פרשה מ-Sefaria...';
-  document.getElementById('scriptCard').style.display='none';
-  try{
-    const ref=encodeURIComponent(S.parasha.r.replace(/ /g,'.'));
-    const r=await fetch(`https://www.sefaria.org/api/texts/${ref}?lang=he&context=0`);
-    const d=await r.json();
-    let he=d.he||d.text;
-    let txt=Array.isArray(he)?flatText(he).join(' '):String(he);
-    txt=txt.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
-    if(txt.length>9000) txt=txt.substring(0,9000)+'...';
-    S.parashaText=txt;
-    st.innerHTML='<span class="spin"></span> Gemini מייצר תסריט...';
-    await genScript();
-  }catch(e){
-    st.innerHTML='<span style="color:var(--red)">❌ '+e.message+'</span>';
-  }
-}
-function flatText(arr){
-  const o=[];
-  for(const x of arr){
-    if(Array.isArray(x)) o.push(...flatText(x));
-    else if(typeof x==='string'&&x.trim()) o.push(x.trim());
-  }
-  return o;
+    </button>`
+  ).join('');
 }
 
-// ══ SCRIPT GENERATION ══
-async function genScript(){
-  const clips=Math.ceil(S.durSec/8);
-  const words=Math.round(S.durSec*2.3);
-  const prompt=`אתה תסריטאי מוכשר המתמחה בסיפורי תנ"ך לוידאו.
+function filterP(v) { renderParshiot(v); }
+
+function selParasha(heb) {
+  S.parasha = PARSHIOT.find(p => p.h === heb);
+  renderParshiot(document.getElementById('psearch').value);
+  document.getElementById('selCard').style.display = 'block';
+  document.getElementById('selName').textContent = 'פרשת ' + heb;
+  document.getElementById('selRef').textContent = S.parasha.r;
+}
+
+async function fetchThisWeek() {
+  try {
+    const r = await fetch('https://www.sefaria.org/api/calendars');
+    const d = await r.json();
+    const pw = (d.calendar_items || []).find(i => i.title && i.title.en === 'Parashat Hashavua');
+    if (pw) {
+      const hn = (pw.displayValue && pw.displayValue.he) || pw.ref;
+      document.getElementById('thisWeek').innerHTML =
+        `<div class="badge-week" style="margin-bottom:10px;">⭐ ${hn}</div>
+         <button class="btn btn-ghost" onclick="selByCalendar('${pw.ref}','${hn}')">בחר פרשה זו ←</button>`;
+    } else {
+      document.getElementById('thisWeek').innerHTML = '<div style="color:var(--muted);font-size:.82rem;">בחר ידנית מהרשימה</div>';
+    }
+  } catch (e) {
+    document.getElementById('thisWeek').innerHTML = '<div style="color:var(--muted);font-size:.82rem;">בחר ידנית מהרשימה</div>';
+  }
+}
+
+function selByCalendar(ref, hn) {
+  const match = PARSHIOT.find(p => hn.includes(p.h) || ref.includes(p.h));
+  if (match) { selParasha(match.h); }
+  else {
+    S.parasha = { h: hn, r: ref, b: '' };
+    document.getElementById('selCard').style.display = 'block';
+    document.getElementById('selName').textContent = 'פרשת ' + hn;
+    document.getElementById('selRef').textContent = ref;
+  }
+}
+
+async function fetchParasha() {
+  if (!S.parasha) { toast('בחר פרשה תחילה'); return; }
+  // Get API key
+  S.apiKey = document.getElementById('apiKey').value.trim() || localStorage.getItem('veo_key') || '';
+  if (!S.apiKey) { toast('נא להזין API key בהגדרות'); return; }
+
+  showScreen(2);
+  const st = document.getElementById('scriptStatus');
+  st.innerHTML = '<span class="spin"></span> שולף פרשה מ-Sefaria...';
+  document.getElementById('scriptCard').style.display = 'none';
+
+  try {
+    const ref = encodeURIComponent(S.parasha.r.replace(/ /g, '.'));
+    const resp = await fetch(`https://www.sefaria.org/api/texts/${ref}?lang=he&context=0`);
+    const data = await resp.json();
+    let he = data.he || data.text;
+    let txt = Array.isArray(he) ? flatText(he).join(' ') : String(he);
+    txt = txt.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    if (txt.length > 9000) txt = txt.substring(0, 9000) + '...';
+    S.parashaText = txt;
+    st.innerHTML = '<span class="spin"></span> Gemini מייצר תסריט...';
+    await genScript();
+  } catch (e) {
+    st.innerHTML = `<span style="color:var(--red)">❌ ${e.message}</span>`;
+  }
+}
+
+function flatText(arr) {
+  const out = [];
+  for (const x of arr) {
+    if (Array.isArray(x)) out.push(...flatText(x));
+    else if (typeof x === 'string' && x.trim()) out.push(x.trim());
+  }
+  return out;
+}
+
+// ══════════════════════════════════════
+// SCRIPT GENERATION (Screen 2)
+// ══════════════════════════════════════
+async function genScript() {
+  const clips = Math.ceil(S.durSec / 8);
+  const words = Math.round(S.durSec * 2.3);
+  const prompt = `אתה תסריטאי המתמחה בסיפורי תנ"ך לוידאו.
 
 פרשה: "${S.parasha.h}"
-טקסט הפרשה:
+טקסט:
 ---
 ${S.parashaText}
 ---
 
 כתוב תסריט וידאו בעברית שמתמצת את עיקרי הפרשה.
+• אורך: ${S.durSec} שניות (~${words} מילים בקצב 2.3 מילים/שנ׳)
+• ${clips} סצנות, כל אחת ~8 שניות
+• סגנון: נרטיב סיפורי מרתק, לא יבש
+• עברית תקנית, נגישה לכל גיל
+• פתיחה חזקה שמיד מושכת
 
-דרישות מדויקות:
-• אורך: ${S.durSec} שניות של דיבוב (${words} מילים בקצב דיבור טבעי של 2.3 מילים לשנייה)
-• מבנה: ${clips} סצנות ברורות, כל אחת ~8 שניות  
-• סגנון: נרטיב סיפורי חי ומרתק — לא יבש, לא כמו שיעור
-• שפה: עברית תקנית וזורמת, מובנת לכל גיל
-• תוכן: כסה את כל האירועים המרכזיים והמסר של הפרשה
-• פתיחה: משפט ראשון חזק שמיד מושך לסיפור
+החזר את טקסט התסריט בלבד — ללא כותרות.`;
 
-החזר את טקסט התסריט בלבד — ללא כותרות, ללא הסברים.`;
-
-  try{
-    if(!S.apiKey){
-    document.getElementById('scriptStatus').innerHTML='<span style="color:var(--red)">❌ נא להזין API key בהגדרות</span>';
-    return;
-  }
-  const resp=await callGemini(prompt,3000);
-    S.script=resp.trim();
+  try {
+    const text = await callGemini(prompt, 3000);
+    S.script = text.trim();
+    if (!S.script) throw new Error('לא התקבל תסריט');
     showScriptReview();
-  }catch(e){
-    document.getElementById('scriptStatus').innerHTML='<span style="color:var(--red)">❌ '+e.message+'</span>';
+  } catch (e) {
+    document.getElementById('scriptStatus').innerHTML = `<span style="color:var(--red)">❌ ${e.message}</span>`;
   }
 }
 
-function showScriptReview(){
-  const wc=S.script.split(/\s+/).length;
-  const estSec=Math.round(wc/2.3);
-  document.getElementById('scriptStatus').innerHTML=`<span style="color:var(--green)">✅ תסריט מוכן לבדיקה</span>`;
-  document.getElementById('scriptCard').style.display='block';
-  document.getElementById('scriptMeta').textContent=`${wc} מילים · ~${estSec} שנ׳ מדובר · פרשת ${S.parasha.h}`;
-  document.getElementById('scriptView').textContent=S.script;
-  document.getElementById('scriptEdit').value=S.script;
+function showScriptReview() {
+  const wc = S.script.split(/\s+/).length;
+  document.getElementById('scriptStatus').innerHTML = '<span style="color:var(--green)">✅ תסריט מוכן — קרא ואשר</span>';
+  document.getElementById('scriptCard').style.display = 'block';
+  document.getElementById('scriptMeta').textContent = `${wc} מילים · ~${Math.round(wc / 2.3)} שנ׳ · ${S.parasha.h}`;
+  document.getElementById('scriptView').textContent = S.script;
+  document.getElementById('scriptEdit').value = S.script;
 }
 
-function toggleEdit(){
-  editMode=!editMode;
-  document.getElementById('scriptView').style.display=editMode?'none':'block';
-  document.getElementById('scriptEdit').style.display=editMode?'block':'none';
-  document.getElementById('editBtn').textContent=editMode?'💾 שמור':'✏️ ערוך';
-  if(!editMode){
-    S.script=document.getElementById('scriptEdit').value;
-    document.getElementById('scriptView').textContent=S.script;
-    const wc=S.script.split(/\s+/).length;
-    document.getElementById('scriptMeta').textContent=`${wc} מילים · ~${Math.round(wc/2.3)} שנ׳ · פרשת ${S.parasha.h}`;
+function toggleEdit() {
+  editMode = !editMode;
+  document.getElementById('scriptView').style.display = editMode ? 'none' : 'block';
+  document.getElementById('scriptEdit').style.display = editMode ? 'block' : 'none';
+  document.getElementById('editBtn').textContent = editMode ? '💾 שמור' : '✏️ ערוך';
+  if (!editMode) {
+    S.script = document.getElementById('scriptEdit').value;
+    document.getElementById('scriptView').textContent = S.script;
+    const wc = S.script.split(/\s+/).length;
+    document.getElementById('scriptMeta').textContent = `${wc} מילים · ~${Math.round(wc / 2.3)} שנ׳ · ${S.parasha.h}`;
   }
 }
-async function regenScript(){
-  if(editMode) toggleEdit();
-  document.getElementById('scriptCard').style.display='none';
-  document.getElementById('scriptStatus').innerHTML='<span class="spin"></span> מייצר תסריט חדש...';
+
+async function regenScript() {
+  if (editMode) toggleEdit();
+  document.getElementById('scriptCard').style.display = 'none';
+  document.getElementById('scriptStatus').innerHTML = '<span class="spin"></span> מייצר תסריט חדש...';
   await genScript();
 }
-async function approveScript(){
-  if(editMode) toggleEdit();
+
+async function approveScript() {
+  if (editMode) toggleEdit();
   showScreen(3);
-  await buildAndValidateScenes();
+  await buildScenes();
 }
 
-// ══ SCENE BUILDING + VALIDATION ══
-async function buildAndValidateScenes(){
-  const wrap=document.getElementById('scenesValList');
-  wrap.innerHTML='<div class="card"><div style="color:var(--muted);display:flex;align-items:center;gap:8px;"><span class="spin"></span> Gemini מחלק לסצנות ומנתח כל פרומפט...</div></div>';
-  document.getElementById('overviewCard').style.display='none';
-  document.getElementById('valActions').style.display='none';
+// ══════════════════════════════════════
+// SCENES + VALIDATION (Screen 3)
+// ══════════════════════════════════════
+async function buildScenes() {
+  document.getElementById('scenesList').innerHTML =
+    '<div class="card"><div style="color:var(--muted);display:flex;align-items:center;gap:8px;"><span class="spin"></span> מחלק לסצנות ומנתח פרומפטים...</div></div>';
+  document.getElementById('overviewCard').style.display = 'none';
+  document.getElementById('valActions').style.display = 'none';
 
-  const numClips=Math.ceil(S.durSec/8);
+  const numClips = Math.ceil(S.durSec / 8);
+  const prompt = `חלק את התסריט ל-${numClips} סצנות (כל סצנה = 8 שניות).
 
-  const prompt=`חלק את התסריט הבא ל-${numClips} סצנות.
-כל סצנה = 8 שניות בדיוק.
+לכל סצנה צור פרומפט מקצועי לVeo 3 הכולל:
+1. תיאור ויזואלי מפורט של מה רואים
+2. סגנון: cinematic 3D biblical animation, Pixar-quality, ancient Middle East
+3. תאורה (golden hour / dramatic shadows וכו')
+4. מצלמה (wide shot / close-up / slow pan וכו')
+5. דמויות — מראה ובגדים
+6. אווירה ורגש
+7. ללא טקסט בתוך הוידאו
+8. מתאים ל-8 שניות
 
-עבור כל סצנה, צור פרומפט מקצועי לVeo 3 שעומד בכל הדרישות הבאות:
-1. תיאור ויזואלי מפורט של הסצנה (מה רואים בדיוק)
-2. סגנון: "cinematic 3D biblical animation, Pixar-quality render, ancient Middle East setting"
-3. תאורה: תאר את סוג האור (golden sunset, dramatic shadows, etc.)
-4. מצלמה: תאר זווית ותנועה (wide establishing shot, close-up, slow pan, etc.)
-5. דמויות: תאר מראה, בגדים, הבעות פנים
-6. רגש/אווירה: תאר את הטון הרגשי
-7. לא לכלול טקסט, כתוביות, או מילים בוידאו עצמו
-8. אורך: 8 seconds
+גם הערך כל פרומפט:
+- score: 1-10
+- issues: בעיות (מערך, ריק אם אין)
+- tips: הצעות שיפור (מערך, ריק אם אין)
 
-גם: ערוך ניתוח עצמי לכל פרומפט:
-- score: מספר 1-10 כמה הפרומפט טוב לVeo 3
-- issues: מערך של בעיות (אם יש) — ריק אם אין
-- tips: הצעות ספציפיות לשיפור — ריק אם אין
+JSON בלבד:
+{"scenes":[{"id":1,"hebrewDesc":"תיאור בעברית","prompt":"English prompt","duration":8,"score":8,"issues":[],"tips":[]}]}
 
-החזר JSON בלבד:
-{"scenes":[{
-  "id":1,
-  "hebrewDesc":"תיאור קצר בעברית",
-  "prompt":"full English prompt for Veo 3",
-  "duration":8,
-  "score":8,
-  "issues":["..."],
-  "tips":["..."]
-}]}
-
-התסריט:
+תסריט:
 ${S.script}`;
 
-  try{
-    const raw=await callGemini(prompt,6000);
-    const clean=raw.replace(/```json|```/g,'').trim();
-    const parsed=JSON.parse(clean);
-    S.scenes=parsed.scenes;
-    // Now run deep validation on each prompt
-    await deepValidateScenes();
-  }catch(e){
-    wrap.innerHTML=`<div class="card"><div class="msg error">שגיאה: ${e.message}</div></div>`;
+  try {
+    const raw = await callGemini(prompt, 6000);
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    S.scenes = parsed.scenes;
+    renderValidation();
+  } catch (e) {
+    document.getElementById('scenesList').innerHTML =
+      `<div class="card"><div class="msg error">שגיאה: ${e.message}</div></div>`;
   }
 }
 
-async function deepValidateScenes(){
-  // Run a second Gemini pass: check each prompt against Veo 3 best practices
-  const checks = [
-    {key:'visual_clarity', label:'בהירות ויזואלית', desc:'האם הפרומפט מתאר בצורה ברורה מה יהיה על המסך?'},
-    {key:'no_text', label:'ללא טקסט בסרטון', desc:'האם הפרומפט לא מבקש כתוביות/טקסט בתוך הוידאו?'},
-    {key:'camera', label:'הוראת מצלמה', desc:'האם יש תיאור זווית/תנועת מצלמה?'},
-    {key:'lighting', label:'תאורה', desc:'האם יש תיאור תאורה?'},
-    {key:'style', label:'סגנון עקבי', desc:'האם הסגנון עקבי עם שאר הסצנות?'},
-    {key:'duration', label:'מתאים ל-8 שנ׳', desc:'האם הפרומפט מתאים לקליפ קצר של 8 שניות?'},
-    {key:'no_text_in_scene', label:'ריאליזם', desc:'האם הסצנה ריאליסטית ואפשרית ב-AI?'},
-    {key:'atmosphere', label:'אווירה ורגש', desc:'האם יש תיאור רגשי/אווירתי?'},
-  ];
+function renderValidation() {
+  const scores = S.scenes.map(s => s.score || 7);
+  const avg = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+  const excellent = scores.filter(s => s >= 8).length;
+  const good = scores.filter(s => s >= 6 && s < 8).length;
+  const weak = scores.filter(s => s < 6).length;
 
-  const promptForValidation=`בדוק כל אחד מהפרומפטים הבאים מול 8 קריטריונים לVeo 3.
-עבור כל פרומפט, עבור כל קריטריון: pass=true/false, note=הסבר קצר אם fail.
-
-קריטריונים:
-${checks.map((c,i)=>`${i+1}. ${c.key}: ${c.desc}`).join('\n')}
-
-החזר JSON:
-{"results":[{"id":1,"checks":{"visual_clarity":{"pass":true,"note":""},...}},...]}
-
-פרומפטים:
-${S.scenes.map(s=>`ID ${s.id}: ${s.prompt}`).join('\n\n')}`;
-
-  try{
-    const raw2=await callGemini(promptForValidation,4000);
-    const clean2=raw2.replace(/```json|```/g,'').trim();
-    const val=JSON.parse(clean2);
-    // Merge validation into scenes
-    S.validatedScenes=S.scenes.map(sc=>{
-      const vres=val.results?.find(r=>r.id===sc.id)||{checks:{}};
-      return {...sc, checks: vres.checks||{}, checkDefs: checks};
-    });
-    renderValidation();
-  }catch(e){
-    // Fallback: show scenes without deep validation
-    S.validatedScenes=S.scenes.map(sc=>({...sc,checks:{},checkDefs:checks}));
-    renderValidation();
-  }
-}
-
-function renderValidation(){
-  const wrap=document.getElementById('scenesValList');
-
-  // Score overview
-  const scores=S.validatedScenes.map(s=>s.score||7);
-  const avgScore=(scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1);
-  const passCount=scores.filter(s=>s>=8).length;
-  const warnCount=scores.filter(s=>s>=6&&s<8).length;
-  const failCount=scores.filter(s=>s<6).length;
-
-  document.getElementById('overviewCard').style.display='block';
-  document.getElementById('scoreOverview').innerHTML=`
-    <div class="so-card ${avgScore>=8?'good':avgScore>=6?'ok':'warn'}">
-      <div class="so-val">${avgScore}</div>
-      <div class="so-label">ציון ממוצע</div>
+  document.getElementById('overviewCard').style.display = 'block';
+  document.getElementById('scoreOv').innerHTML = `
+    <div class="so ${avg >= 8 ? 'good' : avg >= 6 ? 'ok' : 'warn'}">
+      <div class="so-val">${avg}</div><div class="so-lbl">ציון ממוצע</div>
     </div>
-    <div class="so-card good"><div class="so-val">${passCount}</div><div class="so-label">מצוין (8+)</div></div>
-    <div class="so-card ${warnCount>0?'warn':'good'}"><div class="so-val">${warnCount}</div><div class="so-label">בינוני (6-7)</div></div>
-    <div class="so-card ${failCount>0?'bad':'good'}"><div class="so-val">${failCount}</div><div class="so-label">חלש (<6)</div></div>
-  `;
+    <div class="so good"><div class="so-val">${excellent}</div><div class="so-lbl">מצוין (8+)</div></div>
+    <div class="so ${good > 0 ? 'ok' : 'good'}"><div class="so-val">${good}</div><div class="so-lbl">טוב (6-7)</div></div>
+    <div class="so ${weak > 0 ? 'bad' : 'good'}"><div class="so-val">${weak}</div><div class="so-lbl">חלש (&lt;6)</div></div>`;
 
-  const overallMsg=document.getElementById('overallMsg');
-  if(avgScore>=8.5){
-    overallMsg.innerHTML='<div class="msg success">🎉 הפרומפטים מצוינים — הסרטון צפוי לצאת ברמה גבוהה מאוד</div>';
-  } else if(avgScore>=7){
-    overallMsg.innerHTML='<div class="msg info">✅ הפרומפטים טובים — מומלץ לשפר את הסצנות עם ציון נמוך מ-7 לפני יצירה</div>';
-  } else {
-    overallMsg.innerHTML='<div class="msg warn">⚠️ מספר פרומפטים חלשים — מומלץ לשפרם לפני יצירת הסרטון</div>';
-  }
+  document.getElementById('overallMsg').innerHTML = avg >= 8.5
+    ? '<div class="msg success">🎉 פרומפטים מצוינים — הסרטון צפוי לצאת ברמה גבוהה</div>'
+    : avg >= 7
+    ? '<div class="msg info">✅ פרומפטים טובים — שקול לשפר סצנות עם ציון נמוך מ-7</div>'
+    : '<div class="msg warn">⚠️ מספר פרומפטים חלשים — מומלץ לשפרם לפני יצירה</div>';
 
-  // Scene cards
-  wrap.innerHTML=S.validatedScenes.map((sc,i)=>renderSceneCard(sc,i)).join('');
+  document.getElementById('scenesList').innerHTML = S.scenes.map((sc, i) => buildSceneCard(sc, i)).join('');
 
-  // Cost + actions
-  const rate=S.model==='fast'?0.15:0.40;
-  document.getElementById('costVal').textContent=`$${(S.durSec*rate).toFixed(2)}`;
-  document.getElementById('valActions').style.display='block';
+  const rate = S.model === 'fast' ? 0.15 : 0.40;
+  document.getElementById('costVal').textContent = `$${(S.durSec * rate).toFixed(2)}`;
+  document.getElementById('valActions').style.display = 'block';
 }
 
-function renderSceneCard(sc, i){
-  const score=sc.score||7;
-  const grade=score>=8?'a':score>=6?'b':score>=4?'c':'d';
-  const sbClass=`sb-${grade}`;
-  const gradeLabel=score>=8?'מצוין':score>=6?'טוב':score>=4?'בינוני':'חלש';
-
-  // Build checks HTML
-  const checks=sc.checkDefs||[];
-  const checksHtml=checks.length?`
-    <div class="prompt-label">✔ בדיקות Veo 3</div>
-    <div class="checks-grid">
-      ${checks.map(c=>{
-        const res=sc.checks?.[c.key];
-        const passed=res?.pass!==false;
-        const note=res?.note||'';
-        return `<div class="check-item ${passed?'pass':score>=6?'warn':'fail'}">
-          <span class="ci-icon"></span>
-          <div class="ci-text"><strong>${c.label}</strong><span>${passed?'תקין':(note||'לא מספיק')}</span></div>
-        </div>`;
-      }).join('')}
-    </div>`:'';
-
-  const issuesHtml=(sc.issues&&sc.issues.length&&sc.issues[0])?`
-    <div class="suggestions">
-      <div class="sug-title">⚠️ בעיות שנמצאו</div>
-      ${sc.issues.map(i=>`<div class="sug-item">${i}</div>`).join('')}
-    </div>`:'';
-
-  const tipsHtml=(sc.tips&&sc.tips.length&&sc.tips[0])?`
-    <div class="suggestions" style="background:rgba(79,191,150,.06);border-color:rgba(79,191,150,.2);">
-      <div class="sug-title" style="color:var(--green)">💡 הצעות לשיפור</div>
-      ${sc.tips.map(t=>`<div class="sug-item" style="color:var(--text)">${t}</div>`).join('')}
-    </div>`:'';
-
+function buildSceneCard(sc, i) {
+  const score = sc.score || 7;
+  const g = score >= 8 ? 'a' : score >= 6 ? 'b' : score >= 4 ? 'c' : 'd';
+  const gl = score >= 8 ? 'מצוין' : score >= 6 ? 'טוב' : score >= 4 ? 'בינוני' : 'חלש';
+  const issHtml = (sc.issues && sc.issues.length && sc.issues[0])
+    ? `<div class="sugg"><div class="sugg-title">⚠️ בעיות</div>${sc.issues.map(x => `<div class="sugg-item">${x}</div>`).join('')}</div>` : '';
+  const tipHtml = (sc.tips && sc.tips.length && sc.tips[0])
+    ? `<div class="sugg" style="background:rgba(79,191,150,.06);border-color:rgba(79,191,150,.2);">
+        <div class="sugg-title" style="color:var(--green)">💡 הצעות שיפור</div>
+        ${sc.tips.map(x => `<div class="sugg-item" style="color:var(--text)">${x}</div>`).join('')}
+       </div>` : '';
   return `
-    <div class="scene-val-card grade-${grade}" id="svc${i}">
-      <div class="svc-header" onclick="toggleSVC(${i})">
-        <div class="svc-num">${i+1}</div>
+    <div class="card svc g${g}" id="svc${i}">
+      <div class="svc-head" onclick="toggleSVC(${i})">
+        <div class="svc-num">${i + 1}</div>
         <div class="svc-title">${sc.hebrewDesc}</div>
-        <div class="svc-right">
-          <span class="score-badge ${sbClass}">${score}/10 — ${gradeLabel}</span>
-          <span class="expand-arrow" id="arr${i}">▼</span>
-        </div>
+        <span class="sbadge sb${g}">${score}/10 — ${gl}</span>
+        <span class="arr" id="arr${i}">▼</span>
       </div>
       <div class="svc-body" id="svb${i}">
-        <div class="prompt-section">
-          <div class="prompt-label">📋 פרומפט לVeo 3</div>
-          <div class="prompt-text" id="pt${i}">${escHtml(sc.prompt)}</div>
-          <textarea class="prompt-edit" id="pe${i}" style="display:none;">${sc.prompt}</textarea>
-          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
-            <button class="btn btn-ghost" style="font-size:.75rem;padding:6px 12px;" onclick="togglePromptEdit(${i})">✏️ ערוך פרומפט</button>
-            <button class="btn btn-blue" style="font-size:.75rem;padding:6px 12px;" onclick="improvePrompt(${i})"><span class="spin" style="display:none;" id="impSpin${i}"></span>✨ שפר אוטומטית</button>
-          </div>
+        <div class="plabel" style="margin-bottom:7px;">📋 פרומפט לVeo 3</div>
+        <div class="ptext" id="pt${i}">${esc(sc.prompt)}</div>
+        <textarea class="pedit" id="pe${i}" style="display:none;">${sc.prompt}</textarea>
+        <div style="display:flex;gap:7px;margin-top:8px;flex-wrap:wrap;">
+          <button class="btn btn-ghost" style="font-size:.73rem;padding:6px 11px;" onclick="togglePE(${i})">✏️ ערוך</button>
+          <button class="btn btn-blue" style="font-size:.73rem;padding:6px 11px;" onclick="improvePrompt(${i})">
+            <span class="spin" id="impSpin${i}" style="display:none;"></span>✨ שפר אוטומטית
+          </button>
         </div>
-        ${checksHtml}
-        ${issuesHtml}
-        ${tipsHtml}
+        ${issHtml}${tipHtml}
       </div>
     </div>`;
 }
 
-function toggleSVC(i){
-  const body=document.getElementById('svb'+i);
-  const arr=document.getElementById('arr'+i);
-  const open=body.classList.toggle('open');
-  arr.classList.toggle('open',open);
+function toggleSVC(i) {
+  document.getElementById('svb' + i).classList.toggle('open');
+  document.getElementById('arr' + i).classList.toggle('open');
 }
 
-function togglePromptEdit(i){
-  const pt=document.getElementById('pt'+i);
-  const pe=document.getElementById('pe'+i);
-  const isEdit=pe.style.display==='block';
-  if(isEdit){
-    // Save
-    const newVal=pe.value.trim();
-    S.validatedScenes[i].prompt=newVal;
-    S.scenes[i].prompt=newVal;
-    pt.textContent=newVal;
-    pe.style.display='none';
-    pt.style.display='block';
+function togglePE(i) {
+  const pt = document.getElementById('pt' + i);
+  const pe = document.getElementById('pe' + i);
+  const isOpen = pe.style.display === 'block';
+  if (isOpen) {
+    const v = pe.value.trim();
+    S.scenes[i].prompt = v;
+    pt.textContent = v;
+    pe.style.display = 'none';
+    pt.style.display = 'block';
     toast('✓ פרומפט נשמר');
-    // Re-score locally
-    rescorePrompt(i);
+    quickScore(i);
   } else {
-    pt.style.display='none';
-    pe.style.display='block';
+    pt.style.display = 'none';
+    pe.style.display = 'block';
     pe.focus();
   }
 }
 
-function rescorePrompt(i){
-  const sc=S.validatedScenes[i];
-  const p=sc.prompt;
-  let score=5;
-  if(p.length>200) score++;
-  if(/camera|shot|angle|pan|zoom|close.up|wide/i.test(p)) score++;
-  if(/light|shadow|golden|dramatic|warm|cool/i.test(p)) score++;
-  if(/style|render|cinematic|quality/i.test(p)) score++;
-  if(/emotion|atmosphere|mood/i.test(p)) score++;
-  score=Math.min(10,score);
-  sc.score=score;
-  // Update badge
-  const grade=score>=8?'a':score>=6?'b':score>=4?'c':'d';
-  const gradeLabel=score>=8?'מצוין':score>=6?'טוב':score>=4?'בינוני':'חלש';
-  const card=document.getElementById('svc'+i);
-  card.className=`scene-val-card grade-${grade}`;
-  const badge=card.querySelector('.score-badge');
-  badge.className=`score-badge sb-${grade}`;
-  badge.textContent=`${score}/10 — ${gradeLabel}`;
+function quickScore(i) {
+  const p = S.scenes[i].prompt;
+  let s = 5;
+  if (p.length > 200) s++;
+  if (/camera|shot|angle|pan|zoom|close.up|wide/i.test(p)) s++;
+  if (/light|shadow|golden|dramatic|warm/i.test(p)) s++;
+  if (/style|render|cinematic|quality/i.test(p)) s++;
+  if (/emotion|atmosphere|mood/i.test(p)) s++;
+  s = Math.min(10, s);
+  S.scenes[i].score = s;
+  const g = s >= 8 ? 'a' : s >= 6 ? 'b' : s >= 4 ? 'c' : 'd';
+  const gl = s >= 8 ? 'מצוין' : s >= 6 ? 'טוב' : s >= 4 ? 'בינוני' : 'חלש';
+  const card = document.getElementById('svc' + i);
+  card.className = `card svc g${g}`;
+  card.querySelector('.sbadge').className = `sbadge sb${g}`;
+  card.querySelector('.sbadge').textContent = `${s}/10 — ${gl}`;
 }
 
-async function improvePrompt(i){
-  const sc=S.validatedScenes[i];
-  const spin=document.getElementById('impSpin'+i);
-  spin.style.display='inline-block';
-
-  const p=`שפר את הפרומפט הבא לVeo 3 כדי לקבל תוצאה הכי טובה:
+async function improvePrompt(i) {
+  const spin = document.getElementById('impSpin' + i);
+  spin.style.display = 'inline-block';
+  const sc = S.scenes[i];
+  const prompt = `שפר את הפרומפט הבא לVeo 3:
 
 פרומפט נוכחי: "${sc.prompt}"
+סצנה: "${sc.hebrewDesc}" (מתוך פרשת ${S.parasha.h})
 
-הקשר: סצנה ${i+1} מתוך סרטון על פרשת ${S.parasha.h}. תיאור הסצנה בעברית: "${sc.hebrewDesc}"
-
-שפר את הפרומפט בהתאם לדרישות Veo 3:
-• הוסף תיאורי מצלמה מדויקים
-• הוסף תיאורי תאורה
-• הוסף תיאורי דמויות מפורטים  
-• וודא שהסגנון: "cinematic 3D biblical animation, Pixar-quality"
-• וודא שמתאים ל-8 שניות
-• אל תוסיף בקשה להצגת טקסט בוידאו
-
-החזר רק את הפרומפט המשופר — ללא הסברים.`;
-
-  try{
-    const improved=await callGemini(p,500);
-    S.validatedScenes[i].prompt=improved.trim();
-    S.scenes[i].prompt=improved.trim();
-    document.getElementById('pt'+i).textContent=improved.trim();
-    document.getElementById('pe'+i).value=improved.trim();
-    rescorePrompt(i);
+הוסף: תיאורי מצלמה, תאורה, דמויות מפורטות.
+וודא סגנון: cinematic 3D biblical animation, Pixar-quality.
+מתאים ל-8 שניות. ללא טקסט בוידאו.
+החזר רק את הפרומפט המשופר.`;
+  try {
+    const improved = await callGemini(prompt, 500);
+    S.scenes[i].prompt = improved.trim();
+    document.getElementById('pt' + i).textContent = improved.trim();
+    document.getElementById('pe' + i).value = improved.trim();
+    quickScore(i);
     toast('✨ פרומפט שופר!');
-  }catch(e){
-    toast('שגיאה בשיפור: '+e.message);
-  }finally{
-    spin.style.display='none';
+  } catch (e) {
+    toast('שגיאה: ' + e.message);
+  } finally {
+    spin.style.display = 'none';
   }
 }
 
-function goGenerate(){
-  if(S.mode==='preview'){
-    const confirmed=confirm('במצב תצוגה מקדימה — כדי ליצור סרטון עם Veo 3 נדרש API key עם Google Cloud Billing.\n\nעבור למצב "יצירה" בלחצן למעלה ונסה שוב, או לחץ אישור כדי להמשיך בכל מקרה.');
-    if(!confirmed) return;
+// ══════════════════════════════════════
+// VIDEO GENERATION (Screen 4)
+// ══════════════════════════════════════
+const MODEL_ID = { fast: 'veo-3-flash-preview-0514', full: 'veo-3-preview-0514' };
+
+function goGenerate() {
+  if (S.mode === 'preview') {
+    if (!confirm('מצב תצוגה מקדימה — ליצירת סרטון נדרש Veo API עם Google Cloud Billing.\nהמשיך?')) return;
   }
   showScreen(4);
   startGeneration();
 }
 
-// ══ VIDEO GENERATION ══
-const MODEL_ID={fast:'veo-3-flash-preview-0514',full:'veo-3-preview-0514'};
+async function startGeneration() {
+  S.clips = [];
+  document.getElementById('spList').innerHTML = S.scenes.map((sc, i) =>
+    `<div class="sp-row" id="sp${i}">
+      <div class="sp-ic" id="spI${i}">${i + 1}</div>
+      <div class="sp-txt">${sc.hebrewDesc}</div>
+      <div class="sp-tm" id="spTm${i}">ממתין</div>
+    </div>`
+  ).join('');
 
-async function startGeneration(){
-  S.clips=[];
-  document.getElementById('spList').innerHTML=
-    S.validatedScenes.map((sc,i)=>`
-      <div class="sp-row" id="sp${i}">
-        <div class="sp-ic" id="spI${i}">${i+1}</div>
-        <div class="sp-txt">${sc.hebrewDesc}</div>
-        <div class="sp-tm" id="spTm${i}">ממתין</div>
-      </div>`).join('');
-
-  let done=0;
-  for(let i=0;i<S.validatedScenes.length;i++){
-    setSP(i,'sp-act','מייצר...');
-    const t0=Date.now();
-    try{
-      const url=await genClip(S.validatedScenes[i],i);
-      S.clips.push({url,scene:S.validatedScenes[i],i});
-      setSP(i,'sp-done',`✓ ${Math.round((Date.now()-t0)/1000)}שנ׳`);
-    }catch(e){
-      S.clips.push({url:null,error:e.message,scene:S.validatedScenes[i],i});
-      setSP(i,'sp-err','שגיאה');
+  let done = 0;
+  for (let i = 0; i < S.scenes.length; i++) {
+    setSP(i, 'act', 'מייצר...');
+    const t0 = Date.now();
+    try {
+      const url = await genClip(S.scenes[i], i);
+      S.clips.push({ url, scene: S.scenes[i], i });
+      setSP(i, 'done', `✓ ${Math.round((Date.now() - t0) / 1000)}שנ׳`);
+    } catch (e) {
+      S.clips.push({ url: null, error: e.message, scene: S.scenes[i], i });
+      setSP(i, 'err', 'שגיאה');
     }
     done++;
-    const pct=Math.round(done/S.validatedScenes.length*100);
-    document.getElementById('progPct').textContent=pct+'%';
-    document.getElementById('progFill').style.width=pct+'%';
+    const pct = Math.round(done / S.scenes.length * 100);
+    document.getElementById('progPct').textContent = pct + '%';
+    document.getElementById('progFill').style.width = pct + '%';
   }
   showResults();
 }
 
-function setSP(i,cls,tm){
-  document.getElementById('sp'+i).className='sp-row '+cls;
-  const ic=document.getElementById('spI'+i);
-  ic.textContent=cls==='sp-done'?'✓':cls==='sp-err'?'✕':'⟳';
-  document.getElementById('spTm'+i).textContent=tm;
+function setSP(i, cls, tm) {
+  document.getElementById('sp' + i).className = 'sp-row ' + cls;
+  const ic = document.getElementById('spI' + i);
+  ic.textContent = cls === 'done' ? '✓' : cls === 'err' ? '✕' : '⟳';
+  document.getElementById('spTm' + i).textContent = tm;
 }
 
-async function genClip(sc,idx){
-  const resp=await fetch(
+async function genClip(sc, idx) {
+  const resp = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID[S.model]}:predictLongRunning?key=${S.apiKey}`,
-    {method:'POST',headers:{'Content-Type':'application/json'},
-     body:JSON.stringify({instances:[{prompt:sc.prompt}],parameters:{aspectRatio:'16:9',durationSeconds:8,sampleCount:1,addWatermark:false}})}
-  );
-  if(!resp.ok){const e=await resp.json();throw new Error(e.error?.message||'שגיאת שליחה');}
-  const op=await resp.json();
-  const opName=op.name;
-  if(!opName) throw new Error('לא התקבל operation name');
-
-  for(let a=0;a<72;a++){
-    await sleep(5000);
-    document.getElementById('spTm'+idx).textContent=`${(a+1)*5}שנ׳...`;
-    const pr=await fetch(`https://generativelanguage.googleapis.com/v1beta/${opName}?key=${S.apiKey}`);
-    if(!pr.ok) continue;
-    const pd=await pr.json();
-    if(pd.done){
-      if(pd.error) throw new Error(pd.error.message||'שגיאת יצירה');
-      const bytes=pd.response?.predictions?.[0]?.bytesBase64Encoded;
-      if(!bytes) throw new Error('לא התקבל וידאו');
-      return 'data:video/mp4;base64,'+bytes;
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        instances: [{ prompt: sc.prompt }],
+        parameters: { aspectRatio: '16:9', durationSeconds: 8, sampleCount: 1, addWatermark: false }
+      })
     }
+  );
+  if (!resp.ok) { const e = await resp.json(); throw new Error(e.error?.message || 'שגיאת שליחה'); }
+  const op = await resp.json();
+  if (!op.name) throw new Error('לא התקבל operation name');
+
+  for (let a = 0; a < 72; a++) {
+    await sleep(5000);
+    document.getElementById('spTm' + idx).textContent = `${(a + 1) * 5}שנ׳...`;
+    try {
+      const pr = await fetch(`https://generativelanguage.googleapis.com/v1beta/${op.name}?key=${S.apiKey}`);
+      const pd = await pr.json();
+      if (pd.done) {
+        if (pd.error) throw new Error(pd.error.message);
+        const bytes = pd.response?.predictions?.[0]?.bytesBase64Encoded;
+        if (!bytes) throw new Error('לא התקבל וידאו');
+        return 'data:video/mp4;base64,' + bytes;
+      }
+    } catch (e) { if (e.message !== 'לא התקבל וידאו') continue; else throw e; }
   }
   throw new Error('פסק זמן');
 }
 
-function showResults(){
+// ══════════════════════════════════════
+// RESULTS (Screen 5)
+// ══════════════════════════════════════
+function showResults() {
   showScreen(5);
-  document.getElementById('s5sub').textContent=`פרשת ${S.parasha.h} — ${S.clips.length} קליפים`;
-  document.getElementById('resGrid').innerHTML=S.clips.map((c,i)=>{
-    if(c.error) return `<div class="res-card"><div class="res-thumb" style="color:var(--red)">❌</div><div class="res-foot"><span class="res-label">סצנה ${i+1} — שגיאה</span></div></div>`;
-    return `<div class="res-card"><div class="res-thumb"><video src="${c.url}" controls muted loop playsinline></video></div><div class="res-foot"><span class="res-label">סצנה ${i+1}</span><span class="res-dur">8שנ׳</span></div></div>`;
-  }).join('');
+  document.getElementById('s5sub').textContent = `פרשת ${S.parasha.h} — ${S.clips.length} קליפים`;
+  document.getElementById('resGrid').innerHTML = S.clips.map((c, i) =>
+    c.error
+      ? `<div class="res-card"><div class="res-thumb" style="color:var(--red)">❌</div><div class="res-foot"><span class="res-lbl">סצנה ${i + 1} — שגיאה</span></div></div>`
+      : `<div class="res-card"><div class="res-thumb"><video src="${c.url}" controls muted loop playsinline></video></div><div class="res-foot"><span class="res-lbl">סצנה ${i + 1}</span><span class="res-dur">8שנ׳</span></div></div>`
+  ).join('');
 }
 
-function dlAll(){
-  S.clips.forEach((c,i)=>{
-    if(!c.url) return;
-    const a=document.createElement('a');
-    a.href=c.url; a.download=`${S.parasha.h}_scene${i+1}.mp4`; a.click();
+function dlAll() {
+  S.clips.forEach((c, i) => {
+    if (!c.url) return;
+    const a = document.createElement('a');
+    a.href = c.url;
+    a.download = `${S.parasha.h}_scene${i + 1}.mp4`;
+    a.click();
   });
 }
-function newVideo(){
-  S.parasha=null;S.parashaText='';S.script='';S.scenes=[];S.validatedScenes=[];S.clips=[];
-  showScreen(1); renderP();
+
+function newVideo() {
+  S.parasha = null; S.parashaText = ''; S.script = ''; S.scenes = []; S.clips = [];
+  renderParshiot();
+  showScreen(1);
 }
 
-// ══ GEMINI HELPER ══
-async function callGemini(prompt,maxTokens=2000){
-  const resp=await fetch(
+// ══════════════════════════════════════
+// GEMINI API
+// ══════════════════════════════════════
+async function callGemini(prompt, maxTokens = 2000) {
+  const resp = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${S.apiKey}`,
-    {method:'POST',headers:{'Content-Type':'application/json'},
-     body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.7,maxOutputTokens:maxTokens}})}
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.7, maxOutputTokens: maxTokens }
+      })
+    }
   );
-  if(!resp.ok){const e=await resp.json();throw new Error(e.error?.message||'שגיאת Gemini API');}
-  const d=await resp.json();
-  return d.candidates?.[0]?.content?.parts?.[0]?.text||'';
+  if (!resp.ok) { const e = await resp.json(); throw new Error(e.error?.message || 'שגיאת Gemini'); }
+  const d = await resp.json();
+  return d.candidates?.[0]?.content?.parts?.[0]?.text || '';
 }
 
-// ══ UTILS ══
-function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
-function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function toast(msg,dur=2500){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),dur);
+// ══════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function toast(msg, dur = 2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
 }
 
-// goStep1 called directly from button onclick
-
-// SERVICE WORKER
-// Show install banner as soon as prompt is available
-let _promptReady = false;
-window.addEventListener('appinstalled', () => {
-  const b = document.getElementById('_ib');
-  if(b) b.remove();
-});
-
-if('serviceWorker' in navigator){
+// ══════════════════════════════════════
+// PWA / SERVICE WORKER
+// ══════════════════════════════════════
+if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(r => console.log('SW ok'))
-      .catch(e => console.log('SW err',e));
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
   });
 }
 
-// PWA INSTALL PROMPT
-let _deferredPrompt;
+let _prompt;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
-  _deferredPrompt = e;
-  if(!window.matchMedia('(display-mode: standalone)').matches){
-    _showInstallBanner();
+  _prompt = e;
+  if (!window.matchMedia('(display-mode: standalone)').matches) {
+    showInstallBanner();
   }
 });
-function _showInstallBanner(){
-  if(document.getElementById('_ib')) return;
+window.addEventListener('appinstalled', () => {
+  const b = document.getElementById('_ib');
+  if (b) b.remove();
+});
+
+function showInstallBanner() {
+  if (document.getElementById('_ib')) return;
   const b = document.createElement('div');
   b.id = '_ib';
-  b.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0f0f1c;border:1px solid #c8a44a;border-radius:14px;padding:12px 18px;display:flex;align-items:center;gap:11px;z-index:9999;max-width:320px;width:calc(100% - 40px);box-shadow:0 8px 32px rgba(0,0,0,.6);';
-  b.innerHTML = '<img src="icon-192.png" style="width:40px;height:40px;border-radius:9px;"><div style="flex:1;"><div style="font-size:.83rem;font-weight:700;color:#e8cc80;font-family:Heebo,sans-serif;">התקן כאפליקציה</div><div style="font-size:.72rem;color:#7a7568;font-family:Heebo,sans-serif;">גישה מהירה מהמסך הראשי</div></div><button onclick="_installPWA()" style="background:linear-gradient(135deg,#c8a44a,#9a7828);border:none;border-radius:7px;color:#07070f;font-family:Heebo,sans-serif;font-size:.78rem;font-weight:700;padding:7px 11px;cursor:pointer;">התקן</button><button onclick="document.getElementById('_ib').remove()" style="background:none;border:none;color:#7a7568;cursor:pointer;font-size:1rem;padding:2px 4px;">✕</button>';
+  b.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0f0f1c;border:1px solid #c8a44a;border-radius:13px;padding:11px 16px;display:flex;align-items:center;gap:10px;z-index:9999;max-width:310px;width:calc(100% - 36px);box-shadow:0 8px 28px rgba(0,0,0,.6);';
+  b.innerHTML = `
+    <img src="icon-192.png" style="width:38px;height:38px;border-radius:8px;flex-shrink:0;">
+    <div style="flex:1;">
+      <div style="font-size:.82rem;font-weight:700;color:#e8cc80;font-family:Heebo,sans-serif;">התקן כאפליקציה</div>
+      <div style="font-size:.72rem;color:#7a7568;font-family:Heebo,sans-serif;">גישה מהירה מהמסך הראשי</div>
+    </div>
+    <button onclick="doInstall()" style="background:linear-gradient(135deg,#c8a44a,#9a7828);border:none;border-radius:7px;color:#07070f;font-family:Heebo,sans-serif;font-size:.78rem;font-weight:700;padding:7px 11px;cursor:pointer;flex-shrink:0;">התקן</button>
+    <button onclick="document.getElementById('_ib').remove()" style="background:none;border:none;color:#7a7568;cursor:pointer;font-size:1rem;padding:0 2px;flex-shrink:0;">✕</button>`;
   document.body.appendChild(b);
 }
-async function _installPWA(){
-  if(!_deferredPrompt) return;
-  _deferredPrompt.prompt();
-  await _deferredPrompt.userChoice;
-  _deferredPrompt = null;
-  const b=document.getElementById('_ib');
-  if(b) b.remove();
+
+async function doInstall() {
+  if (!_prompt) return;
+  _prompt.prompt();
+  await _prompt.userChoice;
+  _prompt = null;
+  const b = document.getElementById('_ib');
+  if (b) b.remove();
 }
 </script>
 </body>
