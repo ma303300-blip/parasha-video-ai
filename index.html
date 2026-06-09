@@ -2013,6 +2013,17 @@ async function generateTTSMultiVoice(){
 
     for(let i=0;i<lines.length;i++){
       const line = lines[i].trim();
+
+      // פקודת הפסקה — [pause|X]
+      const pauseM = line.match(/^\[pause\|([0-9.]+)\]/i);
+      if(pauseM){
+        const silenceSec = parseFloat(pauseM[1]) || 0.5;
+        const silenceLen = Math.ceil(audioCtx.sampleRate * silenceSec);
+        const silenceBuf = audioCtx.createBuffer(1, silenceLen, audioCtx.sampleRate);
+        audioBuffers.push(silenceBuf);
+        continue;
+      }
+
       const m = line.match(/^\[([^\|]+)\|([^\]]+)\]\s*(.*)/);
       if(!m) continue;
       const role = m[1].trim();
