@@ -254,7 +254,7 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
 <nav>
   <div class="logo"><div class="logo-mark">📜</div>פרשת השבוע — AI</div>
   <div style="display:flex;gap:8px;align-items:center;">
-    <button class="btn btn-ghost" onclick="showScreen(5)" style="padding:6px 12px;font-size:.76rem;">🎬 מיזוג</button>
+    <button class="btn btn-ghost" onclick="openMergeDirect()" style="padding:6px 12px;font-size:.76rem;">🎬 מיזוג</button>
     <button class="btn btn-ghost" onclick="openNarDirect()" style="padding:6px 12px;font-size:.76rem;">🎙️ קריינות</button>
     <span class="nbadge">Veo 3 · Sefaria</span>
   </div>
@@ -266,7 +266,7 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
   <div class="sn" id="sn2" onclick="showScreen(2)" style="cursor:pointer;"><div class="sdot">3</div><div class="slabel">פרומפטים</div></div>
   <div class="sn" id="sn3" onclick="showScreen(3)" style="cursor:pointer;"><div class="sdot">4</div><div class="slabel">אימות</div></div>
   <div class="sn" id="sn4" onclick="showScreen(4)" style="cursor:pointer;"><div class="sdot">5</div><div class="slabel">וידאו</div></div>
-  <div class="sn" id="sn5" onclick="showScreen(5)" style="cursor:pointer;"><div class="sdot">6</div><div class="slabel">מיזוג</div></div>
+  <div class="sn" id="sn5"><div class="sdot">6</div><div class="slabel">מיזוג</div></div>
 </div>
 
 <main>
@@ -1563,6 +1563,15 @@ function mergAgain(){
 // ════════════════════════════════════════
 let narBlob = null;
 let finalBlob = null;
+
+function openMergeDirect(){
+  showScreen(5);
+  document.getElementById('importCard').style.display = 'block';
+  document.getElementById('clipListCard').style.display = 'block';
+  document.getElementById('mergeCard').style.display = 'block';
+  document.getElementById('narrationCard').style.display = 'none';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 
 function openNarDirect(){
   showScreen(5);
