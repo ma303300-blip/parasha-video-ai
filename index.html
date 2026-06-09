@@ -294,6 +294,20 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
   </div>
 
   <div class="card">
+    <div class="ch">🔑 Google Cloud TTS API Key (קריינות)</div>
+    <div class="row">
+      <div style="position:relative;flex:1;">
+        <input type="password" id="ttsKey" placeholder="AIza... — נדרש לקריינות בלבד" autocomplete="off" style="padding-left:36px;">
+        <button onclick="toggleTtsKey()" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:0;">👁</button>
+      </div>
+      <button class="btn btn-ghost" onclick="saveTtsKey()" style="flex-shrink:0;">שמור</button>
+    </div>
+    <div class="msg info" style="font-size:.74rem;margin-top:8px;">
+      🔗 מפרויקט Subhe: <a href="https://console.cloud.google.com/apis/credentials?project=subhe-496919" target="_blank" style="color:var(--glt)">console.cloud.google.com</a>
+    </div>
+  </div>
+
+  <div class="card">
     <div class="ch">⏱ אורך הסרטון</div>
     <div class="row" style="align-items:flex-end;">
       <div class="fld"><label>דקות</label><input type="number" id="durM" value="4" min="0" max="10" oninput="calcDur()"></div>
@@ -600,7 +614,7 @@ function scorePrompt(p){
 // STATE
 // ════════════════════════════════════════
 const S = {
-  apiKey:'', durSec:240, model:'fast',
+  apiKey:'', ttsKey:'', durSec:240, model:'fast',
   parasha:null, parashaText:'', scenes:[], clips:[]
 };
 
@@ -615,6 +629,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Restore key
   const k = localStorage.getItem('veo_key');
   if(k){ document.getElementById('apiKey').value = k; S.apiKey = k; }
+  const tk = localStorage.getItem('tts_key');
+  if(tk){ document.getElementById('ttsKey').value = tk; S.ttsKey = tk; }
   calcDur();
   renderParshiot();
   fetchThisWeek();
@@ -666,6 +682,8 @@ function showScreen(n) {
 // SETTINGS (S0)
 // ════════════════════════════════════════
 function toggleKey(){const i=document.getElementById('apiKey');i.type=i.type==='password'?'text':'password';}
+function toggleTtsKey(){const i=document.getElementById('ttsKey');i.type=i.type==='password'?'text':'password';}
+function saveTtsKey(){const k=document.getElementById('ttsKey').value.trim();if(!k){toast('נא להזין TTS key');return;}localStorage.setItem('tts_key',k);S.ttsKey=k;toast('✓ TTS Key נשמר');}
 function saveKey(){
   const k=document.getElementById('apiKey').value.trim();
   if(!k){toast('הכנס מפתח'); return;}
@@ -1565,7 +1583,7 @@ async function generateTTS(){
   try{
     const voice = document.getElementById('narVoice').value;
     const resp = await fetch(
-      'https://texttospeech.googleapis.com/v1/text:synthesize?key='+S.apiKey,
+      'https://texttospeech.googleapis.com/v1/text:synthesize?key='+(S.ttsKey||S.apiKey),
       {
         method:'POST',
         headers:{'Content-Type':'application/json'},
