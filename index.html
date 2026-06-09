@@ -526,10 +526,18 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
       <div class="fld" style="margin-bottom:10px;">
         <label>קול</label>
         <select id="narVoice" style="direction:rtl;">
-          <option value="he-IL-Wavenet-A">עברית — נשי (A)</option>
-          <option value="he-IL-Wavenet-B">עברית — גברי (B)</option>
-          <option value="he-IL-Wavenet-C">עברית — נשי (C)</option>
-          <option value="he-IL-Wavenet-D" selected>עברית — גברי (D)</option>
+          <optgroup label="⭐ Neural2 — הכי טבעי">
+            <option value="he-IL-Neural2-A">Neural2 — נשי (A)</option>
+            <option value="he-IL-Neural2-B" selected>Neural2 — גברי (B) ★ מומלץ לקריינות</option>
+            <option value="he-IL-Neural2-C">Neural2 — נשי (C)</option>
+            <option value="he-IL-Neural2-D">Neural2 — גברי (D)</option>
+          </optgroup>
+          <optgroup label="WaveNet — טבעי">
+            <option value="he-IL-Wavenet-A">WaveNet — נשי (A)</option>
+            <option value="he-IL-Wavenet-B">WaveNet — גברי (B)</option>
+            <option value="he-IL-Wavenet-C">WaveNet — נשי (C)</option>
+            <option value="he-IL-Wavenet-D">WaveNet — גברי (D)</option>
+          </optgroup>
         </select>
       </div>
       <button class="btn btn-ghost btn-full" onclick="generateTTS()" id="btnTTS">🎙️ צור קול</button>
@@ -1687,15 +1695,25 @@ async function generateTTS(){
 
   try{
     const voice = document.getElementById('narVoice').value;
+
+    // בניית SSML — הפסקות דרמטיות, קצב אטי, צליל עמוק
+    const sentences = text.split(/(?<=[.!?])\s+/).filter(s => s.trim());
+    let ssmlBody = '';
+    for(const sentence of sentences){
+      const clean = sentence.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      ssmlBody += '<s>' + clean + '</s><break time="600ms"/>';
+    }
+    const ssml = '<speak><prosody rate="slow" pitch="-2st">' + ssmlBody + '</prosody></speak>';
+
     const resp = await fetch(
       'https://texttospeech.googleapis.com/v1/text:synthesize?key='+(S.ttsKey||S.apiKey),
       {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
-          input: { text },
+          input: { ssml },
           voice: { languageCode:'he-IL', name: voice },
-          audioConfig: { audioEncoding:'MP3', speakingRate: 0.95, pitch: -1.0 }
+          audioConfig: { audioEncoding:'MP3', speakingRate: 0.9, pitch: -2.0 }
         })
       }
     );
