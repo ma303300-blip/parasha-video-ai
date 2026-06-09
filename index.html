@@ -328,7 +328,7 @@ textarea.prompt-edit{width:100%;min-height:80px;background:var(--s3);border:1px 
     </div>
   </div>
 
-  <button class="btn btn-gold btn-full" onclick="goStep(1)">המשך לבחירת פרשה ←</button>
+  <button class="btn btn-gold btn-full" onclick="goStep1()">המשך לבחירת פרשה ←</button>
 </div>
 
 <!-- ══ S1: PARASHA ══ -->
@@ -551,8 +551,8 @@ function calcDur(){
 }
 function goStep1(){
   S.apiKey=document.getElementById('apiKey').value.trim();
-  if(!S.apiKey){toast('נא להזין API key');return;}
   if(S.durSec<8){toast('אורך מינימלי 8 שניות');return;}
+  if(S.apiKey) localStorage.setItem('veo_key',S.apiKey);
   goStep(1);
 }
 
@@ -598,7 +598,9 @@ function selByRef(ref,hn){
 async function fetchParasha(){
   if(!S.parasha){toast('בחר פרשה תחילה');return;}
   S.apiKey=document.getElementById('apiKey').value.trim();
-  if(!S.apiKey){toast('נא להזין API key');return;}
+  if(!S.apiKey){
+    S.apiKey=localStorage.getItem('veo_key')||'';
+  }
   showScreen(2);
   const st=document.getElementById('scriptStatus');
   st.innerHTML='<span class="spin"></span> שולף פרשה מ-Sefaria...';
@@ -652,7 +654,11 @@ ${S.parashaText}
 החזר את טקסט התסריט בלבד — ללא כותרות, ללא הסברים.`;
 
   try{
-    const resp=await callGemini(prompt,3000);
+    if(!S.apiKey){
+    document.getElementById('scriptStatus').innerHTML='<span style="color:var(--red)">❌ נא להזין API key בהגדרות</span>';
+    return;
+  }
+  const resp=await callGemini(prompt,3000);
     S.script=resp.trim();
     showScriptReview();
   }catch(e){
@@ -1093,10 +1099,7 @@ function toast(msg,dur=2500){
   setTimeout(()=>t.classList.remove('show'),dur);
 }
 
-// Override goStep(1) to check API key
-document.addEventListener('DOMContentLoaded',()=>{
-  document.querySelector('#s0 .btn-gold').onclick=goStep1;
-});
+// goStep1 called directly from button onclick
 
 // SERVICE WORKER
 // Show install banner as soon as prompt is available
@@ -1108,7 +1111,7 @@ window.addEventListener('appinstalled', () => {
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register('./sw.js')
       .then(r => console.log('SW ok'))
       .catch(e => console.log('SW err',e));
   });
