@@ -208,6 +208,16 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
 #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--s2);border:1px solid var(--border);border-radius:22px;padding:7px 16px;font-size:.82rem;color:var(--text);opacity:0;transition:all .3s;z-index:9999;white-space:nowrap;pointer-events:none;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+.clip-item{display:flex;align-items:center;gap:9px;padding:9px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;cursor:grab;transition:all .2s;user-select:none;}
+.clip-item:active{cursor:grabbing;opacity:.7;}
+.clip-item.drag-over{border-color:var(--gold);background:var(--gdim);}
+.clip-thumb{width:54px;height:32px;object-fit:cover;border-radius:4px;background:var(--s3);flex-shrink:0;}
+.clip-num{min-width:24px;height:24px;border-radius:5px;background:var(--gdim);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--gold);flex-shrink:0;}
+.clip-name{flex:1;font-size:.78rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.clip-dur{font-size:.68rem;color:var(--muted);flex-shrink:0;}
+.clip-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:0 3px;flex-shrink:0;}
+.clip-del:hover{color:var(--red);}
+
 @media(max-width:560px){
   .ov-grid{grid-template-columns:1fr 1fr;}
   .checks-wrap{grid-template-columns:1fr;}
@@ -230,6 +240,7 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
   <div class="sn" id="sn2"><div class="sdot">3</div><div class="slabel">פרומפטים</div></div>
   <div class="sn" id="sn3"><div class="sdot">4</div><div class="slabel">אימות</div></div>
   <div class="sn" id="sn4"><div class="sdot">5</div><div class="slabel">וידאו</div></div>
+  <div class="sn" id="sn5"><div class="sdot">6</div><div class="slabel">מיזוג</div></div>
 </div>
 
 <main>
@@ -376,7 +387,68 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
     <div class="res-grid" id="resGrid"></div>
     <div class="row-c" style="margin-top:14px;">
       <button class="btn btn-green" onclick="dlAll()">⬇️ הורד הכל</button>
+      <button class="btn btn-gold" onclick="showScreen(5)">🎬 ערוך ומזג לסרטון אחד</button>
       <button class="btn btn-ghost" onclick="newVideo()">🔄 פרשה חדשה</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- S5: VIDEO EDITOR -->
+<div class="screen" id="s5">
+  <div class="sh"><h2>🎬 עורך וידאו</h2><p>בחר קליפים, סדר, מזג לסרטון אחד</p></div>
+
+  <!-- IMPORT -->
+  <div class="card" id="importCard">
+    <div class="ch">📁 ייבוא קליפים</div>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:12px;">בחר את קובצי ה-MP4 שהורדת מ-AI Studio</p>
+    <label style="display:block;background:var(--gdim);border:2px dashed rgba(200,164,74,.4);border-radius:10px;padding:24px;text-align:center;cursor:pointer;">
+      <input type="file" id="clipFiles" accept="video/mp4,video/*" multiple style="display:none;" onchange="loadClips(this)">
+      <div style="font-size:2rem;margin-bottom:8px;">📂</div>
+      <div style="font-size:.88rem;font-weight:600;color:var(--glt);">לחץ לבחירת קליפים</div>
+      <div style="font-size:.74rem;color:var(--muted);margin-top:4px;">בחר מספר קבצים בבת אחת</div>
+    </label>
+  </div>
+
+  <!-- CLIP LIST -->
+  <div class="card" id="clipListCard" style="display:none;">
+    <div class="ch">🎞️ קליפים <span id="clipCount" style="color:var(--gold);"></span></div>
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:10px;">גרור לסידור מחדש</p>
+    <div id="clipList" style="display:flex;flex-direction:column;gap:6px;"></div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+      <label class="btn btn-ghost" style="cursor:pointer;">
+        <input type="file" accept="video/mp4,video/*" multiple style="display:none;" onchange="addMoreClips(this)">
+        ➕ הוסף עוד
+      </label>
+      <button class="btn btn-ghost" onclick="clearClips()">🗑️ נקה הכל</button>
+    </div>
+  </div>
+
+  <!-- MERGE -->
+  <div class="card" id="mergeCard" style="display:none;">
+    <div class="ch">⚙️ מיזוג</div>
+    <div class="cost-box" style="margin-bottom:12px;">
+      <span>קליפים לאיחוד</span>
+      <span class="cost-val" id="mergeCount">0</span>
+    </div>
+    <div id="mergeProgress" style="display:none;margin-bottom:12px;">
+      <div class="prog-top"><span class="prog-title">ממזג...</span><span class="prog-pct" id="mergePct">0%</span></div>
+      <div class="prog-track"><div class="prog-fill" id="mergeFill"></div></div>
+      <div style="font-size:.78rem;color:var(--muted);margin-top:6px;" id="mergeStatus">מכין...</div>
+    </div>
+    <div class="row-c">
+      <button class="btn btn-green" onclick="startMerge()" id="btnMerge">🎬 מזג לסרטון אחד</button>
+      <button class="btn btn-ghost" onclick="showScreen(4)">← חזור</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="card" id="mergeResult" style="display:none;">
+    <div class="ch">✅ הסרטון מוכן!</div>
+    <video id="mergedVideo" controls style="width:100%;border-radius:8px;margin-bottom:12px;"></video>
+    <div class="row-c">
+      <button class="btn btn-green" onclick="downloadMerged()">⬇️ שמור לגלריה</button>
+      <button class="btn btn-ghost" onclick="mergAgain()">🔄 מזג שוב</button>
     </div>
   </div>
 </div>
@@ -504,8 +576,9 @@ function restoreScenes(){
 // ════════════════════════════════════════
 function showScreen(n) {
   document.querySelectorAll('.screen').forEach((el,i) => el.classList.toggle('active', i===n));
-  for(let i=0;i<5;i++){
+  for(let i=0;i<6;i++){
     const sn = document.getElementById('sn'+i);
+    if(!sn) continue;
     sn.classList.remove('active','done');
     if(i < n) sn.classList.add('done');
     else if(i === n) sn.classList.add('active');
@@ -1064,6 +1137,181 @@ function toast(msg,dur=2500){
   const t=document.getElementById('toast');
   t.textContent=msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),dur);
+}
+
+// ════════════════════════════════════════
+// VIDEO EDITOR
+// ════════════════════════════════════════
+const VE = { clips: [], dragIdx: null };
+
+function loadClips(input){
+  const files = Array.from(input.files);
+  if(!files.length) return;
+  files.forEach(f => addClipFile(f));
+  updateClipUI();
+}
+
+function addMoreClips(input){
+  const files = Array.from(input.files);
+  files.forEach(f => addClipFile(f));
+  updateClipUI();
+}
+
+function addClipFile(file){
+  const url = URL.createObjectURL(file);
+  VE.clips.push({ file, url, name: file.name, dur: 0 });
+  // Sort by filename number if possible
+  VE.clips.sort((a,b) => {
+    const na = parseInt(a.name.match(/\d+/)?.[0]||'999');
+    const nb = parseInt(b.name.match(/\d+/)?.[0]||'999');
+    return na - nb;
+  });
+}
+
+function clearClips(){
+  VE.clips = [];
+  updateClipUI();
+}
+
+function removeClip(idx){
+  VE.clips.splice(idx,1);
+  updateClipUI();
+}
+
+function updateClipUI(){
+  const hasClips = VE.clips.length > 0;
+  document.getElementById('clipListCard').style.display = hasClips ? 'block' : 'none';
+  document.getElementById('mergeCard').style.display = hasClips ? 'block' : 'none';
+  document.getElementById('mergeCount').textContent = VE.clips.length;
+  document.getElementById('clipCount').textContent = '(' + VE.clips.length + ')';
+
+  const list = document.getElementById('clipList');
+  list.innerHTML = VE.clips.map((cl,i) => `
+    <div class="clip-item" id="ci${i}" draggable="true"
+      ondragstart="dragStart(${i})" ondragover="dragOver(event,${i})"
+      ondrop="dropOn(${i})" ondragleave="dragLeave(${i})">
+      <div class="clip-num">${i+1}</div>
+      <video class="clip-thumb" src="${cl.url}" muted></video>
+      <div class="clip-name">${cl.name}</div>
+      <button class="clip-del" onclick="removeClip(${i})">✕</button>
+    </div>`).join('');
+}
+
+// Drag and drop sorting
+function dragStart(idx){ VE.dragIdx = idx; }
+function dragOver(e, idx){ e.preventDefault(); document.getElementById('ci'+idx)?.classList.add('drag-over'); }
+function dragLeave(idx){ document.getElementById('ci'+idx)?.classList.remove('drag-over'); }
+function dropOn(idx){
+  dragLeave(idx);
+  if(VE.dragIdx === null || VE.dragIdx === idx) return;
+  const moved = VE.clips.splice(VE.dragIdx, 1)[0];
+  VE.clips.splice(idx, 0, moved);
+  VE.dragIdx = null;
+  updateClipUI();
+}
+
+// ── MERGE ──────────────────────────────
+let mergedBlob = null;
+
+async function startMerge(){
+  if(VE.clips.length < 2){ toast('צריך לפחות 2 קליפים'); return; }
+
+  document.getElementById('mergeProgress').style.display = 'block';
+  document.getElementById('btnMerge').disabled = true;
+  document.getElementById('mergeResult').style.display = 'none';
+
+  try{
+    setMergeStatus('טוען FFmpeg...');
+    setMergePct(5);
+
+    // Load FFmpeg
+    const { FFmpeg } = await import('https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/esm/index.js');
+    const { fetchFile, toBlobURL } = await import('https://unpkg.com/@ffmpeg/util@0.12.1/dist/esm/index.js');
+
+    const ffmpeg = new FFmpeg();
+    ffmpeg.on('progress', ({progress}) => {
+      setMergePct(Math.round(10 + progress * 85));
+    });
+
+    const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
+    await ffmpeg.load({
+      coreURL: await toBlobURL(baseURL+'/ffmpeg-core.js', 'text/javascript'),
+      wasmURL: await toBlobURL(baseURL+'/ffmpeg-core.wasm', 'application/wasm'),
+    });
+
+    setMergeStatus('מעלה קליפים...');
+    setMergePct(10);
+
+    // Write all clip files
+    const listLines = [];
+    for(let i=0; i<VE.clips.length; i++){
+      const name = 'clip'+i+'.mp4';
+      await ffmpeg.writeFile(name, await fetchFile(VE.clips[i].file));
+      listLines.push("file '"+name+"'");
+      setMergePct(10 + Math.round(i/VE.clips.length * 20));
+    }
+
+    // Write concat list
+    await ffmpeg.writeFile('list.txt', listLines.join('\n'));
+
+    setMergeStatus('ממזג ' + VE.clips.length + ' קליפים...');
+    setMergePct(30);
+
+    // Concat
+    await ffmpeg.exec([
+      '-f', 'concat', '-safe', '0', '-i', 'list.txt',
+      '-c', 'copy',
+      'output.mp4'
+    ]);
+
+    setMergeStatus('מכין להורדה...');
+    setMergePct(97);
+
+    const data = await ffmpeg.readFile('output.mp4');
+    mergedBlob = new Blob([data.buffer], {type:'video/mp4'});
+    const url = URL.createObjectURL(mergedBlob);
+
+    setMergePct(100);
+    setMergeStatus('מוכן!');
+
+    // Show result
+    document.getElementById('mergedVideo').src = url;
+    document.getElementById('mergeResult').style.display = 'block';
+    document.getElementById('mergeProgress').style.display = 'none';
+    document.getElementById('btnMerge').disabled = false;
+    toast('הסרטון מוכן!');
+
+  }catch(e){
+    document.getElementById('mergeProgress').style.display = 'none';
+    document.getElementById('btnMerge').disabled = false;
+    document.getElementById('mergeCard').querySelector('.ch').insertAdjacentHTML('afterend',
+      '<div class="msg error" style="margin-top:8px;">❌ '+e.message+'</div>');
+    toast('שגיאה: '+e.message);
+  }
+}
+
+function setMergePct(p){
+  document.getElementById('mergePct').textContent = p+'%';
+  document.getElementById('mergeFill').style.width = p+'%';
+}
+function setMergeStatus(m){
+  document.getElementById('mergeStatus').textContent = m;
+}
+
+function downloadMerged(){
+  if(!mergedBlob){ toast('אין סרטון'); return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(mergedBlob);
+  a.download = (S.parasha?.h||'video') + '_מלא.mp4';
+  a.click();
+  toast('נשמר!');
+}
+
+function mergAgain(){
+  mergedBlob = null;
+  document.getElementById('mergeResult').style.display = 'none';
+  document.getElementById('mergeProgress').style.display = 'none';
+  document.getElementById('btnMerge').disabled = false;
 }
 
 // ════════════════════════════════════════
