@@ -654,7 +654,7 @@ ${S.parashaText}
 המשימה: צור ${numClips} פרומפטים מקצועיים לVeo 3.1 — אחד לכל סצנה.
 
 חוקים חשובים:
-1. כל פרומפט חייב להיות באנגלית בלבד (Veo עובד הכי טוב עם אנגלית)
+1. כל פרומפט באנגלית — חוץ מהדיאלוג והדיבוב שחייבים להיות בעברית (Hebrew speech/narration)
 2. כל סצנה חייבת להיות שונה לחלוטין מהקודמת
 3. המשכיות סיפורית — כל סצנה ממשיכה את הקודמת
 4. בסיס: הטקסט הספציפי של אותו חלק בפרשה
@@ -667,7 +667,7 @@ ${S.parashaText}
 
 [ACTION]: מה הדמויות עושות בדיוק — תנועות גוף, הבעות פנים, אינטראקציה.
 
-[DIALOGUE]: מה הדמויות אומרות — כתוב את הדיאלוג המדויק באנגלית. אם אין דיאלוג — כתוב narration voice-over של קריין.
+[DIALOGUE]: MANDATORY — all speech and narration MUST be in Hebrew language only. Write the exact Hebrew words spoken. Include phonetic pronunciation in parentheses. Example: Character says: "בְּרֵאשִׁית בָּרָא אֱלֹהִים" (Bereshit bara Elohim). NO English dialogue allowed.
 
 [SETTING]: תאר את המיקום בפירוט — סביבה, אדריכלות, צמחייה, חפצים ספציפיים.
 
@@ -678,7 +678,7 @@ ${S.parashaText}
 [AUDIO]: תאר את הסאונד — מוזיקת רקע (סגנון, כלים), אפקטי סביבה, קצב.
 
 דוגמה לפרומפט מושלם:
-"Cinematic 3D biblical animation, Pixar-quality render, ancient Middle East, 10 seconds. [CHARACTERS] Moses: elderly man 80 years old, long white flowing beard, deep-set intense blue eyes, weathered sun-darkened skin, wearing rough brown wool robe with rope belt, worn leather sandals, holding tall gnarled wooden staff. [ACTION] Moses stands on rocky hillside, raises his staff dramatically toward the sky, robes billowing in wind, face showing awe and determination. [DIALOGUE] Moses speaks with commanding authority: 'Let my people go!' — voice echoing across desert. [SETTING] Vast Egyptian desert at dawn, distant pyramids silhouetted on horizon, sparse desert brush, large ancient stones. [CAMERA] Low angle heroic shot looking up at Moses, slow tilt up from sandaled feet to outstretched staff against sky. [LIGHTING] Dramatic golden sunrise backlighting Moses creating silhouette effect, warm amber rays piercing through dust. [AUDIO] Epic orchestral strings building tension, distant crowd murmur, wind howling, staff striking stone."
+"Cinematic 3D biblical animation, Pixar-quality render, ancient Middle East, 10 seconds. [CHARACTERS] Moses: elderly man 80 years old, long white flowing beard, deep-set intense blue eyes, weathered sun-darkened skin, wearing rough brown wool robe with rope belt, worn leather sandals, holding tall gnarled wooden staff. [ACTION] Moses stands on rocky hillside, raises his staff dramatically toward the sky, robes billowing in wind, face showing awe and determination. [DIALOGUE] Moses speaks Hebrew with commanding authority: 'שַׁלַּח אֶת-עַמִּי' (Shalach et ami) — voice echoing across desert. Hebrew narration: 'וַיֹּאמֶר מֹשֶׁה אֶל-פַּרְעֹה'. [SETTING] Vast Egyptian desert at dawn, distant pyramids silhouetted on horizon, sparse desert brush, large ancient stones. [CAMERA] Low angle heroic shot looking up at Moses, slow tilt up from sandaled feet to outstretched staff against sky. [LIGHTING] Dramatic golden sunrise backlighting Moses creating silhouette effect, warm amber rays piercing through dust. [AUDIO] Epic orchestral strings building tension, distant crowd murmur, wind howling, staff striking stone."
 
 החזר JSON בלבד:
 {"scenes":[{"id":1,"hebrewDesc":"תיאור קצר בעברית של הסצנה","prompt":"full detailed English prompt","duration":10}]}`;
