@@ -1775,24 +1775,33 @@ async function generateTTS(){
       const voiceName = voice.replace('gemini-', '');
       const stylePrompt = 'You are a biblical documentary narrator in the style of Testament (Netflix) and The Bible (History Channel). Read in Hebrew only. Use a deep, warm, authoritative voice. Adapt your tone to the content of each sentence: slow and reverent for divine moments, dramatic for battles and confrontations, calm and soft for peaceful scenes, urgent for danger. Speak with natural pauses between sentences. Never read in English.';
 
-      // ניקוי audio tags מהטקסט לפני שליחה
-      const cleanText = text.replace(/\[(slow|fast|pause|awe|dramatic|soft|whisper|calm|happy|sad|excited|angry|fearful|relief|alarm|anxiety)\]/gi, '').replace(/\s+/g, ' ').trim();
+      // ניקוי tags ו-BLOCK markers מהטקסט
+      const cleanText = text
+        .replace(/\[BLOCK_\d+\]/g, '')
+        .replace(/\[(slow|fast|pause|awe|dramatic|soft|whisper|calm|happy|sad|excited|angry|fearful|relief|alarm|anxiety)\]/gi, '')
+        .replace(/\s+/g, ' ').trim();
 
       const resp = await fetch(
-        'https://texttospeech.googleapis.com/v1beta1/text:synthesize?key='+(S.ttsKey||S.apiKey),
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent?key='+S.apiKey,
         {
           method:'POST',
           headers:{'Content-Type':'application/json'},
           body: JSON.stringify({
-            audioConfig:{ audioEncoding:'LINEAR16', pitch:0, speakingRate:1 },
-            input:{ prompt: stylePrompt, text: cleanText },
-            voice:{ languageCode:'he-il', modelName:'gemini-3.1-flash-tts-preview', name: voiceName }
+            contents:[{ parts:[{ text: stylePrompt + '\n\nRead this Hebrew text:\n' + cleanText }] }],
+            generationConfig:{
+              responseModalities:['AUDIO'],
+              speechConfig:{
+                voiceConfig:{
+                  prebuiltVoiceConfig:{ voiceName }
+                }
+              }
+            }
           })
         }
       );
       if(!resp.ok){ const e=await resp.json(); throw new Error(e.error?.message||'שגיאת Gemini TTS'); }
       const data = await resp.json();
-      const b64 = data.audioContent;
+      const b64 = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
       if(!b64) throw new Error('לא התקבל אודיו');
       const bytes = atob(b64);
       const arr = new Uint8Array(bytes.length);
