@@ -351,7 +351,21 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
   <!-- STEP B: PROMPTS -->
   <div id="s2content" style="display:none;">
     <div class="sh"><h2>פרומפטים לVeo 3</h2><p>בדוק כל פרומפט — בחינם ב-AI Studio לפני שמוציאים כסף</p></div>
-═══════════════════════════════ -->
+    <div class="card" id="overviewCard">
+      <div class="ch">📊 סקירה כללית</div>
+      <div class="ov-grid" id="ovGrid"></div>
+      <div id="ovMsg"></div>
+    </div>
+    <div id="scenesList"></div>
+    <div class="cost-box"><span>עלות ייצור מלא</span><span class="cost-val" id="costVal">—</span></div>
+    <div class="row-c">
+      <button class="btn btn-green" onclick="goGenerate()" id="btnGenerate">🎬 צור סרטון</button>
+      <button class="btn btn-ghost" onclick="showScreen(1)">← חזור</button>
+    </div>
+  </div>
+
+</div>
+
 <div class="screen" id="s3">
   <div class="sh"><h2>מייצר סרטון...</h2><p>כל קליפ מעובד בנפרד — כמה דקות</p></div>
   <div class="card">
