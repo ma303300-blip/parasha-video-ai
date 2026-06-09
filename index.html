@@ -266,7 +266,7 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
   <div class="sn" id="sn2" onclick="showScreen(2)" style="cursor:pointer;"><div class="sdot">3</div><div class="slabel">פרומפטים</div></div>
   <div class="sn" id="sn3" onclick="showScreen(3)" style="cursor:pointer;"><div class="sdot">4</div><div class="slabel">אימות</div></div>
   <div class="sn" id="sn4" onclick="showScreen(4)" style="cursor:pointer;"><div class="sdot">5</div><div class="slabel">וידאו</div></div>
-  <div class="sn" id="sn5"><div class="sdot">6</div><div class="slabel">מיזוג</div></div>
+  <div class="sn" id="sn5" onclick="openMergeDirect()" style="cursor:pointer;"><div class="sdot">6</div><div class="slabel">מיזוג</div></div>
 </div>
 
 <main>
@@ -1666,6 +1666,10 @@ async function generateNarText(){
       '• דוגמה רעה: "משה עלה להר סיני כדי לקבל את התורה מהאל."\n'+
       '• פורמט מדויק לכל בלוק: [BLOCK_N] טקסט הבלוק\n'+
       '• ללא הוראות במאי — רק טקסט קריינות\n'+
+      '• חובה: הוסף audio tags לפי ההקשר הרגשי של כל משפט — החלט בעצמך מה מתאים:\n'+
+      '  tags זמינים: [slow] [pause] [awe] [dramatic] [soft] [whisper] [fast] [calm]\n'+
+      '  התגלות אלוהים/פלא → [slow][awe], מלחמה/שיא → [dramatic], מתח → [whisper], שקט → [soft]\n'+
+      '  אתה הבמאי — בחר לפי מה שקורה בכל סצנה\n'+
       'כתוב את '+clips+' הבלוקים:';
 
     const raw = await callGemini(prompt, 6000);
@@ -2049,7 +2053,10 @@ async function generateVoiceAct(){
       '• כל שורה: מקסימום 15 מילים\n'+
       '• התאם דמות לפי מה שקורה בכל סצנה\n'+
       '• סצנת מתח → קצב מהיר. התגלות → איטי. דיאלוג → רגיל\n'+
-      '• ללא הסברים — רק שורות תסריט\n\n'+
+      '• ללא הסברים — רק שורות תסריט\n'+
+      '• הוסף audio tags בתוך הטקסט לפי ההקשר — החלט בעצמך:\n'+
+      '  tags זמינים: [slow] [pause] [awe] [dramatic] [soft] [whisper] [fast] [calm]\n'+
+      '  אתה הבמאי — בחר לפי מה שמרגיש נכון לכל רגע\n\n'+
       'כתוב את התסריט:';
 
     const raw = await callGemini(prompt, 8000);
