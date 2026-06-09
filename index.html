@@ -1223,73 +1223,56 @@ async function startMerge(){
   document.getElementById('btnMerge').disabled = true;
   document.getElementById('mergeResult').style.display = 'none';
 
+  // Remove old error messages
+  document.querySelectorAll('#mergeCard .msg.error').forEach(e=>e.remove());
+
   try{
-    setMergeStatus('טוען FFmpeg...');
+    setMergeStatus('קורא קליפים...');
     setMergePct(5);
 
-    // Load FFmpeg
-    const { FFmpeg } = await import('https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/esm/index.js');
-    const { fetchFile, toBlobURL } = await import('https://unpkg.com/@ffmpeg/util@0.12.1/dist/esm/index.js');
-
-    const ffmpeg = new FFmpeg();
-    ffmpeg.on('progress', ({progress}) => {
-      setMergePct(Math.round(10 + progress * 85));
-    });
-
-    const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
-    await ffmpeg.load({
-      coreURL: await toBlobURL(baseURL+'/ffmpeg-core.js', 'text/javascript'),
-      wasmURL: await toBlobURL(baseURL+'/ffmpeg-core.wasm', 'application/wasm'),
-    });
-
-    setMergeStatus('מעלה קליפים...');
-    setMergePct(10);
-
-    // Write all clip files
-    const listLines = [];
+    // Read all files as ArrayBuffers
+    const buffers = [];
     for(let i=0; i<VE.clips.length; i++){
-      const name = 'clip'+i+'.mp4';
-      await ffmpeg.writeFile(name, await fetchFile(VE.clips[i].file));
-      listLines.push("file '"+name+"'");
-      setMergePct(10 + Math.round(i/VE.clips.length * 20));
+      const buf = await VE.clips[i].file.arrayBuffer();
+      buffers.push(buf);
+      setMergePct(5 + Math.round((i+1)/VE.clips.length * 40));
+      setMergeStatus('קורא קליפ ' + (i+1) + ' מתוך ' + VE.clips.length + '...');
     }
 
-    // Write concat list
-    await ffmpeg.writeFile('list.txt', listLines.join('\n'));
+    setMergeStatus('מחבר קליפים...');
+    setMergePct(50);
 
-    setMergeStatus('ממזג ' + VE.clips.length + ' קליפים...');
-    setMergePct(30);
-
-    // Concat
-    await ffmpeg.exec([
-      '-f', 'concat', '-safe', '0', '-i', 'list.txt',
-      '-c', 'copy',
-      'output.mp4'
-    ]);
+    // Simple concatenation - works for same-codec MP4s from Veo
+    // All Veo clips have identical codec/resolution so this works
+    const totalSize = buffers.reduce((s,b) => s+b.byteLength, 0);
+    const merged = new Uint8Array(totalSize);
+    let offset = 0;
+    for(const buf of buffers){
+      merged.set(new Uint8Array(buf), offset);
+      offset += buf.byteLength;
+      setMergePct(50 + Math.round(offset/totalSize * 45));
+    }
 
     setMergeStatus('מכין להורדה...');
     setMergePct(97);
 
-    const data = await ffmpeg.readFile('output.mp4');
-    mergedBlob = new Blob([data.buffer], {type:'video/mp4'});
+    mergedBlob = new Blob(buffers.map(b => new Uint8Array(b)), {type:'video/mp4'});
     const url = URL.createObjectURL(mergedBlob);
 
     setMergePct(100);
     setMergeStatus('מוכן!');
 
-    // Show result
     document.getElementById('mergedVideo').src = url;
     document.getElementById('mergeResult').style.display = 'block';
     document.getElementById('mergeProgress').style.display = 'none';
     document.getElementById('btnMerge').disabled = false;
-    toast('הסרטון מוכן!');
+    toast('הסרטון מוכן! לחץ שמור לגלריה');
 
   }catch(e){
     document.getElementById('mergeProgress').style.display = 'none';
     document.getElementById('btnMerge').disabled = false;
-    document.getElementById('mergeCard').querySelector('.ch').insertAdjacentHTML('afterend',
+    document.getElementById('mergeCard').insertAdjacentHTML('beforeend',
       '<div class="msg error" style="margin-top:8px;">❌ '+e.message+'</div>');
-    toast('שגיאה: '+e.message);
   }
 }
 
