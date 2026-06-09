@@ -1447,17 +1447,6 @@ async function startMerge(){
         }, delay);
       }
 
-      // הכן את הקליפ הבא מראש
-      if(next){
-        next.currentTime = 0;
-        next.muted = true;
-        next.play().catch(()=>{});
-        next.pause();
-        next.currentTime = 0;
-        next.muted = false;
-        if(gNext) gNext.gain.setValueAtTime(0, audioCtx.currentTime);
-      }
-
       // Reset and play
       curr.currentTime = 0;
       await curr.play();
