@@ -310,48 +310,38 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
      S2: פרומפטים + בדיקה
 ═══════════════════════════════ -->
 <div class="screen" id="s2">
-  <div class="sh"><h2>פרומפטים לVeo 3</h2><p>בדוק כל פרומפט — בחינם ב-AI Studio לפני שמוציאים כסף</p></div>
 
-  <div id="s2loading" class="card">
+  <!-- LOADING -->
+  <div id="s2loading" class="card" style="display:block;">
     <div style="display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.84rem;">
       <span class="spin"></span><span id="s2loadMsg">שולף פרשה מ-Sefaria...</span>
     </div>
   </div>
 
-  <div id="s2content" style="display:none;">
-
-    <!-- HOW TO TEST -->
-    <div class="card" style="background:rgba(90,138,212,.07);border-color:rgba(90,138,212,.25);">
-      <div class="ch" style="color:var(--blue);">🧪 איך לבדוק בחינם לפני ייצור</div>
-      <div style="font-size:.82rem;line-height:1.8;color:var(--text);">
-        <div style="margin-bottom:6px;">1. לחץ על סצנה → העתק את הפרומפט שלה</div>
-        <div style="margin-bottom:6px;">2. פתח <a href="https://aistudio.google.com" target="_blank" style="color:var(--glt);font-weight:600;">AI Studio</a> → בחר מודל Veo → הדבק → צפה בתוצאה חינם</div>
-        <div style="margin-bottom:6px;">3. אם לא מרוצה → ערוך את הפרומפט כאן → בדוק שוב</div>
-        <div>4. כשהכל מושלם → לחץ "צור סרטון" למטה</div>
+  <!-- STEP A: SCRIPT APPROVAL -->
+  <div id="s2script" style="display:none;">
+    <div class="sh"><h2>📜 תסריט הסרטון</h2><p>קרא, ערוך אם צריך — ואשר לבניית הסצנות</p></div>
+    <div class="card">
+      <div class="ch">תסריט קולנועי — פרשת <span id="scriptParashaName"></span></div>
+      <div style="font-size:.78rem;color:var(--muted);margin-bottom:10px;" id="scriptMeta"></div>
+      <div class="script-wrap">
+        <div class="script-toolbar">
+          <span style="font-size:.7rem;color:var(--muted);">ערוך לפי הצורך לפני אישור</span>
+          <button class="btn btn-ghost" style="padding:5px 10px;font-size:.73rem;" onclick="toggleScriptEdit()" id="scriptEditBtn">✏️ ערוך</button>
+        </div>
+        <div id="scriptView" style="padding:16px;font-family:'Frank Ruhl Libre',serif;font-size:.93rem;line-height:2.1;direction:rtl;white-space:pre-wrap;max-height:65vh;overflow-y:auto;color:var(--text);"></div>
+        <textarea id="scriptEdit" style="display:none;width:100%;min-height:420px;background:var(--s2);border:none;color:var(--text);font-family:'Frank Ruhl Libre',serif;font-size:.93rem;line-height:2.1;padding:16px;outline:none;resize:vertical;direction:rtl;"></textarea>
+      </div>
+      <div class="row-c" style="margin-top:16px;">
+        <button class="btn btn-green" onclick="approveScript()" id="approveScriptBtn">✅ אשר — בנה סצנות</button>
+        <button class="btn btn-ghost" onclick="showScreen(1)">← חזור</button>
       </div>
     </div>
-
-    <!-- OVERVIEW -->
-    <div class="card">
-      <div class="ch">📊 סקירה כללית</div>
-      <div class="ov-grid" id="ovGrid"></div>
-      <div id="ovMsg"></div>
-    </div>
-
-    <!-- SCENES -->
-    <div id="scenesList"></div>
-
-    <!-- ACTIONS -->
-    <div class="cost-box"><span>עלות ייצור מלא</span><span class="cost-val" id="costVal">—</span></div>
-    <div class="row-c">
-      <button class="btn btn-green" onclick="goGenerate()" id="btnGenerate">🎬 צור סרטון</button>
-      <button class="btn btn-ghost" onclick="showScreen(1)">← חזור</button>
-    </div>
   </div>
-</div>
 
-<!-- ═══════════════════════════════
-     S3: יצירת וידאו
+  <!-- STEP B: PROMPTS -->
+  <div id="s2content" style="display:none;">
+    <div class="sh"><h2>פרומפטים לVeo 3</h2><p>בדוק כל פרומפט — בחינם ב-AI Studio לפני שמוציאים כסף</p></div>
 ═══════════════════════════════ -->
 <div class="screen" id="s3">
   <div class="sh"><h2>מייצר סרטון...</h2><p>כל קליפ מעובד בנפרד — כמה דקות</p></div>
@@ -596,27 +586,25 @@ function selByCalendar(ref,hn){
 // Gemini = חינמי | Veo = בתשלום
 // ════════════════════════════════════════
 async function fetchAndBuild(){
-  if(!S.parasha){toast('בחר פרשה'); return;}
+  if(!S.parasha){ toast('בחר פרשה'); return; }
 
-  // Gemini API key required for prompt generation
   S.apiKey = document.getElementById('apiKey').value.trim()
            || localStorage.getItem('veo_key')
            || S.apiKey || '';
   if(!S.apiKey){
-    toast('נא להזין API key של Gemini בהגדרות — חינמי לגמרי');
+    toast('נא להזין API key בהגדרות');
     showScreen(0);
     return;
   }
+  localStorage.setItem('veo_key', S.apiKey);
 
   showScreen(2);
-  document.getElementById('s2loading').style.display='block';
-  document.getElementById('s2content').style.display='none';
+  document.getElementById('s2loading').style.display = 'block';
+  document.getElementById('s2script').style.display = 'none';
+  document.getElementById('s2content').style.display = 'none';
+  setMsg('שולף פרשה מ-Sefaria...');
 
   try{
-    // Show which key we're using
-    console.log('Using API key:', S.apiKey ? S.apiKey.substring(0,8)+'...' : 'NONE');
-    // STEP 1: Fetch parasha text from Sefaria (free, no API)
-    setMsg('שולף פרשה מ-Sefaria...');
     const ref = encodeURIComponent(S.parasha.r.replace(/ /g,'.'));
     const resp = await fetch('https://www.sefaria.org/api/texts/'+ref+'?lang=he&context=0');
     if(!resp.ok) throw new Error('שגיאה בשליפה מ-Sefaria');
@@ -626,22 +614,16 @@ async function fetchAndBuild(){
     txt = txt.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
     if(txt.length > 9000) txt = txt.substring(0,9000)+'...';
     S.parashaText = txt;
-
-    // STEP 2: Use Gemini to build professional Veo 3 prompts
-    setMsg('Gemini בונה פרומפטים מקצועיים לVeo 3... ('+S.parashaText.length+' תווים)');
-    console.log('Parasha text sample:', S.parashaText.substring(0,300));
-    await buildPromptsWithGemini();
-
+    setMsg('Gemini כותב תסריט קולנועי בעברית...');
+    await buildHebrewScript();
   }catch(e){
-    console.error('fetchAndBuild error:', e);
-    document.getElementById('s2loading').style.display='block';
     document.getElementById('s2loading').innerHTML =
-      '<div class="msg error" style="font-size:.85rem;">❌ '+e.message+'<br><br><small style="color:var(--muted)">פרטים: '+e.toString()+'</small><br><button class="btn btn-ghost" style="margin-top:9px;" onclick="showScreen(1)">← חזור</button></div>';
+      '<div class="msg error">❌ '+e.message+'<br><button class="btn btn-ghost" style="margin-top:9px;" onclick="showScreen(1)">← חזור</button></div>';
   }
 }
 
 function setMsg(m){
-  document.getElementById('s2loadMsg').textContent=m;
+  document.getElementById('s2loadMsg').textContent = m;
 }
 
 function flatText(arr){
@@ -653,85 +635,109 @@ function flatText(arr){
   return o;
 }
 
-async function buildPromptsWithGemini(){
-  const numClips = Math.ceil(S.durSec/10);
-  setMsg('Gemini בונה ' + numClips + ' פרומפטים מפורטים...');
+async function buildHebrewScript(){
+  const numScenes = Math.ceil(S.durSec/10);
 
-  const prompt = `You are a professional Hollywood cinematographer creating ${numClips} video scene prompts for Google Veo 3.1.
+  const prompt = `אתה תסריטאי קולנועי מוכשר המתמחה בסרטים על התנ"ך.
 
-Torah portion: "${S.parasha.h}"
-Total: ${S.durSec} seconds / ${numClips} scenes of 10 seconds each
+קרא את פרשת "${S.parasha.h}" ובנה תסריט קולנועי שלם בעברית.
 
-Torah text:
+טקסט הפרשה:
 ---
 ${S.parashaText}
 ---
 
-CRITICAL RULES:
-1. Prompts in English only (except dialogue/subtitles which MUST be in Hebrew)
-2. Each scene COMPLETELY DIFFERENT — different location, camera, lighting, mood, color grade
-3. NARRATIVE CONTINUITY — all scenes together tell ONE complete flowing story
-4. DIALOGUE CONTINUITY — STRICT RULES:
-   - The entire narration across ALL scenes is like ONE long book divided into chapters
-   - Each scene picks up EXACTLY where the previous scene ENDED — not from the beginning
-   - FORBIDDEN: repeating ANY word, phrase or sentence from a previous scene
-   - FORBIDDEN: summarizing what already happened
-   - Each scene covers ONLY the NEW events happening in that specific part of the Torah
-   - Think of it as a narrator reading the Torah straight through — never going back
-5. DRAMA — emotional weight must match each Torah moment precisely
-6. Think like a Hollywood director — every cinematic detail matters
-7. CROWD & SCALE — The Torah is about a nation. Most scenes must include:
-   - Large crowds of ancient Hebrew people (men, women, children, elders)
-   - Massive scale environments — vast desert camps with hundreds of tents, huge crowds at Sinai, armies, caravans
-   - Varied people: different ages, faces, clothing, reactions — not identical clones
-   - When the Torah speaks of "בני ישראל" (Children of Israel) — show THOUSANDS of people
-   - Epic wide shots showing the true scale of the Israelite nation
-   - Only go to intimate/close scenes when the Torah specifically focuses on one person
+המשימה: כתוב תסריט קולנועי מלא ב-${numScenes} סצנות (כל סצנה = 10 שניות).
 
-MANDATORY structure — ALL 11 sections required in every prompt:
+כללים:
+• הסיפור חייב להיות רציף מהסצנה הראשונה עד האחרונה — עלילה עם התחלה, אמצע וסוף
+• כל סצנה ממשיכה ישירות מהקודמת — ללא חזרות
+• כתוב כמו תסריטאי הוליוודי — דרמה, רגש, מתח
+• כאשר יש המוני בני ישראל — תאר אלפי אנשים
 
-[STYLE]: High-budget 3D animated film, photorealistic CGI at 4K. Style: Prince of Egypt meets Pixar. Realistic skin textures, cloth physics, hair simulation. FULLY RENDERED 3D ANIMATION. NOT live action. 10 seconds.
+לכל סצנה כתוב בפורמט הזה:
 
-[CHARACTERS]: Full detail — name, age, face features, beard (length/color), hair, exact clothing (color/fabric/style), sandals, jewelry, body build, posture. Consistent across all scenes.
+**סצנה [מספר]: [כותרת]**
+🎬 ויזואל: [מה רואים — סביבה, דמויות, פעולה, מצלמה]
+🗣️ דיאלוג: [מה הדמויות אומרות בדיוק]
+🎵 סאונד: [מוזיקה ספציפית, קולות רקע, אווירה]
+📢 נרטיב: [קריין ממשיך ישירות מהסצנה הקודמת — אסור לחזור על מילים]`;
 
-[ACTION]: Precise body movements, micro-expressions (widening eyes, trembling hands, moving lips), gestures, character interactions. Match action to the drama of this specific Torah moment.
+  const raw = await callGemini(prompt, 65000);
+  if(!raw || raw.length < 100) throw new Error('לא התקבל תסריט');
 
-[DIALOGUE]: MANDATORY Hebrew only. Unique narration continuing from previous scene. Advances story with new information. Format: "טֶקסְט עִבְרִי" (phonetic). NO English. NO repetition from other scenes.
+  S.hebrewScript = raw.trim();
 
-[SUBTITLES]: On-screen Hebrew text overlay at bottom of screen. Display as white bold text with black shadow. The exact Hebrew words to show on screen as subtitle: write them here. Example: subtitle text "בְּרֵאשִׁית בָּרָא אֱלֹהִים".
+  document.getElementById('s2loading').style.display = 'none';
+  document.getElementById('s2script').style.display = 'block';
+  document.getElementById('scriptParashaName').textContent = S.parasha.h;
+  document.getElementById('scriptMeta').textContent = numScenes + ' סצנות · ' + S.durSec + ' שניות';
+  document.getElementById('scriptView').textContent = S.hebrewScript;
+  document.getElementById('scriptEdit').value = S.hebrewScript;
+}
 
-[SETTING]: Detailed location — environment, architecture, vegetation, specific objects, weather conditions (storm clouds, blowing sand, rain, fire, smoke), time of day. Different each scene.
+let scriptEditing = false;
+function toggleScriptEdit(){
+  scriptEditing = !scriptEditing;
+  document.getElementById('scriptView').style.display = scriptEditing ? 'none' : 'block';
+  document.getElementById('scriptEdit').style.display = scriptEditing ? 'block' : 'none';
+  document.getElementById('scriptEditBtn').textContent = scriptEditing ? '💾 שמור' : '✏️ ערוך';
+  if(!scriptEditing){
+    S.hebrewScript = document.getElementById('scriptEdit').value;
+    document.getElementById('scriptView').textContent = S.hebrewScript;
+  }
+}
 
-[CAMERA]: Cinematic shot — include ALL of:
-- Shot type (extreme wide / wide / medium / close-up / extreme close-up)
-- Movement (slow crane / tracking / handheld shake for action / static for tension)
-- Depth of field (shallow DOF blurred background / deep DOF everything sharp)
-- Special angles (Dutch angle for tension/evil / low angle for heroic / high angle for vulnerability)
-- If scene has multiple moments: specify timing e.g. "0-3s wide establishing shot, cut to 7s close-up on face"
+async function approveScript(){
+  if(scriptEditing) toggleScriptEdit();
+  S.hebrewScript = document.getElementById('scriptEdit').value || S.hebrewScript;
+  document.getElementById('s2script').style.display = 'none';
+  document.getElementById('s2loading').style.display = 'block';
+  setMsg('Gemini בונה פרומפטים לVeo 3...');
+  await buildPromptsFromScript();
+}
 
-[LIGHTING]: Match emotional tone exactly:
-- Joyful/miraculous: warm golden rays, divine beams of light, bright atmosphere
-- Tense/evil: cold blue-grey, deep shadows, harsh contrast
-- Sad/solemn: desaturated grey-brown, soft diffused light
-- Epic/revelation: dramatic chiaroscuro, god rays piercing darkness
-- Dominant color grade for this scene (e.g. amber/red for desert, blue/gold for divine, grey/brown for despair)
+async function buildPromptsFromScript(){
+  const numClips = Math.ceil(S.durSec/10);
 
-[DRAMA]: Specify the dramatic technique:
-- Peak moment: what is the emotional climax of this 10-second scene?
-- Silence: does this scene use a moment of silence before the dramatic peak?
-- Character power dynamic: who stands higher/closer to camera, who has power?
-- Weather/atmosphere effect if relevant (lightning flash, wind gust, earthquake rumble)
+  const prompt = `You are a professional Hollywood cinematographer converting a Hebrew script to Veo 3.1 prompts.
 
-[AUDIO]: MUST precisely match emotional intensity:
-- Music: specific instruments (e.g. "single cello playing minor melody", "thundering war drums building to brass fanfare", "soft oud and flute")
-- Tempo: slow/building/urgent/silent
-- Ambient: specific environment sounds (wind, water, crowd, animals, fire crackling)
-- Dramatic technique: "sudden silence before climax" / "music swells to peak at 8s" / "audio cuts to silence at 5s then returns"
+Torah portion: "${S.parasha.h}" — ${numClips} scenes of 10 seconds each.
 
-[COLOR_GRADE]: Dominant color palette for this scene (e.g. "warm amber and deep red", "cold steel blue and grey", "golden divine light with purple shadows"). This creates visual distinction between scenes.
+Hebrew script (already approved):
+---
+${S.hebrewScript}
+---
 
-Return ONLY valid JSON, no markdown:
-{"scenes":[{"id":1,"hebrewDesc":"תיאור קצר בעברית","prompt":"full English prompt with all 11 sections","duration":10}]}`;
+Convert EACH scene from the script into a detailed Veo 3.1 prompt.
+The script already has the story, dialogue and audio — use it exactly.
+
+For each scene include ALL 11 sections:
+
+[STYLE]: High-budget 3D animated film, photorealistic CGI 4K. Prince of Egypt meets Pixar. Realistic textures, cloth physics, hair simulation. FULLY RENDERED 3D ANIMATION. 10 seconds.
+
+[CHARACTERS]: Full detail — name, age, face, beard, hair, exact clothing, sandals, jewelry. Consistent across scenes.
+
+[ACTION]: Precise movements and micro-expressions matching this scene's drama.
+
+[DIALOGUE]: Hebrew only — exact words from this scene's dialogue in the script. Format: "טקסט" (phonetic). NO repetition.
+
+[SUBTITLES]: White Hebrew subtitles with black outline at bottom. Exact text from this scene's narration/dialogue.
+
+[SETTING]: Detailed environment. Show massive crowds when script mentions בני ישראל.
+
+[CAMERA]: Shot type + movement + DOF + angle. Vary across scenes. Include timing e.g. "0-3s wide, cut to 7s close-up".
+
+[LIGHTING]: Match emotion from script — joyful: golden warm; tense: cold dark; miraculous: divine rays. Include color grade.
+
+[DRAMA]: Peak moment, silence technique, power dynamic, weather effects from script.
+
+[AUDIO]: Use the exact sounds/music described in the script's סאונד section. Add specific instruments and ambient sounds.
+
+[COLOR_GRADE]: Unique color palette matching this scene's mood.
+
+Return ONLY valid JSON:
+{"scenes":[{"id":1,"hebrewDesc":"תיאור קצר בעברית","prompt":"full English prompt","duration":10}]}`;
 
   const raw = await callGemini(prompt, 65000);
   const clean = raw.replace(/```json|```/g,'').trim();
@@ -746,15 +752,12 @@ Return ONLY valid JSON, no markdown:
       for(const m of sceneMatches){
         try{ scenes.push(JSON.parse(m[0])); }catch(e2){}
       }
-      if(scenes.length > 0){
-        parsed = {scenes};
-        toast('שוחזרו ' + scenes.length + ' סצנות מתוך ' + numClips);
-      } else throw new Error('שגיאת JSON — נסה שוב');
-    } else throw new Error('שגיאת JSON: ' + e.message.substring(0,100));
+      if(scenes.length > 0){ parsed = {scenes}; toast('שוחזרו '+scenes.length+' סצנות'); }
+      else throw new Error('שגיאת JSON — נסה שוב');
+    } else throw new Error('שגיאת JSON: '+e.message.substring(0,100));
   }
 
-  if(!parsed.scenes||!parsed.scenes.length)
-    throw new Error('לא התקבלו סצנות');
+  if(!parsed.scenes||!parsed.scenes.length) throw new Error('לא התקבלו סצנות');
 
   S.scenes = parsed.scenes.map(sc=>{
     const checks = scorePrompt(sc.prompt);
@@ -763,7 +766,13 @@ Return ONLY valid JSON, no markdown:
   });
 
   saveState();
+  document.getElementById('s2loading').style.display = 'none';
+  document.getElementById('s2content').style.display = 'block';
   renderS2();
+}
+
+async function buildPromptsWithGemini(){
+  await buildPromptsFromScript();
 }
 
 async function callGemini(prompt, maxTokens=2000){
