@@ -693,8 +693,23 @@ async function approveScript(){
   S.hebrewScript = document.getElementById('scriptEdit').value || S.hebrewScript;
   document.getElementById('s2script').style.display = 'none';
   document.getElementById('s2loading').style.display = 'block';
-  setMsg('Gemini בונה פרומפטים לVeo 3...');
-  await buildPromptsFromScript();
+  document.getElementById('s2loadMsg').textContent = 'Gemini בונה פרומפטים לVeo 3...';
+  try{
+    await buildPromptsFromScript();
+  }catch(e){
+    document.getElementById('s2loading').innerHTML =
+      '<div class="msg error">❌ '+e.message+
+      '<br><br><button class="btn btn-ghost" style="margin-top:9px;" onclick="showScriptAgain()">← חזור לתסריט</button></div>';
+  }
+}
+
+function showScriptAgain(){
+  document.getElementById('s2loading').style.display = 'block';
+  document.getElementById('s2loading').innerHTML =
+    '<div style="display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.84rem;"><span class="spin"></span><span id="s2loadMsg"></span></div>';
+  document.getElementById('s2script').style.display = 'block';
+  document.getElementById('s2content').style.display = 'none';
+  document.getElementById('s2loading').style.display = 'none';
 }
 
 async function buildPromptsFromScript(){
@@ -798,6 +813,14 @@ async function callGemini(prompt, maxTokens=2000){
 function renderS2(){
   document.getElementById('s2loading').style.display='none';
   document.getElementById('s2content').style.display='block';
+
+  // Guard against empty scenes
+  if(!S.scenes || S.scenes.length === 0){
+    document.getElementById('s2content').innerHTML =
+      '<div class="card"><div class="msg error">❌ לא התקבלו סצנות — נסה שוב</div>' +
+      '<button class="btn btn-ghost" style="margin-top:10px;" onclick="showScreen(1)">← חזור לפרשה</button></div>';
+    return;
+  }
 
   // Overview
   const scores=S.scenes.map(s=>s.score);
