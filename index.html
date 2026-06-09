@@ -512,6 +512,10 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
         <input type="number" id="narClips" min="1" max="60" value="24" style="width:90px;text-align:center;">
         <span style="font-size:.74rem;color:var(--muted);margin-right:8px;">= <span id="narDurDisplay">240</span> שניות</span>
       </div>
+      <div class="fld" style="margin-bottom:10px;">
+        <label style="font-size:.78rem;color:var(--muted);">תאר את הסרטון (אופציונלי — לסרטון חיצוני)</label>
+        <textarea id="narVideoDesc" style="width:100%;min-height:60px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Heebo',sans-serif;font-size:.82rem;line-height:1.6;padding:8px;outline:none;resize:vertical;direction:rtl;" placeholder="לדוגמה: משה עולה להר סיני, השם מדבר אליו מתוך הענן, 3 קליפים של 10 שניות"></textarea>
+      </div>
       <div class="row-c" style="justify-content:flex-start;margin-bottom:10px;gap:8px;">
         <button class="btn btn-ghost" onclick="generateNarText()" id="btnGenNar">✨ קריינות עם Gemini</button>
         <button class="btn btn-ghost" onclick="generateVoiceAct()" id="btnGenVoice">🎭 דיבוב דמויות</button>
@@ -1599,13 +1603,18 @@ async function generateNarText(){
     const dur = clips * 10;
     const parasha = S.parasha?.h || '';
     const scenes = S.scenes || [];
+    const videoDesc = document.getElementById('narVideoDesc').value.trim();
 
     // בניית תיאור סצנות לפי קליפים
     let scenesDesc = '';
-    for(let i=0;i<clips;i++){
-      const sc = scenes[i];
-      const title = sc ? sc.title || ('סצנה '+(i+1)) : ('סצנה '+(i+1));
-      scenesDesc += (i+1)+'. ['+((i*10)+'–'+((i+1)*10)+' שניות')+'] '+title+'\n';
+    if(videoDesc){
+      scenesDesc = videoDesc;
+    } else {
+      for(let i=0;i<clips;i++){
+        const sc = scenes[i];
+        const title = sc ? sc.title || ('סצנה '+(i+1)) : ('סצנה '+(i+1));
+        scenesDesc += (i+1)+'. ['+((i*10)+'–'+((i+1)*10)+' שניות')+'] '+title+'\n';
+      }
     }
 
     const prompt = 'אתה קריין סרט תיעודי תנכי — בסגנון Testament של Netflix ו-The Bible של History Channel.\n\n'+
@@ -1946,12 +1955,17 @@ async function generateVoiceAct(){
     const clips = parseInt(document.getElementById('narClips').value) || 24;
     const parasha = S.parasha?.h || '';
     const scenes = S.scenes || [];
+    const videoDesc = document.getElementById('narVideoDesc').value.trim();
 
     let scenesDesc = '';
-    for(let i=0;i<clips;i++){
-      const sc = scenes[i];
-      const title = sc ? sc.title || ('סצנה '+(i+1)) : ('סצנה '+(i+1));
-      scenesDesc += (i+1)+'. ['+(i*10)+'–'+((i+1)*10)+' שניות] '+title+'\n';
+    if(videoDesc){
+      scenesDesc = videoDesc;
+    } else {
+      for(let i=0;i<clips;i++){
+        const sc = scenes[i];
+        const title = sc ? sc.title || ('סצנה '+(i+1)) : ('סצנה '+(i+1));
+        scenesDesc += (i+1)+'. ['+(i*10)+'–'+((i+1)*10)+' שניות] '+title+'\n';
+      }
     }
 
     const prompt =
