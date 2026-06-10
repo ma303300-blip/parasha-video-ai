@@ -1801,8 +1801,10 @@ async function generateTTS(){
       );
       if(!resp.ok){ const e=await resp.json(); throw new Error(e.error?.message||'שגיאת Gemini TTS'); }
       const data = await resp.json();
-      const b64 = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-      if(!b64) throw new Error('לא התקבל אודיו');
+      const b64 = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data
+                || data.candidates?.[0]?.content?.parts?.[0]?.data
+                || data.audioContent;
+      if(!b64){ toast('מבנה: '+JSON.stringify(Object.keys(data.candidates?.[0]?.content?.parts?.[0]||{}))); throw new Error('לא התקבל אודיו'); }
       const bytes = atob(b64);
       const arr = new Uint8Array(bytes.length);
       for(let i=0;i<bytes.length;i++) arr[i]=bytes.charCodeAt(i);
