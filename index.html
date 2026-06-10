@@ -308,8 +308,8 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
   <div class="card">
     <div class="ch">⏱ אורך הסרטון</div>
     <div class="row" style="align-items:flex-end;">
-      <div class="fld"><label>דקות</label><input type="number" id="durM" value="4" min="0" max="10" oninput="calcDur()"></div>
-      <div class="fld"><label>שניות</label><input type="number" id="durS" value="0" min="0" max="59" oninput="calcDur()"></div>
+      <div class="fld"><label>דקות</label><input type="number" id="durM" value="3" min="0" max="10" oninput="calcDur()"></div>
+      <div class="fld"><label>שניות</label><input type="number" id="durS" value="20" min="0" max="59" oninput="calcDur()"></div>
       <div class="dur-info" id="durInfo"><strong>240 שניות</strong>30 קליפים | Fast: $36</div>
     </div>
   </div>
@@ -508,13 +508,13 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
     <div id="narStep1">
       <div style="font-size:.84rem;font-weight:600;color:var(--glt);margin-bottom:8px;">שלב 1 — טקסט קריינות</div>
       <div class="fld" style="margin-bottom:10px;">
-        <label style="font-size:.78rem;color:var(--muted);">מספר קליפים בסרטון (כל קליפ = 10 שניות)</label>
+        <label style="font-size:.78rem;color:var(--muted);">מספר קליפים בסרטון (כל קליפ = 8 שניות)</label>
         <input type="number" id="narClips" min="1" max="60" value="24" style="width:90px;text-align:center;">
         <span style="font-size:.74rem;color:var(--muted);margin-right:8px;">= <span id="narDurDisplay">240</span> שניות</span>
       </div>
       <div class="fld" style="margin-bottom:10px;">
         <label style="font-size:.78rem;color:var(--muted);">תאר את הסרטון (אופציונלי — לסרטון חיצוני)</label>
-        <textarea id="narVideoDesc" style="width:100%;min-height:60px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Heebo',sans-serif;font-size:.82rem;line-height:1.6;padding:8px;outline:none;resize:vertical;direction:rtl;" placeholder="לדוגמה: משה עולה להר סיני, השם מדבר אליו מתוך הענן, 3 קליפים של 10 שניות"></textarea>
+        <textarea id="narVideoDesc" style="width:100%;min-height:60px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Heebo',sans-serif;font-size:.82rem;line-height:1.6;padding:8px;outline:none;resize:vertical;direction:rtl;" placeholder="לדוגמה: משה עולה להר סיני, השם מדבר אליו מתוך הענן, 3 קליפים של 8 שניות"></textarea>
       </div>
       <div class="row-c" style="justify-content:flex-start;margin-bottom:10px;gap:8px;">
         <button class="btn btn-ghost" onclick="generateNarText()" id="btnGenNar">✨ קריינות עם Gemini</button>
@@ -654,7 +654,7 @@ function scorePrompt(p){
     if(c.k==='lighting') pass=/light|shadow|golden|dramatic|warm|cool|sun|glow|dawn|dusk|bright|dark|beam/i.test(p);
     if(c.k==='style')    pass=/cinematic|animation|render|quality|Pixar|biblical|3D|CGI/i.test(p);
     if(c.k==='no_text')  pass=/\[SUBTITLES\]/i.test(p); // now we WANT subtitles
-    if(c.k==='duration') pass=/10 second/i.test(p);
+    if(c.k==='duration') pass=/8 second/i.test(p);
     if(c.k==='emotion')  pass=/atmosphere|emotion|dramatic|feeling|tension|epic|grand|solemn|joyful|fearful|mood/i.test(p);
     return {...c,pass};
   });
@@ -664,7 +664,7 @@ function scorePrompt(p){
 // STATE
 // ════════════════════════════════════════
 const S = {
-  apiKey:'', ttsKey:'', durSec:240, model:'fast',
+  apiKey:'', ttsKey:'', durSec:200, model:'fast',
   parasha:null, parashaText:'', scenes:[], clips:[]
 };
 
@@ -749,7 +749,7 @@ function calcDur(){
   const m=parseInt(document.getElementById('durM').value)||0;
   const s=parseInt(document.getElementById('durS').value)||0;
   S.durSec=m*60+s;
-  const clips=Math.max(1,Math.ceil(S.durSec/10));
+  const clips=Math.max(1,Math.ceil(S.durSec/8));
   const rate=S.model==='fast'?0.15:0.40;
   document.getElementById('durInfo').innerHTML=
     `<strong>${S.durSec} שניות</strong>${clips} קליפים | עלות: $${(S.durSec*rate).toFixed(2)}`;
@@ -869,7 +869,7 @@ function flatText(arr){
 }
 
 async function buildHebrewScript(){
-  const numScenes = Math.ceil(S.durSec/10);
+  const numScenes = Math.ceil(S.durSec/8);
 
   const prompt = `אתה תסריטאי קולנועי מוכשר המתמחה בסרטים על התנ"ך.
 
@@ -880,7 +880,7 @@ async function buildHebrewScript(){
 ${S.parashaText}
 ---
 
-המשימה: כתוב תסריט קולנועי מלא ב-${numScenes} סצנות (כל סצנה = 10 שניות).
+המשימה: כתוב תסריט קולנועי מלא ב-${numScenes} סצנות (כל סצנה = 8 שניות).
 
 כללים:
 • הסיפור חייב להיות רציף מהסצנה הראשונה עד האחרונה — עלילה עם התחלה, אמצע וסוף
@@ -892,7 +892,7 @@ ${S.parashaText}
 • קרבות ומלחמות — תאר מרחוק כתנועת צבאות, ללא אלימות ישירה
 
 כללי ברזל לדיאלוג:
-• כל סצנה היא 8-10 שניות בלבד — מקסימום משפט אחד או שניים קצרים לכל הסצנה
+• כל סצנה היא 8 שניות בלבד — מקסימום משפט אחד או שניים קצרים לכל הסצנה
 • הדיאלוג חייב להיות מתוך הפרשה עצמה — ציטוט מדויק או פרפראזה צמודה
 • פזר את הדיאלוגים על פני כל הסצנות — אל תעמיס הכל בסצנה אחת
 • משפט דיאלוג = עד 8 מילים בלבד
@@ -957,14 +957,14 @@ function showScriptAgain(){
 }
 
 async function buildPromptsFromScript(){
-  const numClips = Math.ceil(S.durSec/10);
+  const numClips = Math.ceil(S.durSec/8);
 
   // Show progress
   setMsg('Gemini בונה ' + numClips + ' פרומפטים... (זה לוקח כ-30 שניות)');
 
   const prompt = `You are a professional Hollywood cinematographer converting a Hebrew script to Veo 3.1 prompts.
 
-Torah portion: "${S.parasha.h}" — ${numClips} scenes of 10 seconds each.
+Torah portion: "${S.parasha.h}" — ${numClips} scenes of 8 seconds each.
 
 Hebrew script:
 ---
@@ -976,12 +976,12 @@ Convert EACH of the ${numClips} scenes into a Veo 3.1 prompt with ALL 11 section
 CRITICAL MUSIC RULE — treat the music like a real film score:
 - Every scene must have a DIFFERENT musical description — no two scenes can repeat the same instrument/mood
 - Music follows the emotional arc of the whole story: quiet opening → builds → peaks at climax → resolves
-- Example progression: scene 1 "solo oud, distant and quiet" → scene 5 "oud + low strings building" → scene 10 "full orchestra, powerful" → scene 15 "sudden silence then solo cello" → scene 20 "choir joins" → scene 24 "full resolution, gentle fade"
+- Example progression: scene 1 "solo oud, distant and quiet" → scene 5 "oud + low strings building" → scene 10 "full orchestra, powerful" → scene 15 "sudden silence then solo cello" → scene 20 "choir joins" → scene 25 "full resolution, gentle fade"
 - FORBIDDEN: repeating "epic orchestral music" or any generic description more than once
 
 IMPORTANT: Return ONLY a JSON array. No markdown. No explanation. Start with { immediately.
 
-[STYLE]: High-budget 3D animated film, photorealistic CGI 4K. Prince of Egypt meets Pixar. FULLY RENDERED 3D ANIMATION. 10 seconds. FAMILY FRIENDLY — suitable for all ages including young children. NO text overlays. NO subtitles. NO on-screen writing. Clean screen only. REQUIRED AUDIO TRANSITIONS: seconds 0.0-1.5 audio fades IN from silence to full volume; seconds 7.5-10.0 audio fades OUT from full volume to silence. REQUIRED VISUAL: seconds 7.5-10.0 scene gradually darkens slightly (subtle vignette). These transitions are mandatory in every scene.
+[STYLE]: High-budget 3D animated film, photorealistic CGI 4K. Prince of Egypt meets Pixar. FULLY RENDERED 3D ANIMATION. 8 seconds. FAMILY FRIENDLY — suitable for all ages including young children. NO text overlays. NO subtitles. NO on-screen writing. Clean screen only. REQUIRED AUDIO TRANSITIONS: seconds 0.0-1.5 audio fades IN from silence to full volume; seconds 6.5-8.0 audio fades OUT from full volume to silence. REQUIRED VISUAL: seconds 6.5-8.0 scene gradually darkens slightly (subtle vignette). These transitions are mandatory in every scene.
 [CHARACTERS]: Full detail — name, age, face, beard, hair, exact clothing. Consistent across scenes.
 [ACTION]: Precise movements and micro-expressions.
 [DIALOGUE]: If the Hebrew script includes dialogue for this scene — ONE character speaks ONE short Hebrew sentence (max 6 words), natural biblical Hebrew accent. VOICE TONE must match the scene emotion exactly — choose ONE:
@@ -1012,7 +1012,7 @@ If no dialogue in script — complete silence on voices, ambient sound only. NEV
 [COLOR_GRADE]: Unique color palette.
 
 JSON format ONLY:
-{"scenes":[{"id":1,"hebrewDesc":"תיאור בעברית","hebrewDialogue":"משפט הדיאלוג מהתסריט — או ריק אם אין","prompt":"full English prompt","duration":10}]}`;
+{"scenes":[{"id":1,"hebrewDesc":"תיאור בעברית","hebrewDialogue":"משפט הדיאלוג מהתסריט — או ריק אם אין","prompt":"full English prompt","duration":8}]}`;
 
   let raw, clean, parsed;
 
@@ -1049,7 +1049,7 @@ JSON format ONLY:
     parsed = JSON.parse(clean);
   } catch(e) {
     // Try to extract individual scene objects
-    const sceneMatches = [...clean.matchAll(/\{"id"\s*:\s*\d+[\s\S]*?"duration"\s*:\s*10\s*\}/g)];
+    const sceneMatches = [...clean.matchAll(/\{"id"\s*:\s*\d+[\s\S]*?"duration"\s*:\s*8\s*\}/g)];
     const scenes = [];
     for(const m of sceneMatches) {
       try { scenes.push(JSON.parse(m[0])); } catch(e2) {}
@@ -1187,10 +1187,16 @@ function copyScene(i){
 
 function openInStudio(i){
   const txt=S.scenes[i].prompt;
-  navigator.clipboard.writeText(txt).then(()=>{
-    toast('✅ הפרומפט הועתק — הדבק ב-AI Studio');
-  }).catch(()=>{});
-  window.open('https://aistudio.google.com/generate/video', '_blank');
+  const copy = ()=>{
+    navigator.clipboard.writeText(txt).catch(()=>{
+      const ta=document.createElement('textarea');
+      ta.value=txt; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+    });
+  };
+  copy();
+  toast('✅ הפרומפט הועתק — פתח AI Studio ← Generate Media ← Video');
+  window.open('https://aistudio.google.com', '_blank');
 }
 
 function togglePE(i){
@@ -1269,7 +1275,7 @@ async function genClip(sc,idx){
   const resp=await fetch(
     'https://generativelanguage.googleapis.com/v1beta/models/'+MODEL_ID[S.model]+':predictLongRunning?key='+S.apiKey,
     {method:'POST',headers:{'Content-Type':'application/json'},
-     body:JSON.stringify({instances:[{prompt:sc.prompt}],parameters:{aspectRatio:'16:9',durationSeconds:10,sampleCount:1,addWatermark:false}})}
+     body:JSON.stringify({instances:[{prompt:sc.prompt}],parameters:{aspectRatio:'16:9',durationSeconds:8,sampleCount:1,addWatermark:false}})}
   );
   if(!resp.ok){const e=await resp.json();throw new Error(e.error?.message||'שגיאת שליחה');}
   const op=await resp.json();
@@ -1473,7 +1479,7 @@ async function startMerge(){
       const curr    = vids[i];
       const gCurr   = gains[i];
       const clip    = VE.clips[i];
-      const durMs   = (isNaN(curr.duration)||!isFinite(curr.duration) ? 10 : curr.duration) * 1000;
+      const durMs   = (isNaN(curr.duration)||!isFinite(curr.duration) ? 8 : curr.duration) * 1000;
       const next    = vids[i+1] || null;
       const gNext   = gains[i+1] || null;
 
