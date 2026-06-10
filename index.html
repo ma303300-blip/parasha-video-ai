@@ -1382,8 +1382,6 @@ async function startMerge(){
   document.querySelectorAll('#mergeCard .msg.error').forEach(e=>e.remove());
 
   const FPS        = 30;
-  const FADE_IN_MS = 1500; // 1.5s fade-in audio when fadeIn button active
-  const FADE_OUT_MS= 1500; // 1.5s fade-out audio when fadeOut button active
 
   try{
     // STEP 1: Preload all clips
@@ -1439,7 +1437,7 @@ async function startMerge(){
     rec.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
     rec.start(100);
 
-    const XFADE_MS = 800; // 0.8 שניות cross-fade בין קליפים
+    const XFADE_MS = 1500; // 1.5 שניות cross-fade אודיו בין קליפים
 
     // STEP 3: Play each clip
     for(let i = 0; i < vids.length; i++){
@@ -1447,52 +1445,37 @@ async function startMerge(){
       const gCurr   = gains[i];
       const clip    = VE.clips[i];
       const durMs   = (isNaN(curr.duration)||!isFinite(curr.duration) ? 10 : curr.duration) * 1000;
-      const doFadeIn  = !!clip.fadeIn;
-      const doFadeOut = !!clip.fadeOut;
       const next    = vids[i+1] || null;
       const gNext   = gains[i+1] || null;
 
       setMergeStatus('מעבד קליפ ' + (i+1) + ' מתוך ' + vids.length);
       setMergePct(18 + Math.round(i / vids.length * 75));
 
-      // Set initial gain
+      // Fade in אודיו
       const now = audioCtx.currentTime;
       gCurr.gain.cancelScheduledValues(now);
-      if(doFadeIn){
-        gCurr.gain.setValueAtTime(0, now);
-        gCurr.gain.linearRampToValueAtTime(1, now + FADE_IN_MS/1000);
-      } else {
-        gCurr.gain.setValueAtTime(1, now);
-      }
+      gCurr.gain.setValueAtTime(0, now);
+      gCurr.gain.linearRampToValueAtTime(1, now + XFADE_MS/1000);
 
-      // Schedule fade-out if requested
-      let fadeOutTimer = null;
-      if(doFadeOut){
-        const delay = Math.max(0, durMs - FADE_OUT_MS);
-        fadeOutTimer = setTimeout(() => {
-          const t = audioCtx.currentTime;
-          gCurr.gain.cancelScheduledValues(t);
-          gCurr.gain.setValueAtTime(gCurr.gain.value, t);
-          gCurr.gain.linearRampToValueAtTime(0, t + FADE_OUT_MS/1000);
-        }, delay);
-      }
-
-      // Reset and play — רק אם הקליפ לא כבר רץ מה-cross-fade
-      if(curr.paused) curr.currentTime = 0;
+      // Reset and play
+      curr.currentTime = 0;
       await curr.play();
 
-      // Draw loop עם cross-fade אוטומטי
+      // Draw loop — ויזואל רציף, אודיו cross-fade
       await new Promise(resolve => {
         const t0 = performance.now();
-        let nextStarted = false;
+        let xfadeStarted = false;
 
         function frame(){
           const elapsed = performance.now() - t0;
           const remaining = durMs - elapsed;
 
-          // Cross-fade zone — 0.8 שניות לפני הסוף
-          if(next && remaining <= XFADE_MS && !nextStarted){
-            nextStarted = true;
+          // ציור רציף ללא שחור
+          ctx.drawImage(curr, 0, 0, canvas.width, canvas.height);
+
+          // Cross-fade אודיו — 1.5 שניות לפני הסוף
+          if(next && remaining <= XFADE_MS && !xfadeStarted){
+            xfadeStarted = true;
             next.currentTime = 0;
             next.play().catch(()=>{});
             if(gNext){
@@ -1501,30 +1484,16 @@ async function startMerge(){
               gNext.gain.setValueAtTime(0, t);
               gNext.gain.linearRampToValueAtTime(1, t + XFADE_MS/1000);
             }
+            // הנמך אודיו קליפ נוכחי
+            const t = audioCtx.currentTime;
+            gCurr.gain.cancelScheduledValues(t);
+            gCurr.gain.setValueAtTime(1, t);
+            gCurr.gain.linearRampToValueAtTime(0, t + XFADE_MS/1000);
           }
 
           if(elapsed < durMs){
-            // ציור הקליפ הנוכחי
-            ctx.globalAlpha = 1;
-            ctx.drawImage(curr, 0, 0, canvas.width, canvas.height);
-
-            // ציור הקליפ הבא מעליו עם opacity עולה
-            if(next && nextStarted){
-              const xPct = Math.min(1, (XFADE_MS - remaining) / XFADE_MS);
-              ctx.globalAlpha = xPct;
-              ctx.drawImage(next, 0, 0, canvas.width, canvas.height);
-              ctx.globalAlpha = 1;
-              // הנמך את הקליפ הנוכחי
-              if(!doFadeOut){
-                const t = audioCtx.currentTime;
-                gCurr.gain.cancelScheduledValues(t);
-                gCurr.gain.setValueAtTime(Math.max(0,1-xPct), t);
-              }
-            }
             requestAnimationFrame(frame);
           } else {
-            ctx.globalAlpha = 1;
-            if(fadeOutTimer) clearTimeout(fadeOutTimer);
             curr.pause();
             gCurr.gain.setValueAtTime(0, audioCtx.currentTime);
             resolve();
@@ -1589,25 +1558,38 @@ function mergAgain(){
 // ════════════════════════════════════════
 let narBlob = null;
 let finalBlob = null;
+let narVideoBlob = null; // סרטון לקריינות — נפרד מהעורך
 
 function openMergeDirect(){
   showScreen(5);
   document.getElementById('importCard').style.display = 'block';
-  document.getElementById('clipListCard').style.display = 'block';
-  document.getElementById('mergeCard').style.display = 'block';
   document.getElementById('narrationCard').style.display = 'none';
+  document.getElementById('narFinalResult') && (document.getElementById('narFinalResult').style.display = 'none');
+  updateClipUI();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function openNarDirect(){
   showScreen(5);
-  // Hide merge cards, show only narration
   document.getElementById('importCard').style.display = 'none';
   document.getElementById('clipListCard').style.display = 'none';
   document.getElementById('mergeCard').style.display = 'none';
   document.getElementById('mergeResult').style.display = 'none';
   document.getElementById('narrationCard').style.display = 'block';
-  // Update duck slider
+  // אפס state קריינות
+  narBlob = null;
+  narVideoBlob = null;
+  document.getElementById('narAudio').style.display = 'none';
+  document.getElementById('narAudio').src = '';
+  document.getElementById('narStep2').style.display = 'none';
+  document.getElementById('narStep3').style.display = 'none';
+  document.getElementById('narBlocksWrap').innerHTML = '';
+  document.getElementById('narText').value = '';
+  document.getElementById('existingVideoName').style.display = 'none';
+  document.getElementById('existingVideoFile').value = '';
+  const ttsBtn = document.getElementById('btnTTS');
+  ttsBtn.textContent = '🎙️ צור קול';
+  ttsBtn.onclick = generateTTS;
   document.getElementById('duckLevel').oninput = function(){
     document.getElementById('duckVal').textContent = this.value;
   };
@@ -1660,7 +1642,7 @@ async function generateNarText(){
       'כתוב קריינות עברית לסרטון פרשת '+parasha+' המחולקת ל-'+clips+' בלוקים.\n\n'+
       'תיאור הסצנות:\n'+scenesDesc+'\n'+
       'כללים קריטיים לסגנון:\n'+
-      '• כל בלוק: מקסימום 19 מילים (חובה!)\n'+
+      '• כל בלוק: מקסימום 22 מילים (חובה!)\n'+
       '• משפטים קצרים — 5-8 מילים כל משפט. נקודה אחרי כל משפט\n'+
       '• פתח כל בלוק בפועל חזק בהווה: "הולך", "עולה", "רואה", "שומע"\n'+
       '• תיאורים חושיים — אור, קול, רוח, חום, כובד\n'+
@@ -1674,6 +1656,7 @@ async function generateNarText(){
       '  tags זמינים: [slow] [pause] [awe] [dramatic] [soft] [whisper] [fast] [calm]\n'+
       '  התגלות אלוהים/פלא → [slow][awe], מלחמה/שיא → [dramatic], מתח → [whisper], שקט → [soft]\n'+
       '  אתה הבמאי — בחר לפי מה שקורה בכל סצנה\n'+
+      '• חשוב מאוד: כתוב כמות מילים שבקצב טבעי לא תעבור 9 שניות — בערך 15-18 מילים לבלוק\n'+
       'כתוב את '+clips+' הבלוקים:';
 
     const raw = await callGemini(prompt, 6000);
@@ -1712,7 +1695,7 @@ async function generateNarText(){
   btn.textContent = '✨ צור קריינות עם Gemini';
 }
 
-const MAX_WORDS_PER_BLOCK = 19;
+const MAX_WORDS_PER_BLOCK = 22;
 
 function countWords(str){ return str.trim() ? str.trim().split(/\s+/).length : 0; }
 
@@ -1773,71 +1756,40 @@ async function generateTTS(){
     if(voice.startsWith('gemini-')){
       // ── Gemini 3.1 Flash TTS ──
       const voiceName = voice.replace('gemini-', '');
-      const stylePrompt = 'You are a biblical documentary narrator in the style of Testament (Netflix) and The Bible (History Channel). Read in Hebrew only. Use a deep, warm, authoritative voice. Adapt your tone to the content of each sentence: slow and reverent for divine moments, dramatic for battles and confrontations, calm and soft for peaceful scenes, urgent for danger. Speak with natural pauses between sentences. Never read in English.';
+      const stylePrompt = 'You are a warm biblical storyteller, like a grandfather telling an ancient story to his grandchildren. Read in Hebrew only, in a natural flowing narrative tone — calm, intimate, and engaging. Be dramatic ONLY at peak moments like divine revelations or battles. For most of the text, speak gently and naturally as if telling a story around a campfire. Use natural pauses between sentences. Never read in English.';
 
+      // ניקוי tags ו-BLOCK markers מהטקסט
       const cleanText = text
         .replace(/\[BLOCK_\d+\]/g, '')
         .replace(/\[(slow|fast|pause|awe|dramatic|soft|whisper|calm|happy|sad|excited|angry|fearful|relief|alarm|anxiety)\]/gi, '')
         .replace(/\s+/g, ' ').trim();
 
-      // retry עד 3 פעמים — באג ידוע בעברית
-      let b64 = null;
-      for(let attempt = 1; attempt <= 3; attempt++){
-        btn.textContent = '⏳ יוצר קול... (ניסיון '+attempt+'/3)';
-        const resp = await fetch(
-          'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent',
-          {
-            method:'POST',
-            headers:{
-              'Content-Type':'application/json',
-              'x-goog-api-key': S.apiKey
-            },
-            body: JSON.stringify({
-              contents:[{ parts:[{ text: stylePrompt + '\n\nRead this Hebrew text:\n' + cleanText }] }],
-              generationConfig:{
-                responseModalities:['AUDIO'],
-                speechConfig:{
-                  voiceConfig:{
-                    prebuiltVoiceConfig:{ voiceName }
-                  }
+      const resp = await fetch(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent?key='+S.apiKey,
+        {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            contents:[{ parts:[{ text: stylePrompt + '\n\nRead this Hebrew text:\n' + cleanText }] }],
+            generationConfig:{
+              responseModalities:['AUDIO'],
+              speechConfig:{
+                voiceConfig:{
+                  prebuiltVoiceConfig:{ voiceName }
                 }
               }
-            })
-          }
-        );
-        if(!resp.ok){ const e=await resp.json(); throw new Error(e.error?.message||'שגיאת Gemini TTS'); }
-        const data = await resp.json();
-        b64 = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-        if(b64) break;
-        if(attempt < 3) await new Promise(r => setTimeout(r, 1500));
-      }
-      if(!b64) throw new Error('לא התקבל אודיו אחרי 3 ניסיונות — נסה שוב');
-
-      // PCM גולמי 24kHz 16-bit → WAV
-      const pcm = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-      const sampleRate = 24000;
-      const numChannels = 1;
-      const bitsPerSample = 16;
-      const byteRate = sampleRate * numChannels * bitsPerSample / 8;
-      const blockAlign = numChannels * bitsPerSample / 8;
-      const wavBuffer = new ArrayBuffer(44 + pcm.byteLength);
-      const view = new DataView(wavBuffer);
-      const writeStr = (o,s) => { for(let i=0;i<s.length;i++) view.setUint8(o+i, s.charCodeAt(i)); };
-      writeStr(0,'RIFF');
-      view.setUint32(4, 36 + pcm.byteLength, true);
-      writeStr(8,'WAVE');
-      writeStr(12,'fmt ');
-      view.setUint32(16, 16, true);
-      view.setUint16(20, 1, true);
-      view.setUint16(22, numChannels, true);
-      view.setUint32(24, sampleRate, true);
-      view.setUint32(28, byteRate, true);
-      view.setUint16(32, blockAlign, true);
-      view.setUint16(34, bitsPerSample, true);
-      writeStr(36,'data');
-      view.setUint32(40, pcm.byteLength, true);
-      new Uint8Array(wavBuffer, 44).set(pcm);
-      narBlob = new Blob([wavBuffer], {type:'audio/wav'});
+            }
+          })
+        }
+      );
+      if(!resp.ok){ const e=await resp.json(); throw new Error(e.error?.message||'שגיאת Gemini TTS'); }
+      const data = await resp.json();
+      const b64 = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+      if(!b64) throw new Error('לא התקבל אודיו');
+      const bytes = atob(b64);
+      const arr = new Uint8Array(bytes.length);
+      for(let i=0;i<bytes.length;i++) arr[i]=bytes.charCodeAt(i);
+      narBlob = new Blob([arr], {type:'audio/wav'});
 
     } else {
       // ── Google Cloud TTS (WaveNet) ──
@@ -1885,7 +1837,7 @@ async function generateTTS(){
 function loadExistingVideo(input){
   const file = input.files[0];
   if(!file) return;
-  mergedBlob = file;
+  narVideoBlob = file;
   document.getElementById('existingVideoName').textContent = '✓ נטען: ' + file.name;
   document.getElementById('existingVideoName').style.display = 'block';
   document.getElementById('narStep3').style.display = 'block';
@@ -1893,7 +1845,7 @@ function loadExistingVideo(input){
 }
 
 async function mergeNarration(){
-  if(!mergedBlob){ toast('אין סרטון — מזג קליפים קודם'); return; }
+  if(!narVideoBlob){ toast('אין סרטון — טען סרטון קודם'); return; }
   if(!narBlob){ toast('אין קריינות — צור קול קודם'); return; }
 
   const btn = document.getElementById('btnMergeNar');
@@ -1907,7 +1859,7 @@ async function mergeNarration(){
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
     btn.textContent = '⏳ טוען מוזיקה...';
-    const vidArrayBuf = await (await fetch(URL.createObjectURL(mergedBlob))).arrayBuffer();
+    const vidArrayBuf = await (await fetch(URL.createObjectURL(narVideoBlob))).arrayBuffer();
     const musicBuf = await audioCtx.decodeAudioData(vidArrayBuf);
 
     btn.textContent = '⏳ טוען קריינות...';
@@ -1958,7 +1910,7 @@ async function mergeNarration(){
     const ctx = canvas.getContext('2d');
 
     const vid = document.createElement('video');
-    vid.src = URL.createObjectURL(mergedBlob);
+    vid.src = URL.createObjectURL(narVideoBlob);
     vid.muted = true;
     vid.playsInline = true;
     await new Promise(r => { vid.onloadeddata = r; vid.load(); });
