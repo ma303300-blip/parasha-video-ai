@@ -1660,7 +1660,7 @@ async function generateNarText(){
       'כתוב קריינות עברית לסרטון פרשת '+parasha+' המחולקת ל-'+clips+' בלוקים.\n\n'+
       'תיאור הסצנות:\n'+scenesDesc+'\n'+
       'כללים קריטיים לסגנון:\n'+
-      '• כל בלוק: מקסימום 22 מילים (חובה!)\n'+
+      '• כל בלוק: מקסימום 19 מילים (חובה!)\n'+
       '• משפטים קצרים — 5-8 מילים כל משפט. נקודה אחרי כל משפט\n'+
       '• פתח כל בלוק בפועל חזק בהווה: "הולך", "עולה", "רואה", "שומע"\n'+
       '• תיאורים חושיים — אור, קול, רוח, חום, כובד\n'+
@@ -1712,7 +1712,7 @@ async function generateNarText(){
   btn.textContent = '✨ צור קריינות עם Gemini';
 }
 
-const MAX_WORDS_PER_BLOCK = 22;
+const MAX_WORDS_PER_BLOCK = 19;
 
 function countWords(str){ return str.trim() ? str.trim().split(/\s+/).length : 0; }
 
