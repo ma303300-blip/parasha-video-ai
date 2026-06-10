@@ -1163,7 +1163,7 @@ function buildCard(sc,i){
         <div style="display:flex;gap:7px;margin-top:8px;flex-wrap:wrap;">
           <button class="btn btn-copy" onclick="copyScene(${i})">📋 העתק לAI Studio</button>
           <button class="btn btn-ghost" style="font-size:.74rem;padding:6px 11px;" onclick="togglePE(${i})">✏️ ערוך</button>
-          <a href="https://aistudio.google.com" target="_blank" class="btn btn-blue" style="font-size:.74rem;padding:6px 11px;">🧪 בדוק חינם</a>
+          <button class="btn btn-blue" style="font-size:.74rem;padding:6px 11px;" onclick="openInStudio(${i})">🧪 בדוק חינם</button>
         </div>
         <div class="checks-wrap">${checksHtml}</div>
       </div>
@@ -1183,6 +1183,14 @@ function copyScene(i){
     document.execCommand('copy'); document.body.removeChild(ta);
     toast('✅ הועתק!');
   });
+}
+
+function openInStudio(i){
+  const txt=S.scenes[i].prompt;
+  navigator.clipboard.writeText(txt).then(()=>{
+    toast('✅ הפרומפט הועתק — הדבק ב-AI Studio');
+  }).catch(()=>{});
+  window.open('https://aistudio.google.com/generate/video', '_blank');
 }
 
 function togglePE(i){
