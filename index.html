@@ -1775,40 +1775,69 @@ async function generateTTS(){
       const voiceName = voice.replace('gemini-', '');
       const stylePrompt = 'You are a biblical documentary narrator in the style of Testament (Netflix) and The Bible (History Channel). Read in Hebrew only. Use a deep, warm, authoritative voice. Adapt your tone to the content of each sentence: slow and reverent for divine moments, dramatic for battles and confrontations, calm and soft for peaceful scenes, urgent for danger. Speak with natural pauses between sentences. Never read in English.';
 
-      // ניקוי tags ו-BLOCK markers מהטקסט
       const cleanText = text
         .replace(/\[BLOCK_\d+\]/g, '')
         .replace(/\[(slow|fast|pause|awe|dramatic|soft|whisper|calm|happy|sad|excited|angry|fearful|relief|alarm|anxiety)\]/gi, '')
         .replace(/\s+/g, ' ').trim();
 
-      const resp = await fetch(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent?key='+S.apiKey,
-        {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({
-            contents:[{ parts:[{ text: stylePrompt + '\n\nRead this Hebrew text:\n' + cleanText }] }],
-            generationConfig:{
-              responseModalities:['AUDIO'],
-              speechConfig:{
-                voiceConfig:{
-                  prebuiltVoiceConfig:{ voiceName }
+      // retry עד 3 פעמים — באג ידוע בעברית
+      let b64 = null;
+      for(let attempt = 1; attempt <= 3; attempt++){
+        btn.textContent = '⏳ יוצר קול... (ניסיון '+attempt+'/3)';
+        const resp = await fetch(
+          'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent',
+          {
+            method:'POST',
+            headers:{
+              'Content-Type':'application/json',
+              'x-goog-api-key': S.apiKey
+            },
+            body: JSON.stringify({
+              contents:[{ parts:[{ text: stylePrompt + '\n\nRead this Hebrew text:\n' + cleanText }] }],
+              generationConfig:{
+                responseModalities:['AUDIO'],
+                speechConfig:{
+                  voiceConfig:{
+                    prebuiltVoiceConfig:{ voiceName }
+                  }
                 }
               }
-            }
-          })
-        }
-      );
-      if(!resp.ok){ const e=await resp.json(); throw new Error(e.error?.message||'שגיאת Gemini TTS'); }
-      const data = await resp.json();
-      const b64 = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data
-                || data.candidates?.[0]?.content?.parts?.[0]?.data
-                || data.audioContent;
-      if(!b64){ toast('מבנה: '+JSON.stringify(Object.keys(data.candidates?.[0]?.content?.parts?.[0]||{}))); throw new Error('לא התקבל אודיו'); }
-      const bytes = atob(b64);
-      const arr = new Uint8Array(bytes.length);
-      for(let i=0;i<bytes.length;i++) arr[i]=bytes.charCodeAt(i);
-      narBlob = new Blob([arr], {type:'audio/wav'});
+            })
+          }
+        );
+        if(!resp.ok){ const e=await resp.json(); throw new Error(e.error?.message||'שגיאת Gemini TTS'); }
+        const data = await resp.json();
+        b64 = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+        if(b64) break;
+        if(attempt < 3) await new Promise(r => setTimeout(r, 1500));
+      }
+      if(!b64) throw new Error('לא התקבל אודיו אחרי 3 ניסיונות — נסה שוב');
+
+      // PCM גולמי 24kHz 16-bit → WAV
+      const pcm = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+      const sampleRate = 24000;
+      const numChannels = 1;
+      const bitsPerSample = 16;
+      const byteRate = sampleRate * numChannels * bitsPerSample / 8;
+      const blockAlign = numChannels * bitsPerSample / 8;
+      const wavBuffer = new ArrayBuffer(44 + pcm.byteLength);
+      const view = new DataView(wavBuffer);
+      const writeStr = (o,s) => { for(let i=0;i<s.length;i++) view.setUint8(o+i, s.charCodeAt(i)); };
+      writeStr(0,'RIFF');
+      view.setUint32(4, 36 + pcm.byteLength, true);
+      writeStr(8,'WAVE');
+      writeStr(12,'fmt ');
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, numChannels, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, byteRate, true);
+      view.setUint16(32, blockAlign, true);
+      view.setUint16(34, bitsPerSample, true);
+      writeStr(36,'data');
+      view.setUint32(40, pcm.byteLength, true);
+      new Uint8Array(wavBuffer, 44).set(pcm);
+      narBlob = new Blob([wavBuffer], {type:'audio/wav'});
 
     } else {
       // ── Google Cloud TTS (WaveNet) ──
