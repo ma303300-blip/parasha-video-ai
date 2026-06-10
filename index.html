@@ -695,7 +695,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('durS').value = s;
       calcDur();
     }
-    if(S.model) setModel(S.model);
+    setModel(S.model || 'fast');
 
     // Show restore banner
     const banner = document.createElement('div');
@@ -884,18 +884,26 @@ ${S.parashaText}
 
 כללים:
 • הסיפור חייב להיות רציף מהסצנה הראשונה עד האחרונה — עלילה עם התחלה, אמצע וסוף
-• כל סצנה ממשיכה ישירות מהקודמת — ללא חזרות
+• כל סצנה ממשיכה ישירות מהקודמת — ללא חזרות, ללא הסברים מחדש
 • כתוב כמו תסריטאי הוליוודי — דרמה, רגש, מתח
 • כאשר יש המוני בני ישראל — תאר אלפי אנשים
 • ללא אלימות בשום צורה — ללא דם, ללא פצעים, ללא קרבות אלימים
 • מותאם לכל הגילאים כולל ילדים — תיאורים חיוביים ומעוררי השראה
 • קרבות ומלחמות — תאר מרחוק כתנועת צבאות, ללא אלימות ישירה
 
+כללי ברזל לדיאלוג:
+• כל סצנה היא 8-10 שניות בלבד — מקסימום משפט אחד או שניים קצרים לכל הסצנה
+• הדיאלוג חייב להיות מתוך הפרשה עצמה — ציטוט מדויק או פרפראזה צמודה
+• פזר את הדיאלוגים על פני כל הסצנות — אל תעמיס הכל בסצנה אחת
+• משפט דיאלוג = עד 8 מילים בלבד
+• לא כל סצנה חייבת דיאלוג — סצנות ויזואליות שקטות הן חלק מהסיפור
+• הדיאלוג צריך לקדם את הסיפור, לא לחזור על מה שרואים
+
 לכל סצנה כתוב בפורמט הזה:
 
 **סצנה [מספר]: [כותרת]**
 🎬 ויזואל: [מה רואים — סביבה, דמויות, פעולה, מצלמה]
-🗣️ דיאלוג: [מה הדמויות אומרות בדיוק]
+🗣️ דיאלוג: [משפט אחד קצר מהפרשה — או "אין" אם סצנה שקטה]
 🎵 סאונד: [מוזיקה ספציפית, קולות רקע, אווירה]
 📢 נרטיב: [קריין ממשיך ישירות מהסצנה הקודמת — אסור לחזור על מילים]`;
 
@@ -976,7 +984,20 @@ IMPORTANT: Return ONLY a JSON array. No markdown. No explanation. Start with { i
 [STYLE]: High-budget 3D animated film, photorealistic CGI 4K. Prince of Egypt meets Pixar. FULLY RENDERED 3D ANIMATION. 10 seconds. FAMILY FRIENDLY — suitable for all ages including young children. NO text overlays. NO subtitles. NO on-screen writing. Clean screen only. REQUIRED AUDIO TRANSITIONS: seconds 0.0-1.5 audio fades IN from silence to full volume; seconds 7.5-10.0 audio fades OUT from full volume to silence. REQUIRED VISUAL: seconds 7.5-10.0 scene gradually darkens slightly (subtle vignette). These transitions are mandatory in every scene.
 [CHARACTERS]: Full detail — name, age, face, beard, hair, exact clothing. Consistent across scenes.
 [ACTION]: Precise movements and micro-expressions.
-[DIALOGUE]: NO spoken dialogue. NO character voices. NO narration. Complete silence on voices — only ambient sound and music.
+[DIALOGUE]: If the Hebrew script includes dialogue for this scene — ONE character speaks ONE short Hebrew sentence (max 6 words), natural biblical Hebrew accent. VOICE TONE must match the scene emotion exactly — choose ONE:
+• AWE/DIVINE moment → hushed whisper, trembling with reverence, barely audible
+• COMMAND/LEADERSHIP (Moses, God, king) → powerful, authoritative, resonant bass voice, slow and deliberate
+• GRIEF/MOURNING → broken, cracking voice, barely holding together, wet with tears
+• FEAR/PANIC → fast, breathless, voice shaking uncontrollably
+• JOY/CELEBRATION → bright, warm, voice rising with laughter underneath
+• LOVE/TENDERNESS → soft, intimate, slow, close to a whisper
+• ANGER/RAGE → sharp, fierce, clipped words, barely contained fury
+• DESPAIR/DISAPPOINTMENT → flat, hollow, empty — the defeat in every syllable
+• PLEADING/PRAYER → urgent yet humble, voice breaking with emotion
+• WAR/BATTLE CRY → full-throated roar, raw, primal
+• PROPHECY/VISION → otherworldly, echoing, slow — as if speaking from another realm
+• SURPRISE/SHOCK → sudden intake of breath before speaking, voice stammering
+If no dialogue in script — complete silence on voices, ambient sound only. NEVER more than one line of dialogue per scene.
 [SETTING]: Detailed environment. Massive crowds when script mentions בני ישראל.
 [CAMERA]: Shot + movement + DOF + angle. Vary across scenes.
 [LIGHTING]: Match scene emotion. Include color grade.
@@ -987,11 +1008,11 @@ IMPORTANT: Return ONLY a JSON array. No markdown. No explanation. Start with { i
 (3) HUMAN SOUNDS: if crowd — background chatter, gasps, collective silence, crying, cheering; if individual — breathing, footsteps, fabric rustling
 (4) ANIMAL SOUNDS if present: horses neighing / camels / sheep / birds — at appropriate volume
 (5) AUDIO DYNAMICS: does sound build to peak? sudden silence? whisper to roar? specify the arc
-(6) NO dialogue, NO narration voice — ambient and music only
+(6) If dialogue exists in scene: voice audio at natural volume, blended with ambient. If no dialogue: complete vocal silence — ambient and music only.
 [COLOR_GRADE]: Unique color palette.
 
 JSON format ONLY:
-{"scenes":[{"id":1,"hebrewDesc":"תיאור בעברית","prompt":"full English prompt","duration":10}]}`;
+{"scenes":[{"id":1,"hebrewDesc":"תיאור בעברית","hebrewDialogue":"משפט הדיאלוג מהתסריט — או ריק אם אין","prompt":"full English prompt","duration":10}]}`;
 
   let raw, clean, parsed;
 
