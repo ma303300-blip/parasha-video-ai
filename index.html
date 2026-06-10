@@ -984,7 +984,7 @@ IMPORTANT: Return ONLY a JSON array. No markdown. No explanation. Start with { i
 [STYLE]: High-budget 3D animated film, photorealistic CGI 4K. Prince of Egypt meets Pixar. FULLY RENDERED 3D ANIMATION. 8 seconds. FAMILY FRIENDLY — suitable for all ages including young children. NO text overlays. NO subtitles. NO on-screen writing. Clean screen only. REQUIRED AUDIO TRANSITIONS: seconds 0.0-1.5 audio fades IN from silence to full volume; seconds 6.5-8.0 audio fades OUT from full volume to silence. REQUIRED VISUAL: seconds 6.5-8.0 scene gradually darkens slightly (subtle vignette). These transitions are mandatory in every scene.
 [CHARACTERS]: Full detail — name, age, face, beard, hair, exact clothing. Consistent across scenes.
 [ACTION]: Precise movements and micro-expressions.
-[DIALOGUE]: If the Hebrew script includes dialogue for this scene — ONE character speaks ONE short Hebrew sentence (max 6 words), natural biblical Hebrew accent. VOICE TONE must match the scene emotion exactly — choose ONE:
+[DIALOGUE]: If the Hebrew script includes dialogue for this scene — ONE character speaks ONE short Hebrew sentence (max 6 words). CRITICAL: Write the dialogue in HEBREW SCRIPT ONLY (אותיות עבריות) — NEVER transliterate into Latin letters. Example: write "לֶךְ לְךָ" NOT "lech lecha". VOICE MUST SOUND NATURAL AND HUMAN — not robotic, not flat, not mechanical. Natural breathing, natural pauses between words, natural emotion in every syllable. Speak like a real person in a real moment — not like a narrator reading a text. SPEAK IN NATURAL MODERN HEBREW — natural Israeli Hebrew pronunciation, natural stress patterns, natural rhythm as spoken in everyday life — not theatrical, not archaic, not exaggerated. VOICE TONE must match the scene emotion exactly — choose ONE:
 • AWE/DIVINE moment → hushed whisper, trembling with reverence, barely audible
 • COMMAND/LEADERSHIP (Moses, God, king) → powerful, authoritative, resonant bass voice, slow and deliberate
 • GRIEF/MOURNING → broken, cracking voice, barely holding together, wet with tears
@@ -994,7 +994,7 @@ IMPORTANT: Return ONLY a JSON array. No markdown. No explanation. Start with { i
 • ANGER/RAGE → sharp, fierce, clipped words, barely contained fury
 • DESPAIR/DISAPPOINTMENT → flat, hollow, empty — the defeat in every syllable
 • PLEADING/PRAYER → urgent yet humble, voice breaking with emotion
-• WAR/BATTLE CRY → full-throated roar, raw, primal
+• ARMIES/CONFLICT moment → full-throated roar, raw, primal — the sound of thousands moving as one
 • PROPHECY/VISION → otherworldly, echoing, slow — as if speaking from another realm
 • SURPRISE/SHOCK → sudden intake of breath before speaking, voice stammering
 If no dialogue in script — complete silence on voices, ambient sound only. NEVER more than one line of dialogue per scene.
@@ -1004,7 +1004,7 @@ If no dialogue in script — complete silence on voices, ambient sound only. NEV
 [DRAMA]: Emotional atmosphere — specify: (1) Primary emotion: joy/sadness/fear/wonder/grief/celebration/tension/awe/anger/hope. (2) How it shows on faces: tears streaming / wide eyes of wonder / trembling lips / raised hands in joy / hunched in grief / frozen in fear / laughing / falling to knees. (3) Crowd body language: weeping together / cheering with raised arms / frozen in silence / bowing in reverence / running in fear. (4) Environment matching emotion: storm for turmoil / golden light for joy / grey desaturated for grief / divine glow for awe. (5) Peak emotional second. (6) Silence before peak if relevant.
 [AUDIO]: Full cinematic sound design — specify ALL layers:
 (1) AMBIENT: exact environmental sounds matching the scene — crowd whispering and murmuring between themselves / horses hooves on stone / camels grunting / sheep bleating / wind through desert sand / river flowing / fire crackling / rain on tent leather / distant thunder / birds calling / marketplace chatter
-(2) MUSIC: specific instruments matching emotion — single oud melody for intimacy / full orchestra swell for epic moments / solo flute for sadness / war drums building tension / choir for divine moments / silence with single note for shock
+(2) MUSIC: specific instruments matching emotion — single oud melody for intimacy / full orchestra swell for epic moments / solo flute for sadness / powerful percussion building tension / choir for divine moments / silence with single note for shock
 (3) HUMAN SOUNDS: if crowd — background chatter, gasps, collective silence, crying, cheering; if individual — breathing, footsteps, fabric rustling
 (4) ANIMAL SOUNDS if present: horses neighing / camels / sheep / birds — at appropriate volume
 (5) AUDIO DYNAMICS: does sound build to peak? sudden silence? whisper to roar? specify the arc
@@ -1791,7 +1791,7 @@ async function generateTTS(){
     if(voice.startsWith('gemini-')){
       // ── Gemini 3.1 Flash TTS ──
       const voiceName = voice.replace('gemini-', '');
-      const stylePrompt = 'You are a warm biblical storyteller, like a grandfather telling an ancient story to his grandchildren. Read in Hebrew only, in a natural flowing narrative tone — calm, intimate, and engaging. Be dramatic ONLY at peak moments like divine revelations or battles. For most of the text, speak gently and naturally as if telling a story around a campfire. Use natural pauses between sentences. Never read in English.';
+      const stylePrompt = 'You are a warm biblical storyteller, like a grandfather telling an ancient story to his grandchildren. Read in Hebrew only, in a natural flowing narrative tone — calm, intimate, and engaging. Be dramatic ONLY at peak moments like divine revelations or moments of great conflict. For most of the text, speak gently and naturally as if telling a story around a campfire. Use natural pauses between sentences. Never read in English.';
 
       // ניקוי tags ו-BLOCK markers מהטקסט
       const cleanText = text
