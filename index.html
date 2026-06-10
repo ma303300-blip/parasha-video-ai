@@ -1457,8 +1457,8 @@ async function startMerge(){
       gCurr.gain.setValueAtTime(0, now);
       gCurr.gain.linearRampToValueAtTime(1, now + XFADE_MS/1000);
 
-      // Reset and play
-      curr.currentTime = 0;
+      // Reset and play — רק אם הקליפ לא כבר רץ מה-cross-fade
+      if(curr.paused) curr.currentTime = 0;
       await curr.play();
 
       // Draw loop — ויזואל רציף, אודיו cross-fade
