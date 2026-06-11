@@ -1,5 +1,5 @@
-// Service Worker v5 - Network First Always
-const CACHE = 'parasha-v5';
+// Service Worker v6 - Network First Always
+const CACHE = 'parasha-v6';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

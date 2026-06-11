@@ -315,15 +315,10 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
   </div>
 
   <div class="card">
-    <div class="ch">🎬 כמות סצנות לייצור</div>
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-      <input type="range" id="sceneCount" min="1" max="25" value="25" oninput="updateSceneCount(this.value)" style="flex:1;accent-color:var(--gold);">
-      <div style="min-width:50px;text-align:center;font-size:1.1rem;font-weight:700;color:var(--glt);" id="sceneCountVal">25</div>
-    </div>
-    <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);">
-      <span>1 — בדיקה</span>
-      <span id="sceneCountInfo" style="color:var(--gold);font-weight:600;">סרטון מלא (200 שנ׳)</span>
-      <span>25 — מלא</span>
+    <div class="ch">🎬 מצב יצירה</div>
+    <div style="display:flex;gap:10px;">
+      <button id="btnMode1" class="btn btn-ghost" onclick="setMode(1)" style="flex:1;padding:14px;font-size:.9rem;border:2px solid var(--border);">🧪 בדיקה<br><span style="font-size:.72rem;color:var(--muted);">סצנה 1 בלבד</span></button>
+      <button id="btnMode25" class="btn btn-ghost active" onclick="setMode(25)" style="flex:1;padding:14px;font-size:.9rem;border:2px solid var(--gold);background:var(--gdim);">🎬 סרטון מלא<br><span style="font-size:.72rem;color:var(--muted);">25 סצנות</span></button>
     </div>
   </div>
 
@@ -772,14 +767,12 @@ function saveKey(){
   if(!k){toast('הכנס מפתח'); return;}
   localStorage.setItem('veo_key',k); S.apiKey=k; toast('✓ נשמר');
 }
-function updateSceneCount(v){
-  v = parseInt(v);
-  S.numScenes = v;
-  document.getElementById('sceneCountVal').textContent = v;
-  const rate = S.model==='fast'?0.15:0.40;
-  const cost = (v * 8 * rate).toFixed(2);
-  const info = v===25 ? 'סרטון מלא (200 שנ׳)' : v===1 ? 'בדיקה בלבד — $'+cost : v+' סצנות — $'+cost;
-  document.getElementById('sceneCountInfo').textContent = info;
+function setMode(n){
+  S.numScenes = n;
+  document.getElementById('btnMode1').style.border = n===1 ? '2px solid var(--gold)' : '2px solid var(--border)';
+  document.getElementById('btnMode1').style.background = n===1 ? 'var(--gdim)' : '';
+  document.getElementById('btnMode25').style.border = n===25 ? '2px solid var(--gold)' : '2px solid var(--border)';
+  document.getElementById('btnMode25').style.background = n===25 ? 'var(--gdim)' : '';
 }
 function setModel(m){
   S.model=m;
@@ -801,7 +794,8 @@ function gotoParasha(){
   const k=document.getElementById('apiKey').value.trim();
   if(k){S.apiKey=k; localStorage.setItem('veo_key',k);}
   if(S.durSec<8){toast('אורך מינימלי: 8 שניות'); return;}
-  S.numScenes = parseInt(document.getElementById('sceneCount').value) || 25;
+  // numScenes כבר מוגדר ע"י setMode — ברירת מחדל 25
+  if(!S.numScenes) S.numScenes = 25;
   showScreen(1);
 }
 
@@ -925,7 +919,7 @@ async function buildHebrewScript(){
 ${S.parashaText}
 ---
 
-המשימה: כתוב תסריט קולנועי מלא ב-${numScenes} סצנות (כל סצנה = 8 שניות).
+המשימה: כתוב תסריט קולנועי ${numScenes === 1 ? 'של סצנה אחת בלבד (8 שניות) — רגע אחד מרכזי ומרשים מהפרשה. קצר וממוקד.' : `מלא ב-${numScenes} סצנות (כל סצנה = 8 שניות).`}
 
 כללים:
 • הסיפור חייב להיות רציף מהסצנה הראשונה עד האחרונה — ${numScenes <= 3 ? 'בחר רגע מרכזי אחד מהפרשה ותאר אותו בעומק' : 'עלילה עם התחלה, אמצע וסוף'}
@@ -1438,15 +1432,20 @@ async function genClip(sc,idx){
       const pd=await pr.json();
       if(pd.done){
         if(pd.error) throw new Error(pd.error.message||'שגיאת יצירה');
-        // נסה מספר מבנים אפשריים של התשובה
-        const bytes =
-          pd.response?.predictions?.[0]?.bytesBase64Encoded ||
-          pd.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.bytesBase64Encoded ||
-          pd.response?.videos?.[0]?.bytesBase64Encoded ||
-          pd.result?.videos?.[0]?.bytesBase64Encoded ||
-          pd.response?.predictions?.[0]?.video?.bytesBase64Encoded;
-        if(!bytes) throw new Error('לא התקבל וידאו');
-        return 'data:video/mp4;base64,'+bytes;
+        // מבנה התשובה הרשמי: response.generateVideoResponse.generatedSamples[0].video.uri
+        const uri = pd.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.uri;
+        const bytes = pd.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.videoBytes ||
+                      pd.response?.predictions?.[0]?.bytesBase64Encoded;
+        if(uri){
+          // הורד את הוידאו מה-URI
+          const vr = await fetch(uri+'?key='+S.apiKey);
+          if(!vr.ok) throw new Error('שגיאה בהורדת וידאו: '+vr.status);
+          const blob = await vr.blob();
+          return URL.createObjectURL(blob);
+        } else if(bytes){
+          return 'data:video/mp4;base64,'+bytes;
+        }
+        throw new Error('לא התקבל וידאו');
       }
     }catch(e){if(e.message!=='לא התקבל וידאו') continue; else throw e;}
   }
