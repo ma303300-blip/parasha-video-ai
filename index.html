@@ -1411,6 +1411,7 @@ async function genClip(sc,idx){
   if(!op.name) throw new Error('לא התקבל operation name');
   // שלב 2: polling לפי התיעוד הרשמי — BASE/op.name
   const pollUrl=BASE+'/'+op.name;
+  let retryCount=0;
   for(let a=0;a<120;a++){
     await sleep(5000);
     const spTmEl=document.getElementById('spTm'+idx); if(spTmEl) spTmEl.textContent=(a+1)*5+'שנ׳...';
@@ -1421,7 +1422,15 @@ async function genClip(sc,idx){
     if(pd.done===true){
       if(pd.error) throw new Error(pd.error.message||'שגיאת יצירה');
       const uri=pd.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.uri;
-      if(!uri) throw new Error('הושלם אך לא התקבל URI');
+      if(!uri){
+        // Veo החזיר done אבל בלי URI — שמור את שם הפעולה ונסה לקרוא שוב
+        retryCount = (retryCount||0) + 1;
+        if(retryCount <= 3){
+          await sleep(3000);
+          continue;
+        }
+        throw new Error('הושלם אך לא התקבל URI');
+      }
       const vr=await fetch(uri,{headers:{'x-goog-api-key':S.apiKey}});
       if(!vr.ok) throw new Error('שגיאה בהורדת וידאו: '+vr.status);
       const blob=await vr.blob();
