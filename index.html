@@ -2048,68 +2048,56 @@ async function generateTTS(){
 
   try{
     const voice = document.getElementById('narVoice').value;
+    const SILENCE_SEC = '7.4'; // 8 - 0.6 = 7.4 שניות שקט בין בלוקים
+
+    // פצל לבלוקים לפי [BLOCK_N]
+    const rawBlocks = [];
+    const lines = text.split('\n');
+    let cur = '';
+    for(const line of lines){
+      const m = line.match(/^\[BLOCK_(\d+)\]\s*(.*)/);
+      if(m){ if(cur.trim()) rawBlocks.push(cur.trim()); cur = m[2]; }
+      else { cur += (cur?' ':'')+line.trim(); }
+    }
+    if(cur.trim()) rawBlocks.push(cur.trim());
+    const blocks = rawBlocks.length>0 ? rawBlocks : [text.replace(/\[BLOCK_\d+\]/g,'').trim()];
+
+    // נקה tags וחבר עם [silence 7.4s] בין בלוקים
+    const cleanBlocks = blocks.map(b =>
+      b.replace(/\[(slow|fast|pause|awe|dramatic|soft|whisper|calm|happy|sad|excited|angry|fearful|relief|alarm|anxiety)\]/gi,'')
+       .replace(/\s+/g,' ').trim()
+    );
+    const combined = cleanBlocks.join(` [silence ${SILENCE_SEC}s] `);
 
     if(voice.startsWith('gemini-')){
-      // ── Gemini 3.1 Flash TTS ──
-      const voiceName = voice.replace('gemini-', '');
-      const stylePrompt = 'You are a calm, natural narrator reading a Hebrew biblical story. Speak in a flowing, gentle, conversational tone — like telling a story to a friend. DO NOT be dramatic or theatrical. Keep a steady, natural pace throughout. Natural breathing, natural pauses. Never exaggerate emotion. Never read in English.';
-
-      // ניקוי tags ו-BLOCK markers מהטקסט
-      const cleanText = text
-        .replace(/\[BLOCK_\d+\]/g, '')
-        .replace(/\[(slow|fast|pause|awe|dramatic|soft|whisper|calm|happy|sad|excited|angry|fearful|relief|alarm|anxiety)\]/gi, '')
-        .replace(/\s+/g, ' ').trim();
-
+      const voiceName = voice.replace('gemini-','');
+      const stylePrompt = 'You are a calm, natural narrator reading a Hebrew biblical story. Speak in a flowing, gentle, conversational tone. DO NOT be dramatic. Keep a steady natural pace. Never read in English. IMPORTANT: respect all [silence Xs] tags exactly — insert silence of exactly X seconds at each tag.';
       const resp = await fetch(
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent',
-        {
-          method:'POST',
-          headers:{'Content-Type':'application/json','x-goog-api-key':S.apiKey},
-          body: JSON.stringify({
-            contents:[{ parts:[{ text: stylePrompt + '\n\nRead this Hebrew text:\n' + cleanText }] }],
-            generationConfig:{
-              responseModalities:['AUDIO'],
-              speechConfig:{
-                voiceConfig:{
-                  prebuiltVoiceConfig:{ voiceName: voiceName }
-                }
-              }
-            }
-          })
-        }
+        {method:'POST', headers:{'Content-Type':'application/json','x-goog-api-key':S.apiKey},
+         body:JSON.stringify({
+           contents:[{parts:[{text: stylePrompt+'\n\nRead this Hebrew text:\n'+combined}]}],
+           generationConfig:{responseModalities:['AUDIO'],speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName}}}}
+         })}
       );
-      if(!resp.ok){ const e=await resp.json(); throw new Error(e.error?.message||'שגיאת Gemini TTS'); }
+      if(!resp.ok){const e=await resp.json(); throw new Error(e.error?.message||'שגיאת Gemini TTS');}
       const data = await resp.json();
       const b64 = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
       if(!b64) throw new Error('לא התקבל אודיו');
-      // התשובה היא PCM raw audio — צריך לעטוף ב-WAV
-      const pcmData = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+      const pcmData = Uint8Array.from(atob(b64), c=>c.charCodeAt(0));
       const wavBuffer = pcmToWav(pcmData, 24000, 1, 16);
       narBlob = new Blob([wavBuffer], {type:'audio/wav'});
-
     } else {
-      // ── Google Cloud TTS (WaveNet) ──
-      const sentences = text.split(/(?<=[.!?])\s+/).filter(s => s.trim());
-      let ssmlBody = '';
-      for(const sentence of sentences){
-        const clean = sentence.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        ssmlBody += '<s>' + clean + '</s><break time="600ms"/>';
-      }
-      const ssml = '<speak><prosody rate="slow" pitch="-2st">' + ssmlBody + '</prosody></speak>';
-
+      const ssmlBody = cleanBlocks.map(b =>
+        '<s>'+b.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</s>'
+      ).join('<break time="'+SILENCE_SEC+'s"/>');
+      const ssml = '<speak><prosody rate="slow" pitch="-2st">'+ssmlBody+'</prosody></speak>';
       const resp = await fetch(
         'https://texttospeech.googleapis.com/v1/text:synthesize?key='+(S.ttsKey||S.apiKey),
-        {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({
-            input: { ssml },
-            voice: { languageCode:'he-IL', name: voice },
-            audioConfig: { audioEncoding:'MP3', speakingRate: 0.9, pitch: -2.0 }
-          })
-        }
+        {method:'POST', headers:{'Content-Type':'application/json'},
+         body:JSON.stringify({input:{ssml},voice:{languageCode:'he-IL',name:voice},audioConfig:{audioEncoding:'MP3',speakingRate:0.9,pitch:-2.0}})}
       );
-      if(!resp.ok){ const e=await resp.json(); throw new Error(e.error?.message||'שגיאת TTS'); }
+      if(!resp.ok){const e=await resp.json(); throw new Error(e.error?.message||'שגיאת TTS');}
       const data = await resp.json();
       const bytes = atob(data.audioContent);
       const arr = new Uint8Array(bytes.length);
@@ -2122,7 +2110,7 @@ async function generateTTS(){
     audio.src = url;
     audio.style.display = 'block';
     document.getElementById('narStep3').style.display = 'block';
-    toast('הקול מוכן — האזן לפני מיזוג');
+    toast('✅ קריינות מוכנה — '+blocks.length+' בלוקים עם שקט '+SILENCE_SEC+'שנ׳');
   }catch(e){
     toast('שגיאת TTS: '+e.message);
   }
