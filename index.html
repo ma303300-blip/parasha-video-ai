@@ -801,6 +801,7 @@ function gotoParasha(){
   const k=document.getElementById('apiKey').value.trim();
   if(k){S.apiKey=k; localStorage.setItem('veo_key',k);}
   if(S.durSec<8){toast('אורך מינימלי: 8 שניות'); return;}
+  S.numScenes = parseInt(document.getElementById('sceneCount').value) || 25;
   showScreen(1);
 }
 
