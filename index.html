@@ -1270,6 +1270,38 @@ function setSP(i,cls,tm){
   document.getElementById('sp'+i).className='sp-row '+cls;
   document.getElementById('spI'+i).textContent=cls==='done'?'✓':cls==='err'?'✕':'⟳';
   document.getElementById('spTm'+i).textContent=tm;
+  const retryBtn = document.getElementById('spRetry'+i);
+  if(cls==='err'){
+    if(!retryBtn){
+      const btn=document.createElement('button');
+      btn.id='spRetry'+i;
+      btn.className='btn btn-ghost';
+      btn.style.cssText='font-size:.7rem;padding:4px 9px;margin-right:6px;';
+      btn.textContent='🔄 נסה שוב';
+      btn.onclick=()=>retryClip(i);
+      document.getElementById('sp'+i).appendChild(btn);
+    }
+  } else {
+    if(retryBtn) retryBtn.remove();
+  }
+}
+
+async function retryClip(i){
+  setSP(i,'act','מייצר...');
+  const t0=Date.now();
+  try{
+    const url=await genClip(S.scenes[i],i);
+    // עדכן ב-S.clips
+    const idx=S.clips.findIndex(c=>c.i===i);
+    if(idx>=0) S.clips[idx]={url,scene:S.scenes[i],i};
+    else S.clips.push({url,scene:S.scenes[i],i});
+    setSP(i,'done','✓ '+Math.round((Date.now()-t0)/1000)+'שנ׳');
+    // עדכן בתצוגת התוצאות אם פתוחה
+    const resCard=document.getElementById('resCard'+i);
+    if(resCard) resCard.outerHTML=buildResCard(S.clips.find(c=>c.i===i),i);
+  }catch(e){
+    setSP(i,'err','שגיאה');
+  }
 }
 
 async function genClip(sc,idx){
@@ -1301,14 +1333,16 @@ async function genClip(sc,idx){
 // ════════════════════════════════════════
 // RESULTS (S4)
 // ════════════════════════════════════════
+function buildResCard(c,i){
+  if(c.error)
+    return `<div class="res-card" id="resCard${i}"><div class="res-thumb" style="color:var(--red)">❌</div><div class="res-foot"><span class="res-lbl">סצנה ${i+1} — שגיאה</span><button class="btn btn-ghost" style="font-size:.7rem;padding:4px 9px;margin-top:6px;" onclick="retryClip(${i})">🔄 נסה שוב</button></div></div>`;
+  return `<div class="res-card" id="resCard${i}"><div class="res-thumb"><video src="${c.url}" controls muted loop playsinline></video></div><div class="res-foot"><span class="res-lbl">סצנה ${i+1}</span><span class="res-dur">8שנ׳</span></div></div>`;
+}
+
 function showResults(){
   showScreen(4);
   document.getElementById('s4sub').textContent='פרשת '+S.parasha.h+' — '+S.clips.length+' קליפים';
-  document.getElementById('resGrid').innerHTML=S.clips.map((c,i)=>
-    c.error
-      ?`<div class="res-card"><div class="res-thumb" style="color:var(--red)">❌</div><div class="res-foot"><span class="res-lbl">סצנה ${i+1} — שגיאה</span></div></div>`
-      :`<div class="res-card"><div class="res-thumb"><video src="${c.url}" controls muted loop playsinline></video></div><div class="res-foot"><span class="res-lbl">סצנה ${i+1}</span><span class="res-dur">8שנ׳</span></div></div>`
-  ).join('');
+  document.getElementById('resGrid').innerHTML=S.clips.map((c,i)=>buildResCard(c,i)).join('');
 }
 function dlAll(){
   S.clips.forEach((c,i)=>{
