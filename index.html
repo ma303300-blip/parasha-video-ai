@@ -1339,7 +1339,61 @@ async function genNext(){
     document.getElementById('s3previewTitle').textContent='❌ סצנה '+(i+1)+' — שגיאה';
     document.getElementById('s3desc').textContent=e.message;
     document.getElementById('s3video').style.display='none';
-    document.getElementById('btnContinue').textContent='המשך לסצנה הבאה ←';
+    // אם השגיאה היא URI חסר — הצג כפתור "נסה שוב לקבל URI"
+    if(e.message.includes('URI') && S.lastPollUrl){
+      document.getElementById('btnContinue').textContent='המשך לסצנה הבאה ←';
+      document.getElementById('s3actions').innerHTML =
+        `<button class="btn btn-green" onclick="retryGetURI(${i})">🔄 נסה שוב לקבל URI</button>
+         <button class="btn btn-ghost" onclick="continueGen()">המשך לסצנה הבאה ←</button>
+         <button class="btn btn-ghost" onclick="stopGen()">עצור ושמור</button>`;
+    } else {
+      document.getElementById('btnContinue').textContent='המשך לסצנה הבאה ←';
+    }
+  }
+}
+
+async function retryGetURI(i){
+  document.getElementById('s3actions').innerHTML =
+    `<div style="display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.84rem;"><span class="spin"></span><span>מנסה שוב לקבל URI...</span></div>`;
+  try{
+    for(let a=0;a<12;a++){
+      await sleep(5000);
+      const pr=await fetch(S.lastPollUrl+'?key='+S.apiKey);
+      if(!pr.ok) continue;
+      const pd=await pr.json();
+      if(pd.done===true){
+        const uri=
+          pd.response?.generatedVideos?.[0]?.video?.uri ||
+          pd.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.uri;
+        if(!uri) continue;
+        const vr=await fetch(uri,{headers:{'x-goog-api-key':S.apiKey}});
+        if(!vr.ok) throw new Error('שגיאה בהורדת וידאו: '+vr.status);
+        const blob=await vr.blob();
+        const url=URL.createObjectURL(blob);
+        // עדכן את ה-clip
+        S.clips[S.clips.length-1]={url,scene:S.scenes[i],i};
+        // הצג
+        document.getElementById('s3previewTitle').textContent='✅ סצנה '+(i+1)+' — התקבל!';
+        document.getElementById('s3desc').textContent=S.scenes[i].hebrewDesc||'';
+        const vid=document.getElementById('s3video');
+        vid.style.display='block';
+        vid.src=url;
+        vid.load();
+        setTimeout(()=>vid.play().catch(()=>{}),300);
+        addDoneItem(i,url);
+        const isLast=(i+1>=S.scenes.length);
+        document.getElementById('s3actions').innerHTML=
+          `<button class="btn btn-green" onclick="continueGen()">${isLast?'סיים ←':'המשך לסצנה '+(i+2)+' ←'}</button>
+           ${isLast?'':'<button class="btn btn-ghost" onclick="stopGen()">עצור ושמור</button>'}`;
+        return;
+      }
+    }
+    throw new Error('לא התקבל URI גם אחרי ניסיון נוסף');
+  }catch(e){
+    document.getElementById('s3actions').innerHTML=
+      `<button class="btn btn-ghost" onclick="continueGen()">המשך לסצנה הבאה ←</button>
+       <button class="btn btn-ghost" onclick="stopGen()">עצור ושמור</button>`;
+    toast('שגיאה: '+e.message);
   }
 }
 
@@ -1426,6 +1480,7 @@ async function genClip(sc,idx){
   if(!op.name) throw new Error('לא התקבל operation name');
   // שלב 2: polling לפי התיעוד הרשמי — BASE/op.name
   const pollUrl=BASE+'/'+op.name;
+  S.lastPollUrl = pollUrl;
   let retryCount=0;
   for(let a=0;a<120;a++){
     await sleep(5000);
@@ -1436,14 +1491,13 @@ async function genClip(sc,idx){
     const pd=await pr.json();
     if(pd.done===true){
       if(pd.error) throw new Error(pd.error.message||'שגיאת יצירה');
-      const uri=pd.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.uri;
+      // לפי תיעוד רשמי: response.generatedVideos[0].video.uri
+      const uri =
+        pd.response?.generatedVideos?.[0]?.video?.uri ||
+        pd.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.uri;
       if(!uri){
-        // Veo החזיר done אבל בלי URI — שמור את שם הפעולה ונסה לקרוא שוב
         retryCount = (retryCount||0) + 1;
-        if(retryCount <= 3){
-          await sleep(3000);
-          continue;
-        }
+        if(retryCount <= 3){ await sleep(3000); continue; }
         throw new Error('הושלם אך לא התקבל URI');
       }
       const vr=await fetch(uri,{headers:{'x-goog-api-key':S.apiKey}});
