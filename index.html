@@ -2048,8 +2048,8 @@ async function generateTTS(){
   try{
     const voice = document.getElementById('narVoice').value;
     const CLIP_SEC = 8;
-    const OVERLAP = 0.6;
-    const BLOCK_START = CLIP_SEC - OVERLAP; // 7.4 — כל בלוק מתחיל ב-i×7.4
+    const OVERLAP = 0.2;
+    const BLOCK_START = CLIP_SEC - OVERLAP; // 7.8 — כל בלוק מתחיל ב-i×7.8
 
     // פצל לבלוקים לפי [BLOCK_N]
     const rawBlocks = [];
@@ -2110,7 +2110,7 @@ async function generateTTS(){
     }
 
     // שלב 2 — הרכב buffer בדיוק N×8 שניות
-    // בלוק i מתחיל ב: i × 7.4 שניות
+    // בלוק i מתחיל ב: i × 7.8 שניות
     btn.textContent = '⏳ מרכיב...';
     const SR = decoded[0].sampleRate;
     const TOTAL_SAMPLES = Math.round(N * CLIP_SEC * SR);
@@ -2118,7 +2118,7 @@ async function generateTTS(){
 
     for(let i=0;i<decoded.length;i++){
       const startSample = Math.round(i * BLOCK_START * SR);
-      const maxSamples = Math.round(BLOCK_START * SR); // חותך בדיוק ל-7.4 שניות
+      const maxSamples = Math.round(BLOCK_START * SR); // חותך בדיוק ל-7.8 שניות
       const src = decoded[i].getChannelData(0);
       const len = Math.min(src.length, maxSamples, TOTAL_SAMPLES - startSample);
       for(let j=0;j<len;j++) out[startSample+j] += src[j];
