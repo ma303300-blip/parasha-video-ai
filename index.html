@@ -1780,6 +1780,12 @@ function openMergeDirect(){
 }
 
 function openNarDirect(){
+  // טען API key מה-localStorage אם לא טעון
+  if(!S.apiKey){
+    const k = localStorage.getItem('veo_key');
+    if(k) S.apiKey = k;
+  }
+  if(!S.apiKey){ toast('נא להזין API Key בהגדרות תחילה'); return; }
   showScreen(5);
   document.getElementById('importCard').style.display = 'none';
   document.getElementById('clipListCard').style.display = 'none';
