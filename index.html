@@ -1396,7 +1396,7 @@ async function genClip(sc,idx){
   const resp=await fetch(
     'https://generativelanguage.googleapis.com/v1beta/models/'+MODEL_ID[S.model]+':predictLongRunning?key='+S.apiKey,
     {method:'POST',headers:{'Content-Type':'application/json'},
-     body:JSON.stringify({instances:[{prompt:sc.prompt}],parameters:{aspectRatio:'16:9',durationSeconds:8,sampleCount:1,addWatermark:false}})}
+     body:JSON.stringify({instances:[{prompt:sc.prompt}],parameters:{aspectRatio:'16:9',durationSeconds:8,sampleCount:1}})}
   );
   if(!resp.ok){const e=await resp.json();throw new Error(e.error?.message||'שגיאת שליחה');}
   const op=await resp.json();
