@@ -935,8 +935,11 @@ ${S.parashaText}
 
 **סצנה [מספר]: [כותרת]**
 🎬 ויזואל: [מה רואים — סביבה, דמויות, פעולה, מצלמה]
-🎵 סאונד: [מוזיקה ספציפית — חייבת להמשיך את הסצנה הקודמת ולהתפתח — ללא דיבור]
-🎞️ מעבר: [HARD_CUT / FADE / FADE_IN / FADE_OUT]`;
+🗣️ דיאלוג: [משפט אחד קצר מהפרשה — או "אין" אם סצנה שקטה]
+🎙️ קריינות: [חובה אם אין דיאלוג — משפט קצר בעברית מנוקדת שמתאר מה שרואים. אם יש דיאלוג — כתוב "אין"]
+🎵 סאונד: [מוזיקה ספציפית — חייבת להמשיך את הסצנה הקודמת ולהתפתח]
+🎞️ מעבר: [HARD_CUT / FADE / FADE_IN / FADE_OUT]
+📢 נרטיב: [קריין ממשיך ישירות מהסצנה הקודמת — אסור לחזור על מילים]`;
 
   const raw = await callGemini(prompt, 65000);
   if(!raw || raw.length < 100) throw new Error('לא התקבל תסריט');
@@ -1002,7 +1005,12 @@ Hebrew script:
 ${S.hebrewScript}
 ---
 
-Convert EACH of the ${numClips} scenes into a Veo 3.1 prompt with ALL 11 sections.
+Convert EACH of the ${numClips} scenes into a Veo 3.1 prompt with ALL sections MANDATORY.
+
+CRITICAL: Every single prompt MUST contain ALL of these sections — if ANY section is missing the prompt is REJECTED:
+[NO DIALOGUE] ✓ [STYLE] ✓ [CHARACTERS] ✓ [SETTING] ✓ [ACTION] ✓ [CAMERA] ✓ [LIGHTING] ✓ [DRAMA] ✓ [AUDIO] ✓ [COLOR_GRADE] ✓ [TRANSITION] ✓
+
+DO NOT skip any section. DO NOT merge sections. Write each section explicitly with its label.
 
 CRITICAL MUSIC RULE — treat the music like a real film score:
 - Music builds a continuous arc across ALL scenes — like one long piece of music, not separate tracks
@@ -1018,18 +1026,23 @@ IMPORTANT: Return ONLY a JSON array. No markdown. No explanation. Start with { i
 [STYLE]: High-budget 3D animated film, photorealistic CGI 4K. Prince of Egypt meets Pixar. FULLY RENDERED 3D ANIMATION. 8 seconds. FAMILY FRIENDLY — suitable for all ages including young children. NO text overlays. NO subtitles. NO on-screen writing. Clean screen only. AUDIO: maintain FULL VOLUME throughout the entire 8 seconds — NO fade in, NO fade out. Consistent audio level from first frame to last frame. The editor will handle transitions between clips.
 [CHARACTERS]: Full detail — name, age, face, beard, hair, exact clothing. Consistent across scenes.
 [ACTION]: Precise movements and micro-expressions.
-[AUDIO]: Full cinematic sound design — NO DIALOGUE, NO NARRATION, NO SPOKEN WORDS of any kind. SILENCE on all human voices. Specify ALL layers:
+[NO DIALOGUE]: NO spoken words, NO dialogue, NO narration, NO voices of any kind. Complete vocal silence throughout the entire clip.
+[SETTING]: Detailed environment. Massive crowds when script mentions בני ישראל.
+[CAMERA]: Shot + movement + DOF + angle. Vary across scenes.
+[LIGHTING]: Match scene emotion. Include color grade.
+[DRAMA]: Emotional atmosphere — specify: (1) Primary emotion: joy/sadness/fear/wonder/grief/celebration/tension/awe/anger/hope. (2) How it shows on faces: tears streaming / wide eyes of wonder / trembling lips / raised hands in joy / hunched in grief / frozen in fear / laughing / falling to knees. (3) Crowd body language: weeping together / cheering with raised arms / frozen in silence / bowing in reverence / running in fear. (4) Environment matching emotion: storm for turmoil / golden light for joy / grey desaturated for grief / divine glow for awe. (5) Peak emotional second. (6) Silence before peak if relevant.
+[AUDIO]: Full cinematic sound design — specify ALL layers:
 (1) AMBIENT: exact environmental sounds matching the scene — crowd whispering and murmuring between themselves / horses hooves on stone / camels grunting / sheep bleating / wind through desert sand / river flowing / fire crackling / rain on tent leather / distant thunder / birds calling / marketplace chatter
 (2) MUSIC: specific instruments matching emotion — single oud melody for intimacy / full orchestra swell for epic moments / solo flute for sadness / powerful percussion building tension / choir for divine moments / silence with single note for shock
 (3) HUMAN SOUNDS: if crowd — background chatter, gasps, collective silence, crying, cheering; if individual — breathing, footsteps, fabric rustling
 (4) ANIMAL SOUNDS if present: horses neighing / camels / sheep / birds — at appropriate volume
 (5) AUDIO DYNAMICS: does sound build to peak? sudden silence? whisper to roar? specify the arc
-(6) CRITICAL: complete vocal silence — NO speech, NO narration, NO singing, NO words in any language
+(6) If dialogue exists in scene: voice audio at natural volume, blended with ambient. If no dialogue: complete vocal silence — ambient and music only.
 [COLOR_GRADE]: Unique color palette.
 [TRANSITION]: {TRANSITION_PLACEHOLDER} — this field defines how this clip connects to adjacent clips in the final edit.
 
 JSON format ONLY:
-{"scenes":[{"id":1,"hebrewDesc":"תיאור בעברית","transition":"HARD_CUT","prompt":"full English prompt","duration":8}]}`;
+{"scenes":[{"id":1,"hebrewDesc":"תיאור בעברית","hebrewDialogue":"משפט הדיאלוג מהתסריט — או ריק אם אין","transition":"HARD_CUT","prompt":"full English prompt","duration":8}]}`;
 
   let raw, clean, parsed;
 
