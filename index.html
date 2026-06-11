@@ -783,14 +783,15 @@ function selParasha(heb){
 }
 async function fetchThisWeek(){
   try{
-    const r=await fetch('https://www.sefaria.org/api/calendars');
+    const r=await fetch('https://www.hebcal.com/shabbat?cfg=json&geonameid=281184&M=on&_nocache='+Date.now());
     const d=await r.json();
-    const pw=(d.calendar_items||[]).find(i=>i.title&&i.title.en==='Parashat Hashavua');
-    if(pw){
-      const hn=(pw.displayValue&&pw.displayValue.he)||pw.ref;
+    const pw=(d.items||[]).find(i=>i.category==='parashat');
+    if(pw&&pw.hebrew){
+      const hn=pw.hebrew;
+      const ref=pw.title?pw.title.replace('Parashat ','').trim():'';
       document.getElementById('thisWeek').innerHTML=
         `<div class="badge-week" style="margin-bottom:9px;">⭐ ${hn}</div>
-         <button class="btn btn-ghost" onclick="selByCalendar('${pw.ref}','${hn}')">בחר פרשה זו ←</button>`;
+         <button class="btn btn-ghost" onclick="selByCalendar('${ref}','${hn}')">בחר פרשה זו ←</button>`;
     } else {
       document.getElementById('thisWeek').innerHTML='<div style="color:var(--muted);font-size:.8rem;">בחר ידנית מהרשימה</div>';
     }
@@ -1791,7 +1792,7 @@ async function generateTTS(){
     if(voice.startsWith('gemini-')){
       // ── Gemini 3.1 Flash TTS ──
       const voiceName = voice.replace('gemini-', '');
-      const stylePrompt = 'You are a warm biblical storyteller, like a grandfather telling an ancient story to his grandchildren. Read in Hebrew only, in a natural flowing narrative tone — calm, intimate, and engaging. Be dramatic ONLY at peak moments like divine revelations or moments of great conflict. For most of the text, speak gently and naturally as if telling a story around a campfire. Use natural pauses between sentences. Never read in English.';
+      const stylePrompt = 'You are a warm biblical storyteller, like a grandfather telling an ancient story to his grandchildren. Read in Hebrew only, in a natural flowing narrative tone — calm, intimate, and engaging. Be dramatic ONLY at peak moments like divine revelations or battles. For most of the text, speak gently and naturally as if telling a story around a campfire. Use natural pauses between sentences. Never read in English.';
 
       // ניקוי tags ו-BLOCK markers מהטקסט
       const cleanText = text
