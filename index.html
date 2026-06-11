@@ -1414,7 +1414,13 @@ async function genClip(sc,idx){
       const pd=await pr.json();
       if(pd.done){
         if(pd.error) throw new Error(pd.error.message||'שגיאת יצירה');
-        const bytes=pd.response?.predictions?.[0]?.bytesBase64Encoded;
+        // נסה מספר מבנים אפשריים של התשובה
+        const bytes =
+          pd.response?.predictions?.[0]?.bytesBase64Encoded ||
+          pd.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.bytesBase64Encoded ||
+          pd.response?.videos?.[0]?.bytesBase64Encoded ||
+          pd.result?.videos?.[0]?.bytesBase64Encoded ||
+          pd.response?.predictions?.[0]?.video?.bytesBase64Encoded;
         if(!bytes) throw new Error('לא התקבל וידאו');
         return 'data:video/mp4;base64,'+bytes;
       }
