@@ -920,12 +920,24 @@ ${S.parashaText}
 • לא כל סצנה חייבת דיאלוג — סצנות ויזואליות שקטות הן חלק מהסיפור
 • הדיאלוג צריך לקדם את הסיפור, לא לחזור על מה שרואים
 
+כלל ברזל למוזיקה:
+• המוזיקה בונה arc לאורך הסרטון כולו — לא מתאפסת בכל סצנה
+• סצנות רצופות חולקות אלמנט מוזיקלי משותף שמתפתח — אותם כלי נגינה בסיסיים עם שינויים
+• שינוי מוזיקה דרמטי רק כשיש מעבר עלילתי גדול
+
+כלל ברזל למעברים:
+• לכל סצנה קבע מעבר: HARD_CUT (כשהפעולה ממשיכה ישירות) או FADE (שינוי דרמטי, זמן, מקום, רגש גדול)
+• סצנה 1 תמיד FADE_IN (פתיחת סרטון)
+• סצנה אחרונה תמיד FADE_OUT (סיום סרטון)
+
 לכל סצנה כתוב בפורמט הזה:
 
 **סצנה [מספר]: [כותרת]**
 🎬 ויזואל: [מה רואים — סביבה, דמויות, פעולה, מצלמה]
 🗣️ דיאלוג: [משפט אחד קצר מהפרשה — או "אין" אם סצנה שקטה]
-🎵 סאונד: [מוזיקה ספציפית, קולות רקע, אווירה]
+🎙️ קריינות: [אם אין דמויות מדברות — משפט קצר בעברית טבעית שמתאר הסיטואציה. אם יש דיאלוג — כתוב "אין"]
+🎵 סאונד: [מוזיקה ספציפית — חייבת להמשיך את הסצנה הקודמת ולהתפתח]
+🎞️ מעבר: [HARD_CUT / FADE / FADE_IN / FADE_OUT]
 📢 נרטיב: [קריין ממשיך ישירות מהסצנה הקודמת — אסור לחזור על מילים]`;
 
   const raw = await callGemini(prompt, 65000);
@@ -995,14 +1007,17 @@ ${S.hebrewScript}
 Convert EACH of the ${numClips} scenes into a Veo 3.1 prompt with ALL 11 sections.
 
 CRITICAL MUSIC RULE — treat the music like a real film score:
-- Every scene must have a DIFFERENT musical description — no two scenes can repeat the same instrument/mood
-- Music follows the emotional arc of the whole story: quiet opening → builds → peaks at climax → resolves
-- Example progression: scene 1 "solo oud, distant and quiet" → scene 5 "oud + low strings building" → scene 10 "full orchestra, powerful" → scene 15 "sudden silence then solo cello" → scene 20 "choir joins" → scene 25 "full resolution, gentle fade"
-- FORBIDDEN: repeating "epic orchestral music" or any generic description more than once
+- Music builds a continuous arc across ALL scenes — like one long piece of music, not separate tracks
+- Consecutive scenes MUST share the same base instruments, evolving gradually (e.g. oud solo → oud + cello → oud + cello + strings → full orchestra)
+- HARD_CUT scenes: music continues at same energy level — no restart, no change in instrumentation
+- FADE scenes: music may shift to new mood/instrumentation — this is the transition point
+- Scene 1: music starts gently from nothing
+- Scene ${numClips}: music resolves and fades to silence
+- FORBIDDEN: starting a completely new musical idea in consecutive HARD_CUT scenes
 
 IMPORTANT: Return ONLY a JSON array. No markdown. No explanation. Start with { immediately.
 
-[STYLE]: High-budget 3D animated film, photorealistic CGI 4K. Prince of Egypt meets Pixar. FULLY RENDERED 3D ANIMATION. 8 seconds. FAMILY FRIENDLY — suitable for all ages including young children. NO text overlays. NO subtitles. NO on-screen writing. Clean screen only. REQUIRED AUDIO TRANSITIONS: seconds 0.0-1.5 audio fades IN from silence to full volume; seconds 6.5-8.0 audio fades OUT from full volume to silence. REQUIRED VISUAL: seconds 6.5-8.0 scene gradually darkens slightly (subtle vignette). These transitions are mandatory in every scene.
+[STYLE]: High-budget 3D animated film, photorealistic CGI 4K. Prince of Egypt meets Pixar. FULLY RENDERED 3D ANIMATION. 8 seconds. FAMILY FRIENDLY — suitable for all ages including young children. NO text overlays. NO subtitles. NO on-screen writing. Clean screen only. AUDIO: maintain FULL VOLUME throughout the entire 8 seconds — NO fade in, NO fade out. Consistent audio level from first frame to last frame. The editor will handle transitions between clips.
 [CHARACTERS]: Full detail — name, age, face, beard, hair, exact clothing. Consistent across scenes.
 [ACTION]: Precise movements and micro-expressions.
 [DIALOGUE]: If the Hebrew script includes dialogue for this scene — ONE character speaks ONE short Hebrew sentence (max 6 words). CRITICAL: Write the dialogue in HEBREW SCRIPT ONLY (אותיות עבריות) — NEVER transliterate into Latin letters. Example: write "לֶךְ לְךָ" NOT "lech lecha". VOICE MUST SOUND NATURAL AND HUMAN — not robotic, not flat, not mechanical. Natural breathing, natural pauses between words, natural emotion in every syllable. Speak like a real person in a real moment — not like a narrator reading a text. SPEAK IN NATURAL MODERN HEBREW — natural Israeli Hebrew pronunciation, natural stress patterns, natural rhythm as spoken in everyday life — not theatrical, not archaic, not exaggerated. VOICE TONE must match the scene emotion exactly — choose ONE:
@@ -1018,7 +1033,7 @@ IMPORTANT: Return ONLY a JSON array. No markdown. No explanation. Start with { i
 • ARMIES/CONFLICT moment → full-throated roar, raw, primal — the sound of thousands moving as one
 • PROPHECY/VISION → otherworldly, echoing, slow — as if speaking from another realm
 • SURPRISE/SHOCK → sudden intake of breath before speaking, voice stammering
-If no dialogue in script — complete silence on voices, ambient sound only. NEVER more than one line of dialogue per scene.
+If no dialogue in script AND no characters speaking — add ONE short Hebrew narration sentence (max 8 words) describing what is happening, spoken by an unseen narrator in natural modern Israeli Hebrew, calm and flowing. If there IS dialogue — no narration needed. NEVER more than one line of spoken audio per scene.
 [SETTING]: Detailed environment. Massive crowds when script mentions בני ישראל.
 [CAMERA]: Shot + movement + DOF + angle. Vary across scenes.
 [LIGHTING]: Match scene emotion. Include color grade.
@@ -1031,9 +1046,10 @@ If no dialogue in script — complete silence on voices, ambient sound only. NEV
 (5) AUDIO DYNAMICS: does sound build to peak? sudden silence? whisper to roar? specify the arc
 (6) If dialogue exists in scene: voice audio at natural volume, blended with ambient. If no dialogue: complete vocal silence — ambient and music only.
 [COLOR_GRADE]: Unique color palette.
+[TRANSITION]: {TRANSITION_PLACEHOLDER} — this field defines how this clip connects to adjacent clips in the final edit.
 
 JSON format ONLY:
-{"scenes":[{"id":1,"hebrewDesc":"תיאור בעברית","hebrewDialogue":"משפט הדיאלוג מהתסריט — או ריק אם אין","prompt":"full English prompt","duration":8}]}`;
+{"scenes":[{"id":1,"hebrewDesc":"תיאור בעברית","hebrewDialogue":"משפט הדיאלוג מהתסריט — או ריק אם אין","transition":"HARD_CUT","prompt":"full English prompt","duration":8}]}`;
 
   let raw, clean, parsed;
 
@@ -1579,7 +1595,9 @@ async function startMerge(){
     rec.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
     rec.start(100);
 
-    const XFADE_MS = 1500; // 1.5 שניות cross-fade אודיו בין קליפים
+    const JCUT_MS = 200;   // J-cut: אודיו מתחיל 0.2 שניות לפני החלפת תמונה
+    const XFADE_MS = 800;  // cross-fade אודיו בסצנות FADE
+    const FADE_MS = 600;   // fade in/out לסצנה ראשונה ואחרונה
 
     // STEP 3: Play each clip
     for(let i = 0; i < vids.length; i++){
@@ -1589,55 +1607,92 @@ async function startMerge(){
       const durMs   = (isNaN(curr.duration)||!isFinite(curr.duration) ? 8 : curr.duration) * 1000;
       const next    = vids[i+1] || null;
       const gNext   = gains[i+1] || null;
+      const isFirst = i === 0;
+      const isLast  = i === vids.length - 1;
+
+      // קרא transition מה-S.clips אם קיים
+      const clipData = S.clips && S.clips[i];
+      const trans = clipData?.scene?.transition || 'HARD_CUT';
+      const nextTrans = S.clips && S.clips[i+1] ? (S.clips[i+1].scene?.transition || 'HARD_CUT') : 'FADE_OUT';
 
       setMergeStatus('מעבד קליפ ' + (i+1) + ' מתוך ' + vids.length);
       setMergePct(18 + Math.round(i / vids.length * 75));
 
-      // Fade in אודיו
+      // Fade in אודיו — רק לסצנה ראשונה
       const now = audioCtx.currentTime;
       gCurr.gain.cancelScheduledValues(now);
-      gCurr.gain.setValueAtTime(0, now);
-      gCurr.gain.linearRampToValueAtTime(1, now + XFADE_MS/1000);
+      if(isFirst){
+        gCurr.gain.setValueAtTime(0, now);
+        gCurr.gain.linearRampToValueAtTime(1, now + FADE_MS/1000);
+      } else {
+        gCurr.gain.setValueAtTime(1, now);
+      }
 
       // Reset and play
       curr.currentTime = 0;
       await curr.play();
 
-      // Draw loop — ויזואל רציף, אודיו cross-fade
+      // Draw loop
       await new Promise(resolve => {
         const t0 = performance.now();
-        let xfadeStarted = false;
+        let transitionStarted = false;
 
         function frame(){
           const elapsed = performance.now() - t0;
           const remaining = durMs - elapsed;
 
-          // ציור רציף ללא שחור
+          // ציור רציף
           ctx.drawImage(curr, 0, 0, canvas.width, canvas.height);
 
-          // Cross-fade אודיו — 1.5 שניות לפני הסוף
-          if(next && remaining <= XFADE_MS && !xfadeStarted){
-            xfadeStarted = true;
-            next.currentTime = 0;
-            next.play().catch(()=>{});
-            if(gNext){
-              const t = audioCtx.currentTime;
-              gNext.gain.cancelScheduledValues(t);
-              gNext.gain.setValueAtTime(0, t);
-              gNext.gain.linearRampToValueAtTime(1, t + XFADE_MS/1000);
+          if(!transitionStarted){
+            if(isLast){
+              // סצנה אחרונה — fade out אודיו + תמונה
+              if(remaining <= FADE_MS){
+                transitionStarted = true;
+                const t = audioCtx.currentTime;
+                gCurr.gain.cancelScheduledValues(t);
+                gCurr.gain.setValueAtTime(1, t);
+                gCurr.gain.linearRampToValueAtTime(0, t + FADE_MS/1000);
+              }
+            } else if(nextTrans === 'FADE' || nextTrans === 'FADE_IN'){
+              // FADE — cross-fade אודיו + תמונה
+              if(next && remaining <= XFADE_MS){
+                transitionStarted = true;
+                next.currentTime = 0;
+                next.play().catch(()=>{});
+                const t = audioCtx.currentTime;
+                if(gNext){
+                  gNext.gain.cancelScheduledValues(t);
+                  gNext.gain.setValueAtTime(0, t);
+                  gNext.gain.linearRampToValueAtTime(1, t + XFADE_MS/1000);
+                }
+                gCurr.gain.cancelScheduledValues(t);
+                gCurr.gain.setValueAtTime(1, t);
+                gCurr.gain.linearRampToValueAtTime(0, t + XFADE_MS/1000);
+              }
+            } else {
+              // HARD_CUT — J-cut: אודיו הבא מתחיל לפני החלפת תמונה
+              if(next && remaining <= JCUT_MS){
+                transitionStarted = true;
+                next.currentTime = 0;
+                next.play().catch(()=>{});
+                if(gNext){
+                  const t = audioCtx.currentTime;
+                  gNext.gain.cancelScheduledValues(t);
+                  gNext.gain.setValueAtTime(0, t);
+                  gNext.gain.linearRampToValueAtTime(1, t + JCUT_MS/1000);
+                }
+              }
             }
-            // הנמך אודיו קליפ נוכחי
-            const t = audioCtx.currentTime;
-            gCurr.gain.cancelScheduledValues(t);
-            gCurr.gain.setValueAtTime(1, t);
-            gCurr.gain.linearRampToValueAtTime(0, t + XFADE_MS/1000);
           }
 
           if(elapsed < durMs){
             requestAnimationFrame(frame);
           } else {
             curr.pause();
-            gCurr.gain.setValueAtTime(0, audioCtx.currentTime);
+            if(trans === 'HARD_CUT' || trans === 'FADE_IN'){
+              gCurr.gain.setValueAtTime(0, audioCtx.currentTime);
+            }
             resolve();
           }
         }
