@@ -409,11 +409,31 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
 </div>
 
 <div class="screen" id="s3">
-  <div class="sh"><h2>מייצר סרטון...</h2><p>כל קליפ מעובד בנפרד — כמה דקות</p></div>
+  <div class="sh"><h2 id="s3title">מייצר סצנה...</h2><p id="s3sub">סצנה 1 מתוך 25</p></div>
   <div class="card">
-    <div class="prog-top"><span class="prog-title">⚙️ עיבוד קליפים</span><span class="prog-pct" id="progPct">0%</span></div>
+    <div class="prog-top"><span class="prog-title" id="s3progTitle">⚙️ מעבד...</span><span class="prog-pct" id="progPct">0%</span></div>
     <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
-    <div class="sp-list" id="spList"></div>
+  </div>
+  <!-- תצוגת הסצנה הנוכחית -->
+  <div class="card" id="s3preview" style="display:none;">
+    <div class="ch" id="s3previewTitle">סצנה 1</div>
+    <video id="s3video" controls playsinline style="width:100%;border-radius:8px;background:#000;"></video>
+    <div style="margin-top:12px;font-size:.82rem;color:var(--muted);text-align:center;" id="s3desc"></div>
+    <div style="display:flex;gap:10px;margin-top:14px;justify-content:center;" id="s3actions">
+      <button class="btn btn-green" id="btnContinue" onclick="continueGen()">המשך לסצנה הבאה ←</button>
+      <button class="btn btn-ghost" id="btnStopGen" onclick="stopGen()">עצור ושמור</button>
+    </div>
+  </div>
+  <!-- סצנה בתהליך -->
+  <div class="card" id="s3generating">
+    <div style="display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.84rem;">
+      <span class="spin"></span><span id="s3genMsg">שולח ל-Veo...</span>
+    </div>
+  </div>
+  <!-- רשימת סצנות שהושלמו -->
+  <div class="card" id="s3doneList" style="display:none;">
+    <div class="ch">✅ סצנות שהושלמו</div>
+    <div id="s3doneItems"></div>
   </div>
 </div>
 
@@ -1234,36 +1254,88 @@ function goGenerate(){
   S.apiKey=document.getElementById('apiKey').value.trim()||localStorage.getItem('veo_key')||S.apiKey||'';
   if(!S.apiKey){toast('נא להזין API key בהגדרות לפני יצירת סרטון'); return;}
   showScreen(3);
-  startGen();
+  S.genIndex=0;
+  S.clips=[];
+  S.genStopped=false;
+  genNext();
 }
 
-async function startGen(){
-  S.clips=[];
-  document.getElementById('spList').innerHTML=S.scenes.map((sc,i)=>
-    `<div class="sp-row" id="sp${i}">
-      <div class="sp-ic" id="spI${i}">${i+1}</div>
-      <div class="sp-txt">${sc.hebrewDesc}</div>
-      <div class="sp-tm" id="spTm${i}">ממתין</div>
-    </div>`).join('');
-
-  let done=0;
-  for(let i=0;i<S.scenes.length;i++){
-    setSP(i,'act','מייצר...');
-    const t0=Date.now();
-    try{
-      const url=await genClip(S.scenes[i],i);
-      S.clips.push({url,scene:S.scenes[i],i});
-      setSP(i,'done','✓ '+Math.round((Date.now()-t0)/1000)+'שנ׳');
-    }catch(e){
-      S.clips.push({url:null,error:e.message,scene:S.scenes[i],i});
-      setSP(i,'err','שגיאה');
-    }
-    done++;
-    const pct=Math.round(done/S.scenes.length*100);
-    document.getElementById('progPct').textContent=pct+'%';
-    document.getElementById('progFill').style.width=pct+'%';
+async function genNext(){
+  const i=S.genIndex;
+  if(i>=S.scenes.length || S.genStopped){
+    showResults();
+    return;
   }
+  const total=S.scenes.length;
+  document.getElementById('s3title').textContent='מייצר סצנה '+(i+1)+' מתוך '+total;
+  document.getElementById('s3sub').textContent='פרשת '+S.parasha.h;
+  document.getElementById('s3progTitle').textContent='⚙️ סצנה '+(i+1)+' מתוך '+total;
+  document.getElementById('progPct').textContent=Math.round(i/total*100)+'%';
+  document.getElementById('progFill').style.width=Math.round(i/total*100)+'%';
+  document.getElementById('s3preview').style.display='none';
+  document.getElementById('s3generating').style.display='block';
+  document.getElementById('s3genMsg').textContent='שולח סצנה '+(i+1)+' ל-Veo...';
+
+  const t0=Date.now();
+  try{
+    document.getElementById('s3genMsg').textContent='ממתין לVeo... (עד 3 דקות)';
+    const url=await genClip(S.scenes[i],i);
+    S.clips.push({url,scene:S.scenes[i],i});
+
+    // הצג את הסרטון
+    document.getElementById('s3generating').style.display='none';
+    document.getElementById('s3preview').style.display='block';
+    document.getElementById('s3previewTitle').textContent='✅ סצנה '+(i+1)+' — '+Math.round((Date.now()-t0)/1000)+'שנ׳';
+    document.getElementById('s3desc').textContent=S.scenes[i].hebrewDesc||'';
+    const vid=document.getElementById('s3video');
+    vid.src=url;
+    vid.load();
+    setTimeout(()=>vid.play().catch(()=>{}),300);
+
+    // עדכן רשימת מוכנות
+    addDoneItem(i, url);
+
+    // עדכן כפתור המשך
+    const isLast=(i+1>=total);
+    document.getElementById('btnContinue').textContent=isLast?'סיים ←':'המשך לסצנה '+(i+2)+' ←';
+    document.getElementById('btnStopGen').style.display=isLast?'none':'inline-flex';
+
+  }catch(e){
+    S.clips.push({url:null,error:e.message,scene:S.scenes[i],i});
+    document.getElementById('s3generating').style.display='none';
+    document.getElementById('s3preview').style.display='block';
+    document.getElementById('s3previewTitle').textContent='❌ סצנה '+(i+1)+' — שגיאה';
+    document.getElementById('s3desc').textContent=e.message;
+    document.getElementById('s3video').style.display='none';
+    document.getElementById('btnContinue').textContent='המשך לסצנה הבאה ←';
+  }
+}
+
+function continueGen(){
+  document.getElementById('s3video').style.display='block';
+  const isLast=(S.genIndex+1>=S.scenes.length);
+  if(isLast){
+    showResults();
+    return;
+  }
+  S.genIndex++;
+  genNext();
+}
+
+function stopGen(){
+  S.genStopped=true;
   showResults();
+}
+
+function addDoneItem(i, url){
+  const list=document.getElementById('s3doneItems');
+  document.getElementById('s3doneList').style.display='block';
+  const div=document.createElement('div');
+  div.style.cssText='display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);';
+  div.innerHTML=`<span style="color:var(--green);font-weight:700;">✓ סצנה ${i+1}</span>
+    <span style="flex:1;font-size:.8rem;color:var(--muted);">${S.scenes[i].hebrewDesc||''}</span>
+    <video src="${url}" style="width:80px;height:45px;border-radius:5px;object-fit:cover;" muted playsinline onclick="this.paused?this.play():this.pause()"></video>`;
+  list.appendChild(div);
 }
 
 function setSP(i,cls,tm){
