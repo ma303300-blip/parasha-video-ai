@@ -1355,9 +1355,13 @@ function addDoneItem(i, url){
 }
 
 function setSP(i,cls,tm){
-  document.getElementById('sp'+i).className='sp-row '+cls;
-  document.getElementById('spI'+i).textContent=cls==='done'?'✓':cls==='err'?'✕':'⟳';
-  document.getElementById('spTm'+i).textContent=tm;
+  const spEl = document.getElementById('sp'+i);
+  if(!spEl) return;
+  spEl.className='sp-row '+cls;
+  const spI = document.getElementById('spI'+i);
+  if(spI) spI.textContent=cls==='done'?'✓':cls==='err'?'✕':'⟳';
+  const spTm = document.getElementById('spTm'+i);
+  if(spTm) spTm.textContent=tm;
   const retryBtn = document.getElementById('spRetry'+i);
   if(cls==='err'){
     if(!retryBtn){
@@ -1403,7 +1407,8 @@ async function genClip(sc,idx){
   if(!op.name) throw new Error('לא התקבל operation name');
   for(let a=0;a<72;a++){
     await sleep(5000);
-    document.getElementById('spTm'+idx).textContent=(a+1)*5+'שנ׳...';
+    const spTmEl = document.getElementById('spTm'+idx); if(spTmEl) spTmEl.textContent=(a+1)*5+'שנ׳...';
+    const s3gMsg = document.getElementById('s3genMsg'); if(s3gMsg) s3gMsg.textContent='ממתין לVeo... '+(a+1)*5+' שנ׳';
     try{
       const pr=await fetch('https://generativelanguage.googleapis.com/v1beta/'+op.name+'?key='+S.apiKey);
       const pd=await pr.json();
