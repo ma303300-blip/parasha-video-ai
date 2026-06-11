@@ -315,14 +315,6 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
   </div>
 
   <div class="card">
-    <div class="ch">🎬 מצב יצירה</div>
-    <div style="display:flex;gap:10px;">
-      <button id="btnMode1" class="btn btn-ghost" onclick="setMode(1)" style="flex:1;padding:14px;font-size:.9rem;border:2px solid var(--border);">🧪 בדיקה<br><span style="font-size:.72rem;color:var(--muted);">סצנה 1 בלבד</span></button>
-      <button id="btnMode25" class="btn btn-ghost active" onclick="setMode(25)" style="flex:1;padding:14px;font-size:.9rem;border:2px solid var(--gold);background:var(--gdim);">🎬 סרטון מלא<br><span style="font-size:.72rem;color:var(--muted);">25 סצנות</span></button>
-    </div>
-  </div>
-
-  <div class="card">
     <div class="ch">🤖 מודל Veo לייצור</div>
     <div class="mrow">
       <div class="mopt active" id="mFast" onclick="setModel('fast')"><div class="mn">Veo 3 Fast</div><div class="md">$0.15/שנ׳</div></div>
@@ -692,7 +684,7 @@ function scorePrompt(p){
 // STATE
 // ════════════════════════════════════════
 const S = {
-  apiKey:'', ttsKey:'', durSec:200, model:'fast', numScenes:25,
+  apiKey:'', ttsKey:'', durSec:200, model:'fast',
   parasha:null, parashaText:'', scenes:[], clips:[]
 };
 
@@ -767,19 +759,11 @@ function saveKey(){
   if(!k){toast('הכנס מפתח'); return;}
   localStorage.setItem('veo_key',k); S.apiKey=k; toast('✓ נשמר');
 }
-function setMode(n){
-  S.numScenes = n;
-  document.getElementById('btnMode1').style.border = n===1 ? '2px solid var(--gold)' : '2px solid var(--border)';
-  document.getElementById('btnMode1').style.background = n===1 ? 'var(--gdim)' : '';
-  document.getElementById('btnMode25').style.border = n===25 ? '2px solid var(--gold)' : '2px solid var(--border)';
-  document.getElementById('btnMode25').style.background = n===25 ? 'var(--gdim)' : '';
-}
 function setModel(m){
   S.model=m;
   document.getElementById('mFast').classList.toggle('active',m==='fast');
   document.getElementById('mFull').classList.toggle('active',m==='full');
   calcDur();
-  updateSceneCount(S.numScenes||25);
 }
 function calcDur(){
   const m=parseInt(document.getElementById('durM').value)||0;
@@ -794,8 +778,6 @@ function gotoParasha(){
   const k=document.getElementById('apiKey').value.trim();
   if(k){S.apiKey=k; localStorage.setItem('veo_key',k);}
   if(S.durSec<8){toast('אורך מינימלי: 8 שניות'); return;}
-  // numScenes כבר מוגדר ע"י setMode — ברירת מחדל 25
-  if(!S.numScenes) S.numScenes = 25;
   showScreen(1);
 }
 
@@ -908,7 +890,7 @@ function flatText(arr){
 }
 
 async function buildHebrewScript(){
-  const numScenes = S.numScenes || Math.ceil(S.durSec/8);
+  const numScenes = Math.ceil(S.durSec/8);
 
   const prompt = `אתה תסריטאי קולנועי מוכשר המתמחה בסרטים על התנ"ך.
 
@@ -919,10 +901,10 @@ async function buildHebrewScript(){
 ${S.parashaText}
 ---
 
-המשימה: כתוב תסריט קולנועי ${numScenes === 1 ? 'של סצנה אחת בלבד (8 שניות) — רגע אחד מרכזי ומרשים מהפרשה. קצר וממוקד.' : `מלא ב-${numScenes} סצנות (כל סצנה = 8 שניות).`}
+המשימה: כתוב תסריט קולנועי מלא ב-${numScenes} סצנות (כל סצנה = 8 שניות).
 
 כללים:
-• הסיפור חייב להיות רציף מהסצנה הראשונה עד האחרונה — ${numScenes <= 3 ? 'בחר רגע מרכזי אחד מהפרשה ותאר אותו בעומק' : 'עלילה עם התחלה, אמצע וסוף'}
+• הסיפור חייב להיות רציף מהסצנה הראשונה עד האחרונה — עלילה עם התחלה, אמצע וסוף
 • כל סצנה ממשיכה ישירות מהקודמת — ללא חזרות, ללא הסברים מחדש
 • כתוב כמו תסריטאי הוליוודי — דרמה, רגש, מתח
 • כאשר יש המוני בני ישראל — תאר אלפי אנשים
@@ -937,6 +919,7 @@ ${S.parashaText}
 • משפט דיאלוג = עד 8 מילים בלבד
 • לא כל סצנה חייבת דיאלוג — סצנות ויזואליות שקטות הן חלק מהסיפור
 • הדיאלוג צריך לקדם את הסיפור, לא לחזור על מה שרואים
+• כלל ברזל לניקוד: כל דיאלוג חייב להיות כתוב עם ניקוד מלא — כל אות עם הסימן המתאים (פָּתַח, קָמַץ, חִירִיק, שְׁוָא, דָּגֵשׁ וכו׳). הניקוד הוא חובה כדי שVeo יבטא את העברית כמו בן אדם אמיתי. לדוגמה: "לֶךְ־לְךָ֛" ולא "לך לך".
 
 כלל ברזל למוזיקה:
 • המוזיקה בונה arc לאורך הסרטון כולו — לא מתאפסת בכל סצנה
@@ -1008,7 +991,7 @@ function showScriptAgain(){
 }
 
 async function buildPromptsFromScript(){
-  const numClips = S.numScenes || Math.ceil(S.durSec/8);
+  const numClips = Math.ceil(S.durSec/8);
 
   // Show progress
   setMsg('Gemini בונה ' + numClips + ' פרומפטים... (זה לוקח כ-30 שניות)');
@@ -1038,7 +1021,7 @@ IMPORTANT: Return ONLY a JSON array. No markdown. No explanation. Start with { i
 [STYLE]: High-budget 3D animated film, photorealistic CGI 4K. Prince of Egypt meets Pixar. FULLY RENDERED 3D ANIMATION. 8 seconds. FAMILY FRIENDLY — suitable for all ages including young children. NO text overlays. NO subtitles. NO on-screen writing. Clean screen only. AUDIO: maintain FULL VOLUME throughout the entire 8 seconds — NO fade in, NO fade out. Consistent audio level from first frame to last frame. The editor will handle transitions between clips.
 [CHARACTERS]: Full detail — name, age, face, beard, hair, exact clothing. Consistent across scenes.
 [ACTION]: Precise movements and micro-expressions.
-[DIALOGUE]: If the Hebrew script includes dialogue for this scene — ONE character speaks ONE short Hebrew sentence (max 6 words). CRITICAL: Write the dialogue in HEBREW SCRIPT ONLY (אותיות עבריות) — NEVER transliterate into Latin letters. Example: write "לֶךְ לְךָ" NOT "lech lecha". VOICE MUST SOUND NATURAL AND HUMAN — not robotic, not flat, not mechanical. Natural breathing, natural pauses between words, natural emotion in every syllable. Speak like a real person in a real moment — not like a narrator reading a text. SPEAK IN NATURAL MODERN HEBREW — natural Israeli Hebrew pronunciation, natural stress patterns, natural rhythm as spoken in everyday life — not theatrical, not archaic, not exaggerated. VOICE TONE must match the scene emotion exactly — choose ONE:
+[DIALOGUE]: If the Hebrew script includes dialogue for this scene — ONE character speaks ONE short Hebrew sentence (max 6 words). CRITICAL: Write the dialogue in HEBREW SCRIPT WITH FULL NIKUD (ניקוד מלא) — every single letter must have its vowel marks (פָּתַח, קָמַץ, חִירִיק, צֵרֵי, שׁוּרוּק, חוֹלָם, שְׁוָא, דָּגֵשׁ etc.). NEVER transliterate into Latin letters. Example: write "לֶךְ־לְךָ֛" NOT "lech lecha". The nikud is MANDATORY — it tells Veo exactly how to pronounce every syllable like a natural Israeli human speaker. VOICE MUST SOUND NATURAL AND HUMAN — not robotic, not flat, not mechanical. Natural breathing, natural pauses between words, natural emotion in every syllable. Speak like a real person in a real moment — not like a narrator reading a text. SPEAK IN NATURAL MODERN HEBREW — natural Israeli Hebrew pronunciation, natural stress patterns, natural rhythm as spoken in everyday life — not theatrical, not archaic, not exaggerated. VOICE TONE must match the scene emotion exactly — choose ONE:
 • AWE/DIVINE moment → hushed whisper, trembling with reverence, barely audible
 • COMMAND/LEADERSHIP (Moses, God, king) → powerful, authoritative, resonant bass voice, slow and deliberate
 • GRIEF/MOURNING → broken, cracking voice, barely holding together, wet with tears
@@ -1296,11 +1279,11 @@ function goGenerate(){
 
 async function genNext(){
   const i=S.genIndex;
-  if(i>=(S.numScenes||S.scenes.length) || S.genStopped){
+  if(i>=S.scenes.length || S.genStopped){
     showResults();
     return;
   }
-  const total=Math.min(S.numScenes||S.scenes.length, S.scenes.length);
+  const total=S.scenes.length;
   document.getElementById('s3title').textContent='מייצר סצנה '+(i+1)+' מתוך '+total;
   document.getElementById('s3sub').textContent='פרשת '+S.parasha.h;
   document.getElementById('s3progTitle').textContent='⚙️ סצנה '+(i+1)+' מתוך '+total;
@@ -1347,7 +1330,7 @@ async function genNext(){
 
 function continueGen(){
   document.getElementById('s3video').style.display='block';
-  const isLast=(S.genIndex+1>=total);
+  const isLast=(S.genIndex+1>=S.scenes.length);
   if(isLast){
     showResults();
     return;
@@ -1415,45 +1398,35 @@ async function retryClip(i){
 }
 
 async function genClip(sc,idx){
+  const BASE='https://generativelanguage.googleapis.com/v1beta';
   // שלב 1: שלח בקשה ל-Veo
-  const BASE = 'https://generativelanguage.googleapis.com/v1beta';
-  const resp = await fetch(
+  const resp=await fetch(
     BASE+'/models/'+MODEL_ID[S.model]+':predictLongRunning',
-    {
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-goog-api-key':S.apiKey},
-      body:JSON.stringify({instances:[{prompt:sc.prompt}],parameters:{aspectRatio:'16:9',durationSeconds:8,sampleCount:1}})
-    }
+    {method:'POST',
+     headers:{'Content-Type':'application/json','x-goog-api-key':S.apiKey},
+     body:JSON.stringify({instances:[{prompt:sc.prompt}],parameters:{aspectRatio:'16:9',durationSeconds:8,sampleCount:1}})}
   );
-  if(!resp.ok){const e=await resp.json(); throw new Error(e.error?.message||'שגיאת שליחה '+resp.status);}
-  const op = await resp.json();
+  if(!resp.ok){const e=await resp.json();throw new Error(e.error?.message||'שגיאת שליחה '+resp.status);}
+  const op=await resp.json();
   if(!op.name) throw new Error('לא התקבל operation name');
-
-  // שלב 2: polling — בדיוק כמו בתיעוד הרשמי
-  // BASE_URL/${operation_name} — operation_name הוא נתיב יחסי כמו "models/veo-.../operations/xxx"
-  const pollUrl = BASE+'/'+op.name;
-
+  // שלב 2: polling לפי התיעוד הרשמי — BASE/op.name
+  const pollUrl=BASE+'/'+op.name;
   for(let a=0;a<120;a++){
     await sleep(5000);
-    const el=document.getElementById('s3genMsg');
-    if(el) el.textContent='ממתין לVeo... '+(a+1)*5+' שנ׳';
-
-    const pr = await fetch(pollUrl+'?key='+S.apiKey);
-    if(!pr.ok) continue; // שגיאת רשת זמנית — נסה שוב
-    const pd = await pr.json();
-
-    if(pd.done === true){
+    const spTmEl=document.getElementById('spTm'+idx); if(spTmEl) spTmEl.textContent=(a+1)*5+'שנ׳...';
+    const s3gMsg=document.getElementById('s3genMsg'); if(s3gMsg) s3gMsg.textContent='ממתין לVeo... '+(a+1)*5+' שנ׳';
+    const pr=await fetch(pollUrl+'?key='+S.apiKey);
+    if(!pr.ok) continue;
+    const pd=await pr.json();
+    if(pd.done===true){
       if(pd.error) throw new Error(pd.error.message||'שגיאת יצירה');
-      // מבנה תשובה רשמי: .response.generateVideoResponse.generatedSamples[0].video.uri
-      const uri = pd.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.uri;
-      if(!uri) throw new Error('הוידאו הושלם אך לא התקבל URI');
-      // הורד את הוידאו מה-URI עם API key
-      const vr = await fetch(uri, {headers:{'x-goog-api-key':S.apiKey}});
+      const uri=pd.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.uri;
+      if(!uri) throw new Error('הושלם אך לא התקבל URI');
+      const vr=await fetch(uri,{headers:{'x-goog-api-key':S.apiKey}});
       if(!vr.ok) throw new Error('שגיאה בהורדת וידאו: '+vr.status);
-      const blob = await vr.blob();
+      const blob=await vr.blob();
       return URL.createObjectURL(blob);
     }
-    // pd.done === false או undefined — ממשיכים לחכות
   }
   throw new Error('פסק זמן — Veo לא הגיב תוך 10 דקות');
 }
@@ -1464,7 +1437,7 @@ async function genClip(sc,idx){
 function buildResCard(c,i){
   if(c.error)
     return `<div class="res-card" id="resCard${i}"><div class="res-thumb" style="color:var(--red)">❌</div><div class="res-foot"><span class="res-lbl">סצנה ${i+1} — שגיאה</span><button class="btn btn-ghost" style="font-size:.7rem;padding:4px 9px;margin-top:6px;" onclick="retryClip(${i})">🔄 נסה שוב</button></div></div>`;
-  return `<div class="res-card" id="resCard${i}"><div class="res-thumb"><video src="${c.url}" controls muted loop playsinline></video></div><div class="res-foot"><span class="res-lbl">סצנה ${i+1}</span><span class="res-dur">8שנ׳</span></div></div>`;
+  return `<div class="res-card" id="resCard${i}"><div class="res-thumb"><video src="${c.url}" controls muted loop playsinline></video></div><div class="res-foot"><span class="res-lbl">סצנה ${i+1}</span><span class="res-dur">8שנ׳</span><a href="${c.url}" download="${'סצנה_'+(i+1)+'.mp4'}" class="btn btn-ghost" style="font-size:.7rem;padding:4px 9px;">⬇️ הורד</a></div></div>`;
 }
 
 function showResults(){
