@@ -1415,41 +1415,47 @@ async function retryClip(i){
 }
 
 async function genClip(sc,idx){
-  const resp=await fetch(
-    'https://generativelanguage.googleapis.com/v1beta/models/'+MODEL_ID[S.model]+':predictLongRunning?key='+S.apiKey,
-    {method:'POST',headers:{'Content-Type':'application/json'},
-     body:JSON.stringify({instances:[{prompt:sc.prompt}],parameters:{aspectRatio:'16:9',durationSeconds:8,sampleCount:1}})}
+  // שלב 1: שלח בקשה ל-Veo
+  const BASE = 'https://generativelanguage.googleapis.com/v1beta';
+  const resp = await fetch(
+    BASE+'/models/'+MODEL_ID[S.model]+':predictLongRunning',
+    {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-goog-api-key':S.apiKey},
+      body:JSON.stringify({instances:[{prompt:sc.prompt}],parameters:{aspectRatio:'16:9',durationSeconds:8,sampleCount:1}})
+    }
   );
-  if(!resp.ok){const e=await resp.json();throw new Error(e.error?.message||'שגיאת שליחה');}
-  const op=await resp.json();
+  if(!resp.ok){const e=await resp.json(); throw new Error(e.error?.message||'שגיאת שליחה '+resp.status);}
+  const op = await resp.json();
   if(!op.name) throw new Error('לא התקבל operation name');
-  for(let a=0;a<72;a++){
+
+  // שלב 2: polling — בדיוק כמו בתיעוד הרשמי
+  // BASE_URL/${operation_name} — operation_name הוא נתיב יחסי כמו "models/veo-.../operations/xxx"
+  const pollUrl = BASE+'/'+op.name;
+
+  for(let a=0;a<120;a++){
     await sleep(5000);
-    const spTmEl = document.getElementById('spTm'+idx); if(spTmEl) spTmEl.textContent=(a+1)*5+'שנ׳...';
-    const s3gMsg = document.getElementById('s3genMsg'); if(s3gMsg) s3gMsg.textContent='ממתין לVeo... '+(a+1)*5+' שנ׳';
-    try{
-      const pr=await fetch('https://generativelanguage.googleapis.com/v1beta/'+op.name+'?key='+S.apiKey);
-      const pd=await pr.json();
-      if(pd.done){
-        if(pd.error) throw new Error(pd.error.message||'שגיאת יצירה');
-        // מבנה התשובה הרשמי: response.generateVideoResponse.generatedSamples[0].video.uri
-        const uri = pd.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.uri;
-        const bytes = pd.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.videoBytes ||
-                      pd.response?.predictions?.[0]?.bytesBase64Encoded;
-        if(uri){
-          // הורד את הוידאו מה-URI
-          const vr = await fetch(uri+'?key='+S.apiKey);
-          if(!vr.ok) throw new Error('שגיאה בהורדת וידאו: '+vr.status);
-          const blob = await vr.blob();
-          return URL.createObjectURL(blob);
-        } else if(bytes){
-          return 'data:video/mp4;base64,'+bytes;
-        }
-        throw new Error('לא התקבל וידאו');
-      }
-    }catch(e){if(e.message!=='לא התקבל וידאו') continue; else throw e;}
+    const el=document.getElementById('s3genMsg');
+    if(el) el.textContent='ממתין לVeo... '+(a+1)*5+' שנ׳';
+
+    const pr = await fetch(pollUrl+'?key='+S.apiKey);
+    if(!pr.ok) continue; // שגיאת רשת זמנית — נסה שוב
+    const pd = await pr.json();
+
+    if(pd.done === true){
+      if(pd.error) throw new Error(pd.error.message||'שגיאת יצירה');
+      // מבנה תשובה רשמי: .response.generateVideoResponse.generatedSamples[0].video.uri
+      const uri = pd.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.uri;
+      if(!uri) throw new Error('הוידאו הושלם אך לא התקבל URI');
+      // הורד את הוידאו מה-URI עם API key
+      const vr = await fetch(uri, {headers:{'x-goog-api-key':S.apiKey}});
+      if(!vr.ok) throw new Error('שגיאה בהורדת וידאו: '+vr.status);
+      const blob = await vr.blob();
+      return URL.createObjectURL(blob);
+    }
+    // pd.done === false או undefined — ממשיכים לחכות
   }
-  throw new Error('פסק זמן');
+  throw new Error('פסק זמן — Veo לא הגיב תוך 10 דקות');
 }
 
 // ════════════════════════════════════════
