@@ -1978,7 +1978,7 @@ function renderNarBlocks(blocks, clips){
     const text = blocks[i] || '';
     const wc = countWords(text);
     const over = wc > MAX_WORDS_PER_BLOCK;
-    const start = i*10, end = (i+1)*10;
+    const start = i*8, end = (i+1)*8;
     html += '<div style="margin-bottom:8px;">'+
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">'+
         '<span style="font-size:.7rem;color:var(--gold);font-weight:600;">'+(i+1)+'. ['+start+'–'+end+' שניות]</span>'+
@@ -2009,7 +2009,7 @@ function syncNarText(){
   let full = '';
   for(let i=0;i<clips;i++){
     const el = document.getElementById('narBlock_'+i);
-    if(el && el.value.trim()) full += el.value.trim() + ' ';
+    if(el && el.value.trim()) full += '[BLOCK_'+(i+1)+'] ' + el.value.trim() + '\n';
   }
   document.getElementById('narText').value = full.trim();
 }
@@ -2340,7 +2340,7 @@ async function generateVoiceAct(){
       for(let i=0;i<clips;i++){
         const sc = scenes[i];
         const title = sc ? sc.title || ('סצנה '+(i+1)) : ('סצנה '+(i+1));
-        scenesDesc += (i+1)+'. ['+(i*10)+'–'+((i+1)*10)+' שניות] '+title+'\n';
+        scenesDesc += (i+1)+'. ['+(i*8)+'–'+((i+1)*8)+' שניות] '+title+'\n';
       }
     }
 
