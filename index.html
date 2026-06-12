@@ -2618,8 +2618,8 @@ async function generateManualTTS(){
     const sr = audioCtx.sampleRate;
 
     for(let i = 0; i < allLines.length; i++){
-      const { raw } = allLines[i];
-      btn.textContent = '⏳ ' + (i+1) + '/' + allLines.length + '...';
+      const { raw, blockIdx } = allLines[i];
+      btn.textContent = '⏳ בלוק ' + (blockIdx+1) + '/' + clips + '...';
 
       // הפסקה
       if(raw === '[pause]'){
