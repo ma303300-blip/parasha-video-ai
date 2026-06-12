@@ -2526,6 +2526,7 @@ const MANUAL_TAG_LABELS = [
   { key:'awe',      label:'פלא' },
   { key:'calm',     label:'שקט' },
   { key:'natural',  label:'טבעי' },
+  { key:'pause',    label:'⏸ הפסקה' },
 ];
 
 function openManualNar(){
@@ -2592,112 +2593,123 @@ async function generateManualTTS(){
   const clips = parseInt(document.getElementById('narClips').value) || 1;
   const voice = document.getElementById('narVoice').value;
 
-  // אסוף את כל השורות מכל הבלוקים
-  const allLines = [];
+  // אסוף בלוקים — כל קופסא = מערך שורות
+  const blocks = [];
   for(let i = 0; i < clips; i++){
     const ta = document.getElementById('manualBlock_' + i);
     if(!ta || !ta.value.trim()) continue;
-    const blockLines = ta.value.split('\n').filter(l => l.trim());
-    for(const line of blockLines){
-      allLines.push({ blockIdx: i, raw: line.trim() });
-    }
-    // הפרדה בין בלוקים — שתיקה קצרה
-    allLines.push({ blockIdx: i, raw: '[pause]' });
+    const lines = ta.value.split('\n').filter(l => l.trim());
+    if(lines.length) blocks.push(lines);
   }
 
-  if(!allLines.length){ toast('אין טקסט לקריינות'); return; }
+  if(!blocks.length){ toast('אין טקסט לקריינות'); return; }
+  const N = blocks.length;
 
   const btn = document.getElementById('btnTTS');
   btn.disabled = true;
   btn.textContent = '⏳ יוצר קול...';
 
+  const CLIP_SEC = 8;
+  const OVERLAP = 0.2;
+  const BLOCK_START = CLIP_SEC - OVERLAP; // 7.8 שניות
+
   try{
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const audioBuffers = [];
-    // תיקון 1: sampleRate תמיד מה-audioCtx ולא מהבאפר הראשון
-    const sr = audioCtx.sampleRate;
+    // decoded[i] = אודיו מחובר של כל השורות בבלוק i
+    const decoded = [];
 
-    for(let i = 0; i < allLines.length; i++){
-      const { raw, blockIdx } = allLines[i];
-      btn.textContent = '⏳ בלוק ' + (blockIdx+1) + '/' + clips + '...';
+    for(let i = 0; i < N; i++){
+      btn.textContent = '⏳ בלוק ' + (i+1) + '/' + N + '...';
+      const lines = blocks[i];
 
-      // הפסקה
-      if(raw === '[pause]'){
-        const silenceLen = Math.ceil(sr * 0.4);
-        audioBuffers.push(audioCtx.createBuffer(1, silenceLen, sr));
-        continue;
+      // שלב א — TTS לכל שורה בנפרד לפי הנימה שלה
+      const lineBuffers = [];
+      for(const raw of lines){
+        // הפסקה — 0.5 שניות שקט
+        if(raw.match(/^\[pause\]\s*$/i)){
+          const silenceLen = Math.ceil(audioCtx.sampleRate * 0.5);
+          lineBuffers.push(audioCtx.createBuffer(1, silenceLen, audioCtx.sampleRate));
+          continue;
+        }
+        const tagMatch = raw.match(/^\[([a-z]+)\]\s*(.*)/i);
+        const tagKey = tagMatch ? tagMatch[1].toLowerCase() : 'natural';
+        const text = tagMatch ? tagMatch[2].trim() : raw;
+        if(!text) continue;
+
+        const params = MANUAL_TAG_PARAMS[tagKey] || MANUAL_TAG_PARAMS['natural'];
+        const clean = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+        if(voice.startsWith('gemini-')){
+          const voiceName = voice.replace('gemini-','');
+          const toneDesc = tagKey==='dramatic'?'dramatic and intense':tagKey==='slow'?'very slow and deliberate':tagKey==='fast'?'fast and energetic':tagKey==='sad'?'sad and sorrowful':tagKey==='happy'?'joyful and upbeat':tagKey==='whisper'?'in a low whisper':tagKey==='awe'?'with deep awe and reverence':tagKey==='calm'?'calm and peaceful':'natural and conversational';
+          const stylePrompt = 'You are a Hebrew narrator. Read the following text '+toneDesc+'. Never read in English.';
+          const resp = await fetch(
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent',
+            {method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':S.apiKey},
+             body:JSON.stringify({contents:[{parts:[{text:stylePrompt+'\n\n'+text}]}],
+               generationConfig:{responseModalities:['AUDIO'],speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName}}}}})}
+          );
+          if(!resp.ok){const e=await resp.json();throw new Error(e.error?.message||'שגיאת Gemini TTS');}
+          const data=await resp.json();
+          const b64=data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+          if(!b64) throw new Error('לא התקבל אודיו בבלוק '+(i+1));
+          const pcm=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+          lineBuffers.push(await audioCtx.decodeAudioData(pcmToWav(pcm,24000,1,16).slice(0)));
+        } else {
+          const ssml='<speak><prosody rate="'+(params.rate*100).toFixed(0)+'%" pitch="'+params.pitch+'st">'+clean+'</prosody><break time="'+params.breakMs+'ms"/></speak>';
+          const resp=await fetch('https://texttospeech.googleapis.com/v1/text:synthesize?key='+(S.ttsKey||S.apiKey),
+            {method:'POST',headers:{'Content-Type':'application/json'},
+             body:JSON.stringify({input:{ssml},voice:{languageCode:'he-IL',name:voice},audioConfig:{audioEncoding:'MP3'}})});
+          if(!resp.ok){const e=await resp.json();throw new Error(e.error?.message||'שגיאת TTS');}
+          const data=await resp.json();
+          const bytes=atob(data.audioContent);
+          const arr=new Uint8Array(bytes.length);
+          for(let j=0;j<bytes.length;j++) arr[j]=bytes.charCodeAt(j);
+          lineBuffers.push(await audioCtx.decodeAudioData(arr.buffer));
+        }
       }
 
-      // פרסר tag + טקסט
-      const tagMatch = raw.match(/^\[([a-z]+)\]\s*(.*)/i);
-      const tagKey = tagMatch ? tagMatch[1].toLowerCase() : 'natural';
-      const text = tagMatch ? tagMatch[2].trim() : raw;
-      if(!text) continue;
+      if(!lineBuffers.length) continue;
 
-      const params = MANUAL_TAG_PARAMS[tagKey] || MANUAL_TAG_PARAMS['natural'];
-      const clean = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-
-      // תיקון 2: תמיכה מלאה בכל הקולות — Gemini וגם WaveNet
-      if(voice.startsWith('gemini-')){
-        const voiceName = voice.replace('gemini-','');
-        // מבנה הפרומפט לפי הנימה שנבחרה
-        const toneDesc = tagKey === 'dramatic' ? 'dramatic and intense' :
-                         tagKey === 'slow'     ? 'very slow and deliberate' :
-                         tagKey === 'fast'     ? 'fast and energetic' :
-                         tagKey === 'sad'      ? 'sad and sorrowful' :
-                         tagKey === 'happy'    ? 'joyful and upbeat' :
-                         tagKey === 'whisper'  ? 'in a low whisper' :
-                         tagKey === 'awe'      ? 'with deep awe and reverence' :
-                         tagKey === 'calm'     ? 'calm and peaceful' : 'natural and conversational';
-        const stylePrompt = `You are a Hebrew narrator. Read the following text ${toneDesc}. Never read in English.`;
-        const resp = await fetch(
-          'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent',
-          { method:'POST', headers:{'Content-Type':'application/json','x-goog-api-key':S.apiKey},
-            body:JSON.stringify({contents:[{parts:[{text:stylePrompt+'\n\n'+text}]}],
-              generationConfig:{responseModalities:['AUDIO'],speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName}}}}})}
-        );
-        if(!resp.ok){ const e = await resp.json(); throw new Error(e.error?.message || 'שגיאת Gemini TTS'); }
-        const data = await resp.json();
-        const b64 = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-        if(!b64) throw new Error('לא התקבל אודיו משורה '+(i+1));
-        const pcm = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-        audioBuffers.push(await audioCtx.decodeAudioData(pcmToWav(pcm, 24000, 1, 16).slice(0)));
-      } else {
-        // WaveNet — עם rate ו-pitch מהטבלה
-        const ssml = `<speak><prosody rate="${(params.rate*100).toFixed(0)}%" pitch="${params.pitch}st">${clean}</prosody><break time="${params.breakMs}ms"/></speak>`;
-        const resp = await fetch(
-          'https://texttospeech.googleapis.com/v1/text:synthesize?key=' + (S.ttsKey || S.apiKey),
-          { method:'POST', headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({ input:{ssml}, voice:{languageCode:'he-IL', name:voice}, audioConfig:{audioEncoding:'MP3'} }) }
-        );
-        if(!resp.ok){ const e = await resp.json(); throw new Error(e.error?.message || 'שגיאת TTS'); }
-        const data = await resp.json();
-        const bytes = atob(data.audioContent);
-        const arr = new Uint8Array(bytes.length);
-        for(let j = 0; j < bytes.length; j++) arr[j] = bytes.charCodeAt(j);
-        audioBuffers.push(await audioCtx.decodeAudioData(arr.buffer));
-      }
+      // שלב ב — חבר את כל שורות הבלוק לאחד
+      const SR = lineBuffers[0].sampleRate;
+      const blockTotalLen = lineBuffers.reduce((s,b)=>s+b.length,0);
+      const blockBuf = audioCtx.createBuffer(1, blockTotalLen, SR);
+      const blockCh = blockBuf.getChannelData(0);
+      let off = 0;
+      for(const b of lineBuffers){ blockCh.set(b.getChannelData(0), off); off += b.length; }
+      decoded.push(blockBuf);
     }
 
-    // חבר את כל הבאפרים לאחד
-    btn.textContent = '⏳ מחבר...';
-    const totalLen = audioBuffers.reduce((s, b) => s + b.length, 0);
-    const merged = audioCtx.createBuffer(1, totalLen, sr);
-    const ch = merged.getChannelData(0);
-    let offset = 0;
-    for(const b of audioBuffers){
-      ch.set(b.getChannelData(0), offset);
-      offset += b.length;
-    }
-    audioCtx.close();
+    if(!decoded.length) throw new Error('לא התקבל אודיו');
 
-    narBlob = audioBufferToWav(merged);
+    // שלב ג — הרכב buffer בדיוק N×8 שניות עם OVERLAP 0.2 — בדיוק כמו generateTTS
+    btn.textContent = '⏳ מרכיב...';
+    const SR = decoded[0].sampleRate;
+    const TOTAL_SAMPLES = Math.round(N * CLIP_SEC * SR);
+    const out = new Float32Array(TOTAL_SAMPLES);
+
+    for(let i=0;i<decoded.length;i++){
+      const startSample = Math.round(i * BLOCK_START * SR);
+      const maxSamples = Math.round(BLOCK_START * SR);
+      const src = decoded[i].getChannelData(0);
+      const len = Math.min(src.length, maxSamples, TOTAL_SAMPLES - startSample);
+      for(let j=0;j<len;j++) out[startSample+j] += src[j];
+    }
+
+    // שלב ד — המר ל-WAV
+    const pcm16 = new Int16Array(TOTAL_SAMPLES);
+    for(let i=0;i<TOTAL_SAMPLES;i++)
+      pcm16[i] = Math.max(-32768, Math.min(32767, Math.round(out[i]*32767)));
+    narBlob = new Blob([pcmToWav(new Uint8Array(pcm16.buffer), SR, 1, 16)], {type:'audio/wav'});
+
     const url = URL.createObjectURL(narBlob);
     const audio = document.getElementById('narAudio');
     audio.src = url;
     audio.style.display = 'block';
     document.getElementById('narStep3').style.display = 'block';
-    toast('✅ קריינות עצמאית מוכנה — האזן לפני מיזוג');
+    toast('✅ קריינות עצמאית — '+(N*CLIP_SEC)+' שנ׳ בדיוק ('+N+' בלוקים)');
+    audioCtx.close();
 
   }catch(e){
     toast('שגיאת TTS: ' + e.message);
