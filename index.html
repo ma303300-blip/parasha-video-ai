@@ -540,6 +540,10 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
       <div class="row-c" style="justify-content:flex-start;margin-bottom:10px;gap:8px;">
         <button class="btn btn-ghost" onclick="generateNarText()" id="btnGenNar">✨ קריינות עם Gemini</button>
         <button class="btn btn-ghost" onclick="generateVoiceAct()" id="btnGenVoice">🎭 דיבוב דמויות</button>
+        <button class="btn btn-ghost" onclick="openManualNar()" id="btnManualNar">✍️ עריכה עצמאית</button>
+      </div>
+      <div id="manualNarWrap" style="display:none;margin-bottom:10px;">
+        <div id="manualNarBlocks"></div>
       </div>
       <div id="narBlocksWrap"></div>
       <textarea id="narText" style="width:100%;min-height:180px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Heebo',sans-serif;font-size:.84rem;line-height:1.8;padding:12px;outline:none;resize:vertical;direction:rtl;display:none;" placeholder="הטקסט יופיע כאן — ניתן לערוך לפני יצירת הקול..."></textarea>
@@ -2495,6 +2499,216 @@ function downloadFinal(){
   a.href = URL.createObjectURL(finalBlob);
   a.download = (S.parasha?.h||'video') + '_עם_קריינות' + ext;
   a.click();
+}
+
+// ════════════════════════════════════════
+// MANUAL NARRATION — עריכה עצמאית
+// ════════════════════════════════════════
+const MANUAL_TAG_PARAMS = {
+  'dramatic': { rate:0.85, pitch:-2.0, breakMs:700 },
+  'slow':     { rate:0.70, pitch:-1.0, breakMs:800 },
+  'fast':     { rate:1.20, pitch: 1.0, breakMs:200 },
+  'sad':      { rate:0.75, pitch:-3.0, breakMs:600 },
+  'happy':    { rate:1.10, pitch: 2.0, breakMs:300 },
+  'whisper':  { rate:0.80, pitch:-4.0, breakMs:500 },
+  'awe':      { rate:0.65, pitch:-1.0, breakMs:900 },
+  'calm':     { rate:0.90, pitch: 0.0, breakMs:400 },
+  'natural':  { rate:1.00, pitch: 0.0, breakMs:400 },
+};
+
+const MANUAL_TAG_LABELS = [
+  { key:'dramatic', label:'דרמה' },
+  { key:'slow',     label:'איטי' },
+  { key:'fast',     label:'מהיר' },
+  { key:'sad',      label:'עצוב' },
+  { key:'happy',    label:'שמחה' },
+  { key:'whisper',  label:'לחש' },
+  { key:'awe',      label:'פלא' },
+  { key:'calm',     label:'שקט' },
+  { key:'natural',  label:'טבעי' },
+];
+
+function openManualNar(){
+  const wrap = document.getElementById('manualNarWrap');
+  const clips = parseInt(document.getElementById('narClips').value) || 1;
+  wrap.style.display = 'block';
+  renderManualBlocks(clips);
+
+  // כשמשנים את מספר הקליפים — מרנדר מחדש
+  const narClipsEl = document.getElementById('narClips');
+  narClipsEl.oninput = function(){
+    const n = Math.min(25, Math.max(1, parseInt(this.value)||1));
+    document.getElementById('narDurDisplay').textContent = n * 8;
+    renderManualBlocks(n);
+  };
+
+  // עדכן כפתור TTS לפונקציה המתאימה
+  const ttsBtn = document.getElementById('btnTTS');
+  ttsBtn.textContent = '🎙️ צור קול';
+  ttsBtn.onclick = generateManualTTS;
+  document.getElementById('narStep2').style.display = 'block';
+  document.getElementById('narBlocksWrap').innerHTML = '';
+  document.getElementById('narText').style.display = 'none';
+}
+
+function renderManualBlocks(n){
+  const wrap = document.getElementById('manualNarBlocks');
+  const tagsHtml = MANUAL_TAG_LABELS.map(t =>
+    `<button type="button" class="btn btn-ghost" style="font-size:.68rem;padding:4px 9px;border-radius:6px;" onclick="insertManualTag(this,'${t.key}')">${t.label}</button>`
+  ).join('');
+
+  let html = '';
+  for(let i = 0; i < n; i++){
+    const start = i * 8, end = (i + 1) * 8;
+    html += `
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+        <span style="font-size:.72rem;color:var(--gold);font-weight:600;">${i+1}. [${start}–${end} שניות]</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;">${tagsHtml}</div>
+      <textarea id="manualBlock_${i}"
+        style="width:100%;min-height:64px;background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Heebo',sans-serif;font-size:.84rem;line-height:1.8;padding:9px;outline:none;resize:vertical;direction:rtl;"
+        placeholder="[dramatic] עצור מיד!&#10;[calm] לאן אתה הולך?"></textarea>
+    </div>`;
+  }
+  wrap.innerHTML = html;
+}
+
+function insertManualTag(btn, tagKey){
+  // מצא את ה-textarea של הבלוק הנוכחי (האח הבא אחרי div הכפתורים)
+  const blockDiv = btn.closest('div[style*="margin-bottom:12px"]');
+  const ta = blockDiv ? blockDiv.querySelector('textarea') : null;
+  if(!ta) return;
+
+  const tag = '[' + tagKey + '] ';
+  const pos = ta.selectionStart;
+  const val = ta.value;
+
+  // הכנס בתחילת השורה הנוכחית
+  const lineStart = val.lastIndexOf('\n', pos - 1) + 1;
+  ta.value = val.slice(0, lineStart) + tag + val.slice(lineStart);
+  // הזז קרסור אחרי ה-tag
+  const newPos = lineStart + tag.length;
+  ta.setSelectionRange(newPos, newPos);
+  ta.focus();
+}
+
+async function generateManualTTS(){
+  const clips = parseInt(document.getElementById('narClips').value) || 1;
+  const voice = document.getElementById('narVoice').value;
+
+  // אסוף את כל השורות מכל הבלוקים
+  const allLines = [];
+  for(let i = 0; i < clips; i++){
+    const ta = document.getElementById('manualBlock_' + i);
+    if(!ta || !ta.value.trim()) continue;
+    const blockLines = ta.value.split('\n').filter(l => l.trim());
+    for(const line of blockLines){
+      allLines.push({ blockIdx: i, raw: line.trim() });
+    }
+    // הפרדה בין בלוקים — שתיקה קצרה
+    allLines.push({ blockIdx: i, raw: '[pause]' });
+  }
+
+  if(!allLines.length){ toast('אין טקסט לקריינות'); return; }
+
+  const btn = document.getElementById('btnTTS');
+  btn.disabled = true;
+  btn.textContent = '⏳ יוצר קול...';
+
+  try{
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const audioBuffers = [];
+    // תיקון 1: sampleRate תמיד מה-audioCtx ולא מהבאפר הראשון
+    const sr = audioCtx.sampleRate;
+
+    for(let i = 0; i < allLines.length; i++){
+      const { raw } = allLines[i];
+      btn.textContent = '⏳ ' + (i+1) + '/' + allLines.length + '...';
+
+      // הפסקה
+      if(raw === '[pause]'){
+        const silenceLen = Math.ceil(sr * 0.4);
+        audioBuffers.push(audioCtx.createBuffer(1, silenceLen, sr));
+        continue;
+      }
+
+      // פרסר tag + טקסט
+      const tagMatch = raw.match(/^\[([a-z]+)\]\s*(.*)/i);
+      const tagKey = tagMatch ? tagMatch[1].toLowerCase() : 'natural';
+      const text = tagMatch ? tagMatch[2].trim() : raw;
+      if(!text) continue;
+
+      const params = MANUAL_TAG_PARAMS[tagKey] || MANUAL_TAG_PARAMS['natural'];
+      const clean = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+      // תיקון 2: תמיכה מלאה בכל הקולות — Gemini וגם WaveNet
+      if(voice.startsWith('gemini-')){
+        const voiceName = voice.replace('gemini-','');
+        // מבנה הפרומפט לפי הנימה שנבחרה
+        const toneDesc = tagKey === 'dramatic' ? 'dramatic and intense' :
+                         tagKey === 'slow'     ? 'very slow and deliberate' :
+                         tagKey === 'fast'     ? 'fast and energetic' :
+                         tagKey === 'sad'      ? 'sad and sorrowful' :
+                         tagKey === 'happy'    ? 'joyful and upbeat' :
+                         tagKey === 'whisper'  ? 'in a low whisper' :
+                         tagKey === 'awe'      ? 'with deep awe and reverence' :
+                         tagKey === 'calm'     ? 'calm and peaceful' : 'natural and conversational';
+        const stylePrompt = `You are a Hebrew narrator. Read the following text ${toneDesc}. Never read in English.`;
+        const resp = await fetch(
+          'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent',
+          { method:'POST', headers:{'Content-Type':'application/json','x-goog-api-key':S.apiKey},
+            body:JSON.stringify({contents:[{parts:[{text:stylePrompt+'\n\n'+text}]}],
+              generationConfig:{responseModalities:['AUDIO'],speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName}}}}})}
+        );
+        if(!resp.ok){ const e = await resp.json(); throw new Error(e.error?.message || 'שגיאת Gemini TTS'); }
+        const data = await resp.json();
+        const b64 = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+        if(!b64) throw new Error('לא התקבל אודיו משורה '+(i+1));
+        const pcm = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+        audioBuffers.push(await audioCtx.decodeAudioData(pcmToWav(pcm, 24000, 1, 16).slice(0)));
+      } else {
+        // WaveNet — עם rate ו-pitch מהטבלה
+        const ssml = `<speak><prosody rate="${(params.rate*100).toFixed(0)}%" pitch="${params.pitch}st">${clean}</prosody><break time="${params.breakMs}ms"/></speak>`;
+        const resp = await fetch(
+          'https://texttospeech.googleapis.com/v1/text:synthesize?key=' + (S.ttsKey || S.apiKey),
+          { method:'POST', headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({ input:{ssml}, voice:{languageCode:'he-IL', name:voice}, audioConfig:{audioEncoding:'MP3'} }) }
+        );
+        if(!resp.ok){ const e = await resp.json(); throw new Error(e.error?.message || 'שגיאת TTS'); }
+        const data = await resp.json();
+        const bytes = atob(data.audioContent);
+        const arr = new Uint8Array(bytes.length);
+        for(let j = 0; j < bytes.length; j++) arr[j] = bytes.charCodeAt(j);
+        audioBuffers.push(await audioCtx.decodeAudioData(arr.buffer));
+      }
+    }
+
+    // חבר את כל הבאפרים לאחד
+    btn.textContent = '⏳ מחבר...';
+    const totalLen = audioBuffers.reduce((s, b) => s + b.length, 0);
+    const merged = audioCtx.createBuffer(1, totalLen, sr);
+    const ch = merged.getChannelData(0);
+    let offset = 0;
+    for(const b of audioBuffers){
+      ch.set(b.getChannelData(0), offset);
+      offset += b.length;
+    }
+    audioCtx.close();
+
+    narBlob = audioBufferToWav(merged);
+    const url = URL.createObjectURL(narBlob);
+    const audio = document.getElementById('narAudio');
+    audio.src = url;
+    audio.style.display = 'block';
+    document.getElementById('narStep3').style.display = 'block';
+    toast('✅ קריינות עצמאית מוכנה — האזן לפני מיזוג');
+
+  }catch(e){
+    toast('שגיאת TTS: ' + e.message);
+  }
+  btn.disabled = false;
+  btn.textContent = '🎙️ צור קול';
 }
 
 // ════════════════════════════════════════
