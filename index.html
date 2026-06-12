@@ -2567,29 +2567,24 @@ function renderManualBlocks(n){
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;">${tagsHtml}</div>
       <textarea id="manualBlock_${i}"
-        style="width:100%;min-height:64px;background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Heebo',sans-serif;font-size:.84rem;line-height:1.8;padding:9px;outline:none;resize:vertical;direction:rtl;"
-        placeholder="[dramatic] עצור מיד!&#10;[calm] לאן אתה הולך?"></textarea>
+        style="width:100%;min-height:64px;background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Heebo',sans-serif;font-size:.84rem;line-height:1.8;padding:9px;outline:none;resize:vertical;direction:rtl;"></textarea>
     </div>`;
   }
   wrap.innerHTML = html;
 }
 
 function insertManualTag(btn, tagKey){
-  // מצא את ה-textarea של הבלוק הנוכחי (האח הבא אחרי div הכפתורים)
   const blockDiv = btn.closest('div[style*="margin-bottom:12px"]');
   const ta = blockDiv ? blockDiv.querySelector('textarea') : null;
   if(!ta) return;
 
   const tag = '[' + tagKey + '] ';
-  const pos = ta.selectionStart;
   const val = ta.value;
 
-  // הכנס בתחילת השורה הנוכחית
-  const lineStart = val.lastIndexOf('\n', pos - 1) + 1;
-  ta.value = val.slice(0, lineStart) + tag + val.slice(lineStart);
-  // הזז קרסור אחרי ה-tag
-  const newPos = lineStart + tag.length;
-  ta.setSelectionRange(newPos, newPos);
+  // תמיד הוסף שורה חדשה בסוף עם ה-tag
+  ta.value = (val.length > 0 ? val + '\n' : '') + tag;
+  // קרסור לסוף — מוכן לכתיבה
+  ta.setSelectionRange(ta.value.length, ta.value.length);
   ta.focus();
 }
 
