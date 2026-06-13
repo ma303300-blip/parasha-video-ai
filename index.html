@@ -253,11 +253,11 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
 <div class="filmstrip"><div class="fi" id="fiEl"></div></div>
 
 <nav>
-  <div class="logo"><div class="logo-mark">📜</div>פרשת השבוע — AI</div>
+  <div class="logo"><div class="logo-mark" id="logoMark">📜</div><span id="logoText">פרשת השבוע — AI</span></div>
   <div style="display:flex;gap:8px;align-items:center;">
     <button class="btn btn-ghost" onclick="openMergeDirect()" style="padding:6px 12px;font-size:.76rem;">🎬 מיזוג</button>
     <button class="btn btn-ghost" onclick="openNarDirect()" style="padding:6px 12px;font-size:.76rem;">🎙️ קריינות</button>
-    <span class="nbadge">Veo 3 · Sefaria</span>
+    <span class="nbadge" id="navBadge">Veo 3 · Sefaria</span>
   </div>
 </nav>
 
@@ -454,7 +454,7 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
   <div id="s2script" style="display:none;">
     <div class="sh"><h2>📜 תסריט הסרטון</h2><p>קרא, ערוך אם צריך — ואשר לבניית הסצנות</p></div>
     <div class="card">
-      <div class="ch">תסריט קולנועי — פרשת <span id="scriptParashaName"></span></div>
+      <div class="ch" id="scriptChTitle">תסריט קולנועי — פרשת <span id="scriptParashaName"></span></div>
       <div style="font-size:.78rem;color:var(--muted);margin-bottom:10px;" id="scriptMeta"></div>
       <div class="script-wrap">
         <div class="script-toolbar">
@@ -802,6 +802,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // שחזר videoStyle
   const savedVS = localStorage.getItem('saved_videoStyle');
   if(savedVS){ S.videoStyle = savedVS; setTimeout(()=>_updateStyleBtns(savedVS),0); }
+  // שחזר מצב אפליקציה
+  const savedMode = localStorage.getItem('app_mode');
+  if(savedMode === 'gan'){ ganMode = true; setTimeout(()=>updateNavForMode(),0); }
 
   // Restore saved state
   if(loadState() && S.scenes.length > 0){
@@ -972,10 +975,30 @@ function chooseMode(mode){
   document.getElementById('sEntry').classList.remove('active');
   // עדכן step 2 label
   document.getElementById('sn1').querySelector('.slabel').textContent = ganMode ? 'נושא' : 'פרשה';
+  // עדכן לוגו, badge וכותרות לפי מצב
+  updateNavForMode();
   showScreen(0);
   // אחרי הגדרות → שלב 1 המתאים
   document.getElementById('btnGotoNext') && (document.getElementById('btnGotoNext').onclick =
     ganMode ? showGanScreen : () => showScreen(1));
+}
+
+function updateNavForMode(){
+  const logoMark = document.getElementById('logoMark');
+  const logoText = document.getElementById('logoText');
+  const navBadge = document.getElementById('navBadge');
+  const scriptChTitle = document.getElementById('scriptChTitle');
+  if(ganMode){
+    if(logoMark) logoMark.textContent = '🌸';
+    if(logoText) logoText.textContent = 'גן בשן — AI';
+    if(navBadge) navBadge.textContent = 'Veo 3 · Gemini';
+    if(scriptChTitle) scriptChTitle.innerHTML = 'תסריט קולנועי — <span id="scriptParashaName"></span>';
+  } else {
+    if(logoMark) logoMark.textContent = '📜';
+    if(logoText) logoText.textContent = 'פרשת השבוע — AI';
+    if(navBadge) navBadge.textContent = 'Veo 3 · Sefaria';
+    if(scriptChTitle) scriptChTitle.innerHTML = 'תסריט קולנועי — פרשת <span id="scriptParashaName"></span>';
+  }
 }
 
 async function autoFillGanDesc(name, type){
@@ -1666,7 +1689,7 @@ async function genNext(){
   }
   const total=S.scenes.length;
   document.getElementById('s3title').textContent='מייצר סצנה '+(i+1)+' מתוך '+total;
-  document.getElementById('s3sub').textContent='פרשת '+S.parasha.h;
+  document.getElementById('s3sub').textContent=(ganMode?'':'פרשת ')+S.parasha.h;
   document.getElementById('s3progTitle').textContent='⚙️ סצנה '+(i+1)+' מתוך '+total;
   document.getElementById('progPct').textContent=Math.round(i/total*100)+'%';
   document.getElementById('progFill').style.width=Math.round(i/total*100)+'%';
