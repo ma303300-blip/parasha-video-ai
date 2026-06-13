@@ -352,6 +352,13 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
         <div style="font-family:'Frank Ruhl Libre',serif;font-size:1.15rem;font-weight:700;color:var(--glt);" id="selName"></div>
         <div style="font-size:.74rem;color:var(--muted);" id="selRef"></div>
       </div>
+      <div style="margin-bottom:10px;">
+        <div style="font-size:.72rem;color:var(--muted);margin-bottom:7px;font-weight:600;">סגנון הסרטון:</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost" id="btnStyleAnim" onclick="setVideoStyle('animation')" style="flex:1;border-color:var(--gold);color:var(--gold);">🎨 אנימציה</button>
+          <button class="btn btn-ghost" id="btnStyleReal" onclick="setVideoStyle('realistic')" style="flex:1;">🎬 ריאליסטי</button>
+        </div>
+      </div>
       <button class="btn btn-gold" onclick="fetchAndBuild()">בנה פרומפטים לVeo ←</button>
     </div>
   </div>
@@ -690,7 +697,8 @@ function scorePrompt(p){
 // ════════════════════════════════════════
 const S = {
   apiKey:'', ttsKey:'', durSec:200, model:'fast',
-  parasha:null, parashaText:'', scenes:[], clips:[]
+  parasha:null, parashaText:'', scenes:[], clips:[],
+  videoStyle:'animation'
 };
 
 // ════════════════════════════════════════
@@ -709,6 +717,9 @@ document.addEventListener('DOMContentLoaded', () => {
   calcDur();
   renderParshiot();
   fetchThisWeek();
+  // שחזר videoStyle
+  const savedVS = localStorage.getItem('saved_videoStyle');
+  if(savedVS){ S.videoStyle = savedVS; setTimeout(()=>setVideoStyle(savedVS),0); }
 
   // Restore saved state
   if(loadState() && S.scenes.length > 0){
@@ -842,6 +853,21 @@ function selByCalendar(ref,hn){
 // FETCH PARASHA + BUILD PROMPTS WITH GEMINI
 // Gemini = חינמי | Veo = בתשלום
 // ════════════════════════════════════════
+function setVideoStyle(style){
+  S.videoStyle = style;
+  localStorage.setItem('saved_videoStyle', style);
+  const btnAnim = document.getElementById('btnStyleAnim');
+  const btnReal = document.getElementById('btnStyleReal');
+  if(!btnAnim || !btnReal) return;
+  if(style === 'animation'){
+    btnAnim.style.borderColor = 'var(--gold)'; btnAnim.style.color = 'var(--gold)';
+    btnReal.style.borderColor = ''; btnReal.style.color = '';
+  } else {
+    btnReal.style.borderColor = 'var(--gold)'; btnReal.style.color = 'var(--gold)';
+    btnAnim.style.borderColor = ''; btnAnim.style.color = '';
+  }
+}
+
 async function fetchAndBuild(){
   if(!S.parasha){ toast('בחר פרשה'); return; }
 
@@ -1006,6 +1032,14 @@ async function buildPromptsFromScript(){
   // Show progress
   setMsg('Gemini בונה ' + numClips + ' פרומפטים... (זה לוקח כ-30 שניות)');
 
+  const isRealistic = S.videoStyle === 'realistic';
+  const styleBlock = isRealistic
+    ? '[STYLE]: Photorealistic live-action 4K cinematic film. Real human actors with authentic ancient Middle Eastern appearance. Shot on RED camera, anamorphic lens. FAMILY FRIENDLY — suitable for all ages including young children. NO text overlays. NO subtitles. NO on-screen writing. Clean screen only. AUDIO: maintain FULL VOLUME throughout the entire 8 seconds — NO fade in, NO fade out. Consistent audio level from first frame to last frame. The editor will handle transitions between clips.'
+    : '[STYLE]: High-budget 3D animated film, photorealistic CGI 4K. Prince of Egypt meets Pixar. FULLY RENDERED 3D ANIMATION. 8 seconds. FAMILY FRIENDLY — suitable for all ages including young children. NO text overlays. NO subtitles. NO on-screen writing. Clean screen only. AUDIO: maintain FULL VOLUME throughout the entire 8 seconds — NO fade in, NO fade out. Consistent audio level from first frame to last frame. The editor will handle transitions between clips.';
+  const charsBlock = isRealistic
+    ? '[CHARACTERS]: Real human actors — full detail: name, age, realistic face, beard, hair, exact authentic period costume. Consistent appearance across scenes. Natural skin texture, real eyes, genuine human expressions.'
+    : '[CHARACTERS]: Full detail — name, age, face, beard, hair, exact clothing. Consistent across scenes.';
+
   const prompt = `You are a professional Hollywood cinematographer converting a Hebrew script to Veo 3.1 prompts.
 
 Torah portion: "${S.parasha.h}" — ${numClips} scenes of 8 seconds each.
@@ -1033,8 +1067,8 @@ CRITICAL MUSIC RULE — treat the music like a real film score:
 
 IMPORTANT: Return ONLY a JSON array. No markdown. No explanation. Start with { immediately.
 
-[STYLE]: High-budget 3D animated film, photorealistic CGI 4K. Prince of Egypt meets Pixar. FULLY RENDERED 3D ANIMATION. 8 seconds. FAMILY FRIENDLY — suitable for all ages including young children. NO text overlays. NO subtitles. NO on-screen writing. Clean screen only. AUDIO: maintain FULL VOLUME throughout the entire 8 seconds — NO fade in, NO fade out. Consistent audio level from first frame to last frame. The editor will handle transitions between clips.
-[CHARACTERS]: Full detail — name, age, face, beard, hair, exact clothing. Consistent across scenes.
+${styleBlock}
+${charsBlock}
 [ACTION]: Precise movements and micro-expressions.
 [NO DIALOGUE]: NO spoken words, NO dialogue, NO narration, NO voices of any kind. Complete vocal silence throughout the entire clip.
 [SETTING]: Detailed environment. Massive crowds when script mentions בני ישראל.
@@ -2728,6 +2762,7 @@ function saveState(){
     localStorage.setItem('saved_durSec', S.durSec);
     localStorage.setItem('saved_model', S.model);
     if(S.hebrewScript) localStorage.setItem('saved_script', S.hebrewScript);
+    localStorage.setItem('saved_videoStyle', S.videoStyle || 'animation');
   }catch(e){ console.log('save error',e); }
 }
 
@@ -2743,6 +2778,8 @@ function loadState(){
     if(dur) S.durSec = parseInt(dur);
     if(model) S.model = model;
     if(script) S.hebrewScript = script;
+    const vs = localStorage.getItem('saved_videoStyle');
+    if(vs) S.videoStyle = vs;
     return !!(scenes && parasha);
   }catch(e){ return false; }
 }
