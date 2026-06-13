@@ -1316,7 +1316,7 @@ ${S.hebrewScript}
 Convert EACH of the ${numClips} scenes into a Veo 3.1 prompt with ALL sections MANDATORY.
 
 CRITICAL: Every single prompt MUST contain ALL of these sections — if ANY section is missing the prompt is REJECTED:
-[NO DIALOGUE] ✓ [STYLE] ✓ [CHARACTERS] ✓ [SETTING] ✓ [ACTION] ✓ [CAMERA] ✓ [LIGHTING] ✓ [DRAMA] ✓ [AUDIO] ✓ [COLOR_GRADE] ✓ [TRANSITION] ✓
+[NO DIALOGUE] ✓ [STYLE] ✓ [CHARACTERS] ✓ [SETTING] ✓ [ACTION] ✓ [CAMERA] ✓ [LIGHTING] ✓ [DRAMA] ✓ [AUDIO] ✓ [COLOR_GRADE] ✓ [TRANSITION: FADE with 0.5s FADE_IN and FADE_OUT] ✓
 
 DO NOT skip any section. DO NOT merge sections. Write each section explicitly with its label.
 
@@ -1328,6 +1328,12 @@ CRITICAL MUSIC RULE — treat the music like a real film score:
 - Scene 1: music starts gently from nothing
 - Scene ${numClips}: music resolves and fades to silence
 - FORBIDDEN: starting a completely new musical idea in consecutive HARD_CUT scenes
+
+IRON LAW — FADE FOR EVERY CLIP — NO EXCEPTIONS:
+Every single clip MUST begin with a 0.5 second FADE_IN and end with a 0.5 second FADE_OUT.
+This applies to ALL clips without exception — first, middle, and last.
+FORBIDDEN: any clip that does not have both FADE_IN at start and FADE_OUT at end.
+FORBIDDEN: HARD_CUT, CUT, or any other transition type.
 
 CRITICAL CHARACTER CONSISTENCY RULE — IRON LAW:
 - Every character introduced in scene 1 MUST look IDENTICAL in every subsequent scene
@@ -1354,9 +1360,9 @@ ${charsBlock}
 (3) HUMAN SOUNDS: if crowd — background chatter, gasps, collective silence, crying, cheering; if individual — breathing, footsteps, fabric rustling
 (4) ANIMAL SOUNDS if present: horses neighing / camels / sheep / birds — at appropriate volume
 (5) AUDIO DYNAMICS: does sound build to peak? sudden silence? whisper to roar? specify the arc
-(6) If dialogue exists in scene: voice audio at natural volume, blended with ambient. If no dialogue: complete vocal silence — ambient and music only.
+(6) ABSOLUTE SILENCE for all human voices — NO speaking, NO dialogue, NO narration, NO singing of any kind. Ambient sounds and music ONLY throughout the entire clip.
 [COLOR_GRADE]: Unique color palette.
-[TRANSITION]: {TRANSITION_PLACEHOLDER} — this field defines how this clip connects to adjacent clips in the final edit.
+[TRANSITION]: FADE — every clip MUST start with a 0.5 second FADE_IN and end with a 0.5 second FADE_OUT. This is an IRON LAW — no exceptions. Every single clip fades in and fades out.
 
 JSON format ONLY:
 {"scenes":[{"id":1,"hebrewDesc":"תיאור בעברית","hebrewDialogue":"משפט הדיאלוג מהתסריט — או ריק אם אין","transition":"HARD_CUT","prompt":"full English prompt","duration":8}]}`;
@@ -1570,19 +1576,26 @@ function fallbackCopyAll(txt){
 function openInStudio(i){
   const txt = S.scenes[i].prompt;
   const n = S.scenes.length;
+  const msg = '✅ סצנה '+(i+1)+' מתוך '+n+' הועתקה — הדבק בגמיני';
 
-  const doCopy = () => {
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(txt)
-        .then(()=>{ toast('✅ סצנה '+(i+1)+' מתוך '+n+' הועתקה — הדבק בגמיני'); })
-        .catch(()=>{ fallbackCopy(txt); toast('✅ סצנה '+(i+1)+' מתוך '+n+' הועתקה — הדבק בגמיני'); });
-    } else {
-      fallbackCopy(txt);
-      toast('✅ סצנה '+(i+1)+' מתוך '+n+' הועתקה — הדבק בגמיני');
-    }
-  };
-  doCopy();
-  window.open('https://gemini.google.com', '_blank');
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    // העתק קודם — פתח גמיני רק אחרי שההעתקה הסתיימה
+    navigator.clipboard.writeText(txt)
+      .then(()=>{
+        toast(msg);
+        setTimeout(()=> window.open('https://gemini.google.com','_blank'), 150);
+      })
+      .catch(()=>{
+        // fallback — execCommand לא מושפע מ-window.open
+        fallbackCopy(txt);
+        toast(msg);
+        setTimeout(()=> window.open('https://gemini.google.com','_blank'), 150);
+      });
+  } else {
+    fallbackCopy(txt);
+    toast(msg);
+    setTimeout(()=> window.open('https://gemini.google.com','_blank'), 150);
+  }
 }
 
 function fallbackCopy(txt){
