@@ -99,6 +99,7 @@ input[type=number]{width:78px;text-align:center;direction:ltr;}
 .btn-full{width:100%;}
 .btn-ghost{background:var(--s2);border:1px solid var(--border);color:var(--text);font-size:.84rem;padding:8px 15px;}
 .btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+.btn-ghost.style-active{border-color:var(--gold);color:var(--gold);background:var(--gdim);}
 .btn-green{background:linear-gradient(135deg,#3a9e74,#2a7a58);color:white;font-size:.88rem;padding:12px 20px;}
 .btn-green:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px rgba(79,191,150,.25);}
 .btn-blue{background:linear-gradient(135deg,#4a7ac8,#2a4a90);color:white;font-size:.82rem;padding:8px 14px;}
@@ -272,9 +273,31 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
 <main>
 
 <!-- ═══════════════════════════════
+     ENTRY: דף כניסה
+═══════════════════════════════ -->
+<div class="screen active" id="sEntry">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;gap:28px;text-align:center;">
+    <div style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:900;background:linear-gradient(135deg,var(--glt),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.3;">יוצר סרטונים AI</div>
+    <div style="font-size:.9rem;color:var(--muted);">בחר את סוג הסרטון שברצונך ליצור</div>
+    <div style="display:flex;flex-direction:column;gap:14px;width:100%;max-width:320px;">
+      <button onclick="chooseMode('parasha')" style="background:linear-gradient(135deg,rgba(200,164,74,.2),rgba(200,164,74,.08));border:2px solid var(--gold);border-radius:16px;padding:24px 20px;cursor:pointer;text-align:center;transition:all .2s;font-family:'Heebo',sans-serif;">
+        <div style="font-size:2.2rem;margin-bottom:8px;">📖</div>
+        <div style="font-size:1.1rem;font-weight:700;color:var(--glt);">פרשת השבוע</div>
+        <div style="font-size:.78rem;color:var(--muted);margin-top:4px;">סרטון על פרשת התורה השבועית</div>
+      </button>
+      <button onclick="chooseMode('gan')" style="background:linear-gradient(135deg,rgba(79,191,150,.15),rgba(79,191,150,.05));border:2px solid rgba(79,191,150,.5);border-radius:16px;padding:24px 20px;cursor:pointer;text-align:center;transition:all .2s;font-family:'Heebo',sans-serif;">
+        <div style="font-size:2.2rem;margin-bottom:8px;">🌸</div>
+        <div style="font-size:1.1rem;font-weight:700;color:#80d4b0;">גן בשן</div>
+        <div style="font-size:.78rem;color:var(--muted);margin-top:4px;">סרטון לחגים, אירועים ויום הולדת</div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
      S0: הגדרות
 ═══════════════════════════════ -->
-<div class="screen active" id="s0">
+<div class="screen" id="s0">
   <div class="sh"><h2>הגדרות</h2><p>הכנס API key לשלב האימות והיצירה בלבד</p></div>
 
   <div class="card">
@@ -325,7 +348,7 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
     </div>
   </div>
 
-  <button class="btn btn-gold btn-full" onclick="gotoParasha()">המשך לבחירת פרשה ←</button>
+  <button class="btn btn-gold btn-full" id="btnGotoNext" onclick="ganMode ? showGanScreen() : gotoParasha()">המשך ←</button>
 </div>
 
 <!-- ═══════════════════════════════
@@ -355,12 +378,63 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
       <div style="margin-bottom:10px;">
         <div style="font-size:.72rem;color:var(--muted);margin-bottom:7px;font-weight:600;">סגנון הסרטון:</div>
         <div style="display:flex;gap:8px;">
-          <button class="btn btn-ghost" id="btnStyleAnim" onclick="setVideoStyle('animation')" style="flex:1;border-color:var(--gold);color:var(--gold);">🎨 אנימציה</button>
+          <button class="btn btn-ghost" id="btnStyleAnim" onclick="setVideoStyle('animation')" style="flex:1;">🎨 אנימציה</button>
           <button class="btn btn-ghost" id="btnStyleReal" onclick="setVideoStyle('realistic')" style="flex:1;">🎬 ריאליסטי</button>
         </div>
       </div>
       <button class="btn btn-gold" onclick="fetchAndBuild()">בנה פרומפטים לVeo ←</button>
     </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     S1GAN: גן בשן
+═══════════════════════════════ -->
+<div class="screen" id="s1gan">
+  <div class="sh"><h2>🌸 גן בשן</h2><p>בחר נושא הסרטון</p></div>
+
+  <div class="card">
+    <div class="ch">🕍 חגי השנה העברית</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+      <button class="btn btn-ghost" onclick="selectGanTopic('ראש השנה','holiday')">🍎 ראש השנה</button>
+      <button class="btn btn-ghost" onclick="selectGanTopic('יום כיפור','holiday')">🤍 יום כיפור</button>
+      <button class="btn btn-ghost" onclick="selectGanTopic('סוכות','holiday')">🌿 סוכות</button>
+      <button class="btn btn-ghost" onclick="selectGanTopic('שמחת תורה','holiday')">📜 שמחת תורה</button>
+      <button class="btn btn-ghost" onclick="selectGanTopic('חנוכה','holiday')">🕎 חנוכה</button>
+      <button class="btn btn-ghost" onclick="selectGanTopic('ט״ו בשבט','holiday')">🌳 ט״ו בשבט</button>
+      <button class="btn btn-ghost" onclick="selectGanTopic('פורים','holiday')">🎭 פורים</button>
+      <button class="btn btn-ghost" onclick="selectGanTopic('פסח','holiday')">🫓 פסח</button>
+      <button class="btn btn-ghost" onclick="selectGanTopic('ל״ג בעומר','holiday')">🔥 ל״ג בעומר</button>
+      <button class="btn btn-ghost" onclick="selectGanTopic('שבועות','holiday')">📖 שבועות</button>
+      <button class="btn btn-ghost" onclick="selectGanTopic('שבת','holiday')">✨ שבת</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch">🇮🇱 אירועים לאומיים</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+      <button class="btn btn-ghost" onclick="selectGanTopic('יום השואה','national')">🕯️ יום השואה</button>
+      <button class="btn btn-ghost" onclick="selectGanTopic('יום הזיכרון','national')">🪖 יום הזיכרון</button>
+      <button class="btn btn-ghost" onclick="selectGanTopic('יום העצמאות','national')">🎆 יום העצמאות</button>
+      <button class="btn btn-ghost" onclick="selectGanTopic('יום ירושלים','national')">🏛️ יום ירושלים</button>
+      <button class="btn btn-ghost" onclick="selectGanTopic('יום העלייה','national')">✈️ יום העלייה</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch">🎂 יום הולדת</div>
+    <button class="btn btn-ghost btn-full" onclick="selectGanTopic('יום הולדת','birthday')">🎂 יום הולדת</button>
+  </div>
+
+  <div class="card" id="ganTopicCard" style="display:none;">
+    <div class="ch">✏️ תאר את הסרטון — <span id="ganTopicName" style="color:var(--glt);"></span></div>
+    <textarea id="ganDesc" style="width:100%;min-height:100px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Heebo',sans-serif;font-size:.88rem;line-height:1.8;padding:10px;outline:none;resize:vertical;direction:rtl;" placeholder="תאר במילים מה אתה רוצה בסרטון..."></textarea>
+    <div style="margin-top:8px;font-size:.74rem;color:var(--muted);" id="ganSceneInfo"></div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-ghost" id="btnStyleAnimGan" onclick="setVideoStyle('animation')">🎨 אנימציה</button>
+      <button class="btn btn-ghost" id="btnStyleRealGan" onclick="setVideoStyle('realistic')">🎬 ריאליסטי</button>
+    </div>
+    <button class="btn btn-gold btn-full" style="margin-top:12px;" onclick="buildGanScript()">שלח לג׳ימיני ←</button>
   </div>
 </div>
 
@@ -409,6 +483,7 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
     <div class="cost-box"><span>עלות ייצור מלא</span><span class="cost-val" id="costVal">—</span></div>
     <div class="row-c">
       <button class="btn btn-green" onclick="goGenerate()" id="btnGenerate">🎬 צור סרטון</button>
+      <button class="btn btn-blue" onclick="copyAllToGemini()">🤖 צור הכל בגמיני</button>
       <button class="btn btn-ghost" onclick="showScriptAgain()">📜 חזור לתסריט</button>
       <button class="btn btn-ghost" onclick="showScreen(1)">← חזור</button>
     </div>
@@ -691,9 +766,9 @@ function scorePrompt(p){
     if(c.k==='action')   pass=/shot|tracking|push|pull|pan|crane|walk|run|speak|gesture|movement/i.test(p);
     if(c.k==='camera')   pass=/camera|shot|angle|pan|zoom|close.up|wide|tracking|drone|tilt|crane/i.test(p);
     if(c.k==='lighting') pass=/light|shadow|golden|dramatic|warm|cool|sun|glow|dawn|dusk|bright|dark|beam/i.test(p);
-    if(c.k==='style')    pass=/cinematic|animation|render|quality|Pixar|biblical|3D|CGI/i.test(p);
-    if(c.k==='no_text')  pass=/\[SUBTITLES\]/i.test(p); // now we WANT subtitles
-    if(c.k==='duration') pass=/8 second/i.test(p);
+    if(c.k==='style')    pass=/cinematic|animation|render|quality|Pixar|biblical|3D|CGI|photorealistic|live.action|RED camera/i.test(p);
+    if(c.k==='no_text')  pass=/NO text overlays|NO subtitles|NO on.screen/i.test(p);
+    if(c.k==='duration') pass=/\d+ second/i.test(p);
     if(c.k==='emotion')  pass=/atmosphere|emotion|dramatic|feeling|tension|epic|grand|solemn|joyful|fearful|mood/i.test(p);
     return {...c,pass};
   });
@@ -726,7 +801,7 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchThisWeek();
   // שחזר videoStyle
   const savedVS = localStorage.getItem('saved_videoStyle');
-  if(savedVS){ S.videoStyle = savedVS; setTimeout(()=>setVideoStyle(savedVS),0); }
+  if(savedVS){ S.videoStyle = savedVS; setTimeout(()=>_updateStyleBtns(savedVS),0); }
 
   // Restore saved state
   if(loadState() && S.scenes.length > 0){
@@ -760,13 +835,37 @@ function restoreScenes(){
 // NAVIGATION
 // ════════════════════════════════════════
 function showScreen(n) {
-  document.querySelectorAll('.screen').forEach((el,i) => el.classList.toggle('active', i===n));
+  // הסתר sEntry ו-s1gan תמיד
+  const entryEl = document.getElementById('sEntry');
+  const ganEl = document.getElementById('s1gan');
+  if(entryEl) entryEl.classList.remove('active');
+  if(ganEl) ganEl.classList.remove('active');
+
+  // מסכים רגילים: s0–s5 (אינדקסים 1–6 ב-querySelectorAll אחרי sEntry ו-s1gan)
+  const screens = document.querySelectorAll('.screen:not(#sEntry):not(#s1gan)');
+  screens.forEach((el,i) => el.classList.toggle('active', i===n));
+
   for(let i=0;i<6;i++){
     const sn = document.getElementById('sn'+i);
     if(!sn) continue;
     sn.classList.remove('active','done');
     if(i < n) sn.classList.add('done');
     else if(i === n) sn.classList.add('active');
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function showGanScreen(){
+  // הסתר כל המסכים הרגילים
+  document.querySelectorAll('.screen:not(#sEntry):not(#s1gan)').forEach(el => el.classList.remove('active'));
+  document.getElementById('sEntry').classList.remove('active');
+  document.getElementById('s1gan').classList.add('active');
+  // עדכן steps
+  for(let i=0;i<6;i++){
+    const sn = document.getElementById('sn'+i);
+    if(!sn) continue;
+    sn.classList.remove('active','done');
+    if(i===1) sn.classList.add('active');
   }
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -860,19 +959,168 @@ function selByCalendar(ref,hn){
 // FETCH PARASHA + BUILD PROMPTS WITH GEMINI
 // Gemini = חינמי | Veo = בתשלום
 // ════════════════════════════════════════
+// ════════════════════════════════════════
+// ENTRY + GAN BSHAN MODE
+// ════════════════════════════════════════
+let ganMode = false;
+let ganTopicType = 'holiday'; // holiday / national / birthday
+
+function chooseMode(mode){
+  ganMode = (mode === 'gan');
+  localStorage.setItem('app_mode', mode);
+  // הסתר דף כניסה
+  document.getElementById('sEntry').classList.remove('active');
+  // עדכן step 2 label
+  document.getElementById('sn1').querySelector('.slabel').textContent = ganMode ? 'נושא' : 'פרשה';
+  showScreen(0);
+  // אחרי הגדרות → שלב 1 המתאים
+  document.getElementById('btnGotoNext') && (document.getElementById('btnGotoNext').onclick =
+    ganMode ? showGanScreen : () => showScreen(1));
+}
+
+async function autoFillGanDesc(name, type){
+  const numScenes = type === 'birthday' ? 4 : 9;
+  const ta = document.getElementById('ganDesc');
+  ta.value = '';
+  ta.placeholder = 'Gemini ממלא תיאור...';
+  const typeDesc = type === 'birthday'
+    ? 'יום הולדת לילד/ה'
+    : type === 'national'
+    ? 'אירוע לאומי ישראלי'
+    : 'חג יהודי';
+
+  try {
+    const prompt = `אתה עוזר ליצירת סרטון לילדי גן (גיל 3-6).
+תאר את "${name}" בצורה קצרה, פשוטה וצבעונית המתאימה לילדים קטנים.
+כלול: מה האירוע/החג מסמל, 3-4 סמלים או אלמנטים מרכזיים, האווירה הכללית.
+הכתיבה תשמש כבסיס לסרטון של ${numScenes} סצנות לילדי גן.
+כתוב בעברית פשוטה, עד 5 משפטים קצרים. ללא כותרות. ללא נקודות. רק טקסט רציף.`;
+
+    const raw = await callGemini(prompt, 500);
+    ta.value = raw.trim();
+    ta.placeholder = '';
+  } catch(e) {
+    ta.placeholder = 'תאר במילים מה אתה רוצה בסרטון על ' + name + '...';
+    toast('לא הצלחתי למלא אוטומטית — תאר בעצמך');
+  }
+}
+
+function selectGanTopic(name, type){
+  ganTopicType = type;
+  const numScenes = type === 'birthday' ? 4 : 9;
+  const totalSec = numScenes * 10;
+  document.getElementById('ganTopicName').textContent = name;
+  document.getElementById('ganSceneInfo').textContent = numScenes + ' סצנות × 10 שניות = ' + totalSec + ' שניות';
+  document.getElementById('ganTopicCard').style.display = 'block';
+  document.getElementById('ganTopicCard').scrollIntoView({behavior:'smooth', block:'center'});
+  // שמור בחירה ב-S
+  S.ganTopic = name;
+  S.ganType = type;
+  // מילוי אוטומטי מ-Gemini
+  autoFillGanDesc(name, type);
+}
+
+async function buildGanScript(){
+  const desc = document.getElementById('ganDesc').value.trim();
+  if(!desc){ toast('תאר את הסרטון קודם'); return; }
+
+  S.apiKey = document.getElementById('apiKey').value.trim()
+           || localStorage.getItem('veo_key') || S.apiKey || '';
+  if(!S.apiKey){ toast('נא להזין API key בהגדרות'); showScreen(0); return; }
+  localStorage.setItem('veo_key', S.apiKey);
+
+  const numScenes = S.ganType === 'birthday' ? 4 : 9;
+  S.durSec = numScenes * 10;
+  S.numScenes = numScenes;
+  S.parashaText = '';
+  S.parasha = { h: S.ganTopic, r: '', b: '' };
+
+  showScreen(2);
+  document.getElementById('s2loading').style.display = 'block';
+  document.getElementById('s2script').style.display = 'none';
+  document.getElementById('s2content').style.display = 'none';
+  setMsg('Gemini כותב תסריט עבור ' + S.ganTopic + '...');
+
+  try {
+    const prompt = `אתה תסריטאי קולנועי מוכשר המתמחה בסרטונים לילדים בגן.
+
+נושא הסרטון: "${S.ganTopic}"
+תיאור: ${desc}
+
+המשימה: כתוב תסריט קולנועי מלא בעברית ב-${numScenes} סצנות (כל סצנה = 10 שניות).
+
+כללים:
+• הסיפור חייב להיות רציף מהסצנה הראשונה עד האחרונה — עלילה עם התחלה, אמצע וסוף
+• כל סצנה ממשיכה ישירות מהקודמת
+• כתוב כמו תסריטאי הוליוודי — שמחה, צבע, חיות, רגש חיובי
+• מותאם לגיל גן — תיאורים צבעוניים, פשוטים, מעוררי השראה
+• ללא אלימות בשום צורה
+
+כללי ברזל לדיאלוג:
+• כל סצנה היא 10 שניות — מקסימום משפט אחד קצר
+• פזר את הדיאלוגים על פני כל הסצנות
+
+כלל ברזל למעברים:
+• לכל סצנה קבע מעבר: HARD_CUT או FADE
+• סצנה 1 תמיד FADE_IN, סצנה אחרונה תמיד FADE_OUT
+
+לכל סצנה כתוב בפורמט הזה:
+
+**סצנה [מספר]: [כותרת]**
+🎬 ויזואל: [מה רואים]
+🗣️ דיאלוג: [משפט קצר — או "אין"]
+🎵 סאונד: [מוזיקה ואפקטים]
+🎞️ מעבר: [HARD_CUT / FADE / FADE_IN / FADE_OUT]
+📢 נרטיב: [קריין קצר]`;
+
+    const raw = await callGemini(prompt, 65000);
+    if(!raw || raw.length < 100) throw new Error('לא התקבל תסריט');
+
+    S.hebrewScript = raw.trim();
+    saveState();
+
+    document.getElementById('s2loading').style.display = 'none';
+    document.getElementById('s2script').style.display = 'block';
+    document.getElementById('scriptParashaName').textContent = S.ganTopic;
+    document.getElementById('scriptMeta').textContent = numScenes + ' סצנות · ' + S.durSec + ' שניות';
+    document.getElementById('scriptView').textContent = S.hebrewScript;
+    document.getElementById('scriptEdit').value = S.hebrewScript;
+  } catch(e) {
+    document.getElementById('s2loading').innerHTML =
+      '<div class="msg error">❌ ' + e.message +
+      '<br><button class="btn btn-ghost" style="margin-top:9px;" onclick="showScreen(1)">← חזור</button></div>';
+  }
+}
+
 function setVideoStyle(style){
+  // לחיצה שנייה על אותו כפתור — ביטול
+  if(S.videoStyle === style){
+    S.videoStyle = null;
+    localStorage.removeItem('saved_videoStyle');
+    _clearStyleBtns();
+    return;
+  }
   S.videoStyle = style;
   localStorage.setItem('saved_videoStyle', style);
-  const btnAnim = document.getElementById('btnStyleAnim');
-  const btnReal = document.getElementById('btnStyleReal');
-  if(!btnAnim || !btnReal) return;
-  if(style === 'animation'){
-    btnAnim.style.borderColor = 'var(--gold)'; btnAnim.style.color = 'var(--gold)';
-    btnReal.style.borderColor = ''; btnReal.style.color = '';
-  } else {
-    btnReal.style.borderColor = 'var(--gold)'; btnReal.style.color = 'var(--gold)';
-    btnAnim.style.borderColor = ''; btnAnim.style.color = '';
-  }
+  _updateStyleBtns(style);
+}
+
+function _clearStyleBtns(){
+  ['btnStyleAnim','btnStyleReal','btnStyleAnimGan','btnStyleRealGan'].forEach(id => {
+    const b = document.getElementById(id);
+    if(b){ b.classList.remove('style-active'); b.style.borderColor=''; b.style.color=''; }
+  });
+}
+
+function _updateStyleBtns(style){
+  _clearStyleBtns();
+  const animIds = ['btnStyleAnim','btnStyleAnimGan'];
+  const realIds = ['btnStyleReal','btnStyleRealGan'];
+  const activeIds = style === 'animation' ? animIds : realIds;
+  activeIds.forEach(id => {
+    const b = document.getElementById(id);
+    if(b){ b.classList.add('style-active'); }
+  });
 }
 
 async function fetchAndBuild(){
@@ -928,6 +1176,7 @@ function flatText(arr){
 }
 
 async function buildHebrewScript(){
+  S.numScenes = null; // פרשה — חישוב לפי durSec/8
   const numScenes = Math.ceil(S.durSec/8);
 
   const prompt = `אתה תסריטאי קולנועי מוכשר המתמחה בסרטים על התנ"ך.
@@ -1034,15 +1283,23 @@ function showScriptAgain(){
 }
 
 async function buildPromptsFromScript(){
-  const numClips = Math.ceil(S.durSec/8);
+  const numClips = S.numScenes || Math.ceil(S.durSec/8);
 
   // Show progress
   setMsg('Gemini בונה ' + numClips + ' פרומפטים... (זה לוקח כ-30 שניות)');
 
   const isRealistic = S.videoStyle === 'realistic';
+  const isAnimation = !S.videoStyle || S.videoStyle === 'animation';
+  const clipDur = S.numScenes ? 10 : 8; // גן בשן = 10 שניות, פרשה = 8 שניות
+
+  if(!S.videoStyle){
+    toast('⚠️ לא נבחר סגנון — ברירת מחדל: אנימציה');
+  }
+
   const styleBlock = isRealistic
-    ? '[STYLE]: Photorealistic live-action 4K cinematic film. Real human actors with authentic ancient Middle Eastern appearance. Shot on RED camera, anamorphic lens. FAMILY FRIENDLY — suitable for all ages including young children. NO text overlays. NO subtitles. NO on-screen writing. Clean screen only. AUDIO: maintain FULL VOLUME throughout the entire 8 seconds — NO fade in, NO fade out. Consistent audio level from first frame to last frame. The editor will handle transitions between clips.'
-    : '[STYLE]: High-budget 3D animated film, photorealistic CGI 4K. Prince of Egypt meets Pixar. FULLY RENDERED 3D ANIMATION. 8 seconds. FAMILY FRIENDLY — suitable for all ages including young children. NO text overlays. NO subtitles. NO on-screen writing. Clean screen only. AUDIO: maintain FULL VOLUME throughout the entire 8 seconds — NO fade in, NO fade out. Consistent audio level from first frame to last frame. The editor will handle transitions between clips.';
+    ? `[STYLE]: Photorealistic live-action 4K cinematic film. Real human actors with authentic appearance. Shot on RED camera, anamorphic lens. ${clipDur} seconds per clip. FAMILY FRIENDLY — suitable for all ages. NO text overlays. NO subtitles. NO on-screen writing. Clean screen only. AUDIO: maintain FULL VOLUME throughout the entire ${clipDur} seconds — NO fade in, NO fade out. Consistent audio level from first frame to last frame.`
+    : `[STYLE]: High-budget 3D animated film, photorealistic CGI 4K. Prince of Egypt meets Pixar. FULLY RENDERED 3D ANIMATION. ${clipDur} seconds. FAMILY FRIENDLY — suitable for all ages including young children. NO text overlays. NO subtitles. NO on-screen writing. Clean screen only. AUDIO: maintain FULL VOLUME throughout the entire ${clipDur} seconds — NO fade in, NO fade out. Consistent audio level from first frame to last frame.`;
+
   const charsBlock = isRealistic
     ? '[CHARACTERS]: Real human actors — full detail: name, age, realistic face, beard, hair, exact authentic period costume. Consistent appearance across scenes. Natural skin texture, real eyes, genuine human expressions.'
     : '[CHARACTERS]: Full detail — name, age, face, beard, hair, exact clothing. Consistent across scenes.';
@@ -1071,6 +1328,15 @@ CRITICAL MUSIC RULE — treat the music like a real film score:
 - Scene 1: music starts gently from nothing
 - Scene ${numClips}: music resolves and fades to silence
 - FORBIDDEN: starting a completely new musical idea in consecutive HARD_CUT scenes
+
+CRITICAL CHARACTER CONSISTENCY RULE — IRON LAW:
+- Every character introduced in scene 1 MUST look IDENTICAL in every subsequent scene
+- Same face structure, same age, same beard length and color, same hair color and style, same exact clothing, same height and build
+- If a character wears a brown robe in scene 1 — exact same brown robe in ALL scenes
+- Describe each character with MAXIMUM physical detail in scene 1
+- In EVERY subsequent scene where the character appears — repeat the EXACT same physical description word for word
+- FORBIDDEN: changing any character's appearance between scenes
+- FORBIDDEN: introducing a "similar" character — it must be the EXACT same character
 
 IMPORTANT: Return ONLY a JSON array. No markdown. No explanation. Start with { immediately.
 
@@ -1266,18 +1532,77 @@ function copyScene(i){
   });
 }
 
+function copyAllToGemini(){
+  if(!S.scenes || !S.scenes.length){ toast('אין סצנות'); return; }
+  const n = S.scenes.length;
+  const topic = S.parasha?.h || 'הסרטון';
+
+  // בנה טקסט מלא עם כל הפרומפטים
+  let txt = `אתה יוצר סרטון וידאו על "${topic}" ב-${n} סצנות.\n`;
+  txt += `חשוב מאוד: שמור על אותן דמויות בדיוק לאורך כל הסצנות — אותו פרצוף, אותה תלבושת, אותו גיל.\n\n`;
+  txt += `צור ${n} קליפים קצרים לפי הפרומפטים הבאים, אחד אחד:\n\n`;
+
+  S.scenes.forEach((sc, i) => {
+    txt += `--- סצנה ${i+1} ---\n${sc.prompt}\n\n`;
+  });
+
+  txt += `התחל בסצנה 1. כשתסיים כל סצנה — אני אגיד לך "הבא" ותמשיך לסצנה הבאה.`;
+
+  // העתק ללוח
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt)
+      .then(()=>{ toast('✅ כל הפרומפטים הועתקו — הדבק בגמיני'); setTimeout(()=>window.open('https://gemini.google.com','_blank'),300); })
+      .catch(()=> fallbackCopyAll(txt));
+  } else {
+    fallbackCopyAll(txt);
+  }
+}
+
+function fallbackCopyAll(txt){
+  const ta = document.createElement('textarea');
+  ta.value = txt; ta.style.cssText='position:fixed;top:0;left:0;opacity:0;';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  document.execCommand('copy'); document.body.removeChild(ta);
+  toast('✅ כל הפרומפטים הועתקו — הדבק בגמיני');
+  setTimeout(()=>window.open('https://gemini.google.com','_blank'),300);
+}
+
 function openInStudio(i){
-  const txt=S.scenes[i].prompt;
-  const copy = ()=>{
-    navigator.clipboard.writeText(txt).catch(()=>{
-      const ta=document.createElement('textarea');
-      ta.value=txt; document.body.appendChild(ta); ta.select();
-      document.execCommand('copy'); document.body.removeChild(ta);
-    });
+  const txt = S.scenes[i].prompt;
+  const n = S.scenes.length;
+
+  const doCopy = () => {
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt)
+        .then(()=>{ toast('✅ סצנה '+(i+1)+' מתוך '+n+' הועתקה — הדבק בגמיני'); })
+        .catch(()=>{ fallbackCopy(txt); toast('✅ סצנה '+(i+1)+' מתוך '+n+' הועתקה — הדבק בגמיני'); });
+    } else {
+      fallbackCopy(txt);
+      toast('✅ סצנה '+(i+1)+' מתוך '+n+' הועתקה — הדבק בגמיני');
+    }
   };
-  copy();
-  toast('✅ הפרומפט הועתק — פתח AI Studio ← Generate Media ← Video');
-  window.open('https://aistudio.google.com', '_blank');
+  doCopy();
+  window.open('https://gemini.google.com', '_blank');
+}
+
+function fallbackCopy(txt){
+  const ta = document.createElement('textarea');
+  ta.value = txt; ta.style.cssText='position:fixed;top:0;left:0;opacity:0;';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  document.execCommand('copy'); document.body.removeChild(ta);
+}
+
+function showCopyToast(i, isFirst){
+  const n = S.scenes.length;
+  if(isFirst){
+    // פעם ראשונה — toast עם קישור לגמיני
+    const t = document.getElementById('toast');
+    t.innerHTML = '✅ סצנה 1 הועתקה — <a href="https://gemini.google.com" target="_blank" style="color:var(--gold);text-decoration:underline;">פתח גמיני</a> והדבק';
+    t.classList.add('show');
+    setTimeout(()=>{ t.classList.remove('show'); t.innerHTML=''; }, 5000);
+  } else {
+    toast('✅ סצנה '+(i+1)+' מתוך '+n+' הועתקה — הדבק בגמיני');
+  }
 }
 
 function togglePE(i){
