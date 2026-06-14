@@ -263,7 +263,7 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
 
 <div class="steps">
   <div class="sn active" id="sn0" onclick="showScreen(0)" style="cursor:pointer;"><div class="sdot">1</div><div class="slabel">הגדרות</div></div>
-  <div class="sn" id="sn1" onclick="showScreen(1)" style="cursor:pointer;"><div class="sdot">2</div><div class="slabel">פרשה</div></div>
+  <div class="sn" id="sn1" onclick="goBack1()" style="cursor:pointer;"><div class="sdot">2</div><div class="slabel">פרשה</div></div>
   <div class="sn" id="sn2" onclick="S.hebrewScript?showScriptAgain():showScreen(2)" style="cursor:pointer;"><div class="sdot">3</div><div class="slabel">פרומפטים</div></div>
   <div class="sn" id="sn3" onclick="showScreen(3)" style="cursor:pointer;"><div class="sdot">4</div><div class="slabel">אימות</div></div>
   <div class="sn" id="sn4" onclick="showScreen(4)" style="cursor:pointer;"><div class="sdot">5</div><div class="slabel">וידאו</div></div>
@@ -466,7 +466,7 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
       </div>
       <div class="row-c" style="margin-top:16px;">
         <button class="btn btn-green" onclick="approveScript()" id="approveScriptBtn">✅ אשר — בנה סצנות</button>
-        <button class="btn btn-ghost" onclick="showScreen(1)">← חזור</button>
+        <button class="btn btn-ghost" onclick="goBack1()">← חזור</button>
       </div>
     </div>
   </div>
@@ -485,7 +485,7 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
       <button class="btn btn-green" onclick="goGenerate()" id="btnGenerate">🎬 צור סרטון</button>
       <button class="btn btn-blue" onclick="copyAllToGemini()">🤖 צור הכל בגמיני</button>
       <button class="btn btn-ghost" onclick="showScriptAgain()">📜 חזור לתסריט</button>
-      <button class="btn btn-ghost" onclick="showScreen(1)">← חזור</button>
+      <button class="btn btn-ghost" onclick="goBack1()">← חזור</button>
     </div>
   </div>
 
@@ -837,6 +837,10 @@ function restoreScenes(){
 // ════════════════════════════════════════
 // NAVIGATION
 // ════════════════════════════════════════
+function goBack1(){
+  ganMode ? showGanScreen() : showScreen(1);
+}
+
 function showScreen(n) {
   // הסתר sEntry ו-s1gan תמיד
   const entryEl = document.getElementById('sEntry');
@@ -903,7 +907,7 @@ function gotoParasha(){
   const k=document.getElementById('apiKey').value.trim();
   if(k){S.apiKey=k; localStorage.setItem('veo_key',k);}
   if(S.durSec<8){toast('אורך מינימלי: 8 שניות'); return;}
-  showScreen(1);
+  showScreen(1); // פרשה תמיד ל-s1
 }
 
 // ════════════════════════════════════════
@@ -1065,7 +1069,13 @@ async function buildGanScript(){
   setMsg('Gemini כותב תסריט עבור ' + S.ganTopic + '...');
 
   try {
-    const prompt = `אתה תסריטאי קולנועי מוכשר המתמחה בסרטונים לילדים בגן.
+    const prompt = `כלל ברזל — ציות מלא 100%:
+עליך ליישם כל הוראה שניתנת לך בדיוק כפי שנכתבה.
+ללא קיצורים. ללא פישוטים. ללא דילוג על שום פרט.
+כל ויזואל, כל פעולה, כל תיאור, כל מעבר — חייב להופיע בפלט שלך.
+ציות חלקי = כישלון מוחלט. חובה לספק 100% ממה שהתבקש.
+
+אתה תסריטאי קולנועי מוכשר המתמחה בסרטונים לילדים בגן.
 
 נושא הסרטון: "${S.ganTopic}"
 תיאור: ${desc}
@@ -1111,7 +1121,7 @@ async function buildGanScript(){
   } catch(e) {
     document.getElementById('s2loading').innerHTML =
       '<div class="msg error">❌ ' + e.message +
-      '<br><button class="btn btn-ghost" style="margin-top:9px;" onclick="showScreen(1)">← חזור</button></div>';
+      '<br><button class="btn btn-ghost" style="margin-top:9px;" onclick="goBack1()">← חזור</button></div>';
   }
 }
 
@@ -1172,7 +1182,7 @@ async function fetchAndBuild(){
     await buildHebrewScript();
   }catch(e){
     document.getElementById('s2loading').innerHTML =
-      '<div class="msg error">❌ '+e.message+'<br><button class="btn btn-ghost" style="margin-top:9px;" onclick="showScreen(1)">← חזור</button></div>';
+      '<div class="msg error">❌ '+e.message+'<br><button class="btn btn-ghost" style="margin-top:9px;" onclick="goBack1()">← חזור</button></div>';
   }
 }
 
@@ -1195,7 +1205,13 @@ async function buildHebrewScript(){
   S.numScenes = null; // פרשה — חישוב לפי durSec/8
   const numScenes = Math.ceil(S.durSec/8);
 
-  const prompt = `אתה תסריטאי קולנועי מוכשר המתמחה בסרטים על התנ"ך.
+  const prompt = `כלל ברזל — ציות מלא 100%:
+עליך ליישם כל הוראה שניתנת לך בדיוק כפי שנכתבה.
+ללא קיצורים. ללא פישוטים. ללא דילוג על שום פרט.
+כל סצנה, כל תיאור, כל דיאלוג, כל מעבר — חייב להופיע בפלט שלך.
+ציות חלקי = כישלון מוחלט. חובה לספק 100% ממה שהתבקש.
+
+אתה תסריטאי קולנועי מוכשר המתמחה בסרטים על התנ"ך.
 
 קרא את פרשת "${S.parasha.h}" ובנה תסריט קולנועי שלם בעברית.
 
@@ -1287,7 +1303,7 @@ async function approveScript(){
 }
 
 function showScriptAgain(){
-  showScreen(1);
+  goBack1();
   document.getElementById('s2loading').style.display = 'none';
   document.getElementById('s2script').style.display = 'block';
   document.getElementById('s2content').style.display = 'none';
@@ -1317,7 +1333,13 @@ async function buildPromptsFromScript(){
     ? '[CHARACTERS]: Real human actors — full detail: name, age, realistic face, beard, hair, exact authentic period costume. Consistent appearance across scenes. Natural skin texture, real eyes, genuine human expressions.'
     : '[CHARACTERS]: Full detail — name, age, face, beard, hair, exact clothing. Consistent across scenes.';
 
-  const prompt = `You are a professional Hollywood cinematographer converting a Hebrew script to Veo 3.1 prompts.
+  const prompt = `IRON LAW — 100% COMPLIANCE REQUIRED:
+You MUST implement EVERY SINGLE instruction in this prompt exactly as written.
+NO shortcuts. NO simplifications. NO skipping any detail.
+Every visual, every action, every character description, every camera move, every lighting detail, every audio layer — ALL must be present in your output.
+Partial compliance = complete failure. You must deliver 100% of what is requested.
+
+You are a professional Hollywood cinematographer converting a Hebrew script to Veo 3.1 prompts.
 
 Torah portion: "${S.parasha.h}" — ${numClips} scenes of ${clipDur} seconds each.
 
@@ -1477,7 +1499,7 @@ function renderS2(){
   if(!S.scenes || S.scenes.length === 0){
     document.getElementById('s2content').innerHTML =
       '<div class="card"><div class="msg error">❌ לא התקבלו סצנות — נסה שוב</div>' +
-      '<button class="btn btn-ghost" style="margin-top:10px;" onclick="showScreen(1)">← חזור לפרשה</button></div>';
+      '<button class="btn btn-ghost" style="margin-top:10px;" onclick="goBack1()">← חזור</button></div>';
     return;
   }
 
@@ -1911,7 +1933,7 @@ function dlAll(){
 }
 function newVideo(){
   S.parasha=null; S.parashaText=''; S.scenes=[]; S.clips=[];
-  renderParshiot(); showScreen(1);
+  renderParshiot(); goBack1();
 }
 
 // ════════════════════════════════════════
