@@ -263,11 +263,11 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
 
 <div class="steps">
   <div class="sn active" id="sn0" onclick="showScreen(0)" style="cursor:pointer;"><div class="sdot">1</div><div class="slabel">הגדרות</div></div>
-  <div class="sn" id="sn1" onclick="goBack1()" style="cursor:pointer;"><div class="sdot">2</div><div class="slabel">פרשה</div></div>
+  <div class="sn" id="sn1" onclick="goBack1()" style="cursor:pointer;"><div class="sdot">2</div><div class="slabel">נושא</div></div>
   <div class="sn" id="sn2" onclick="S.hebrewScript?showScriptAgain():showScreen(2)" style="cursor:pointer;"><div class="sdot">3</div><div class="slabel">פרומפטים</div></div>
-  <div class="sn" id="sn3" onclick="showScreen(3)" style="cursor:pointer;"><div class="sdot">4</div><div class="slabel">אימות</div></div>
-  <div class="sn" id="sn4" onclick="showScreen(4)" style="cursor:pointer;"><div class="sdot">5</div><div class="slabel">וידאו</div></div>
-  <div class="sn" id="sn5" onclick="openMergeDirect()" style="cursor:pointer;"><div class="sdot">6</div><div class="slabel">מיזוג</div></div>
+  <div class="sn" id="sn3" style="cursor:pointer;display:none;"><div class="sdot">4</div><div class="slabel">אימות</div></div>
+  <div class="sn" id="sn4" style="cursor:pointer;display:none;"><div class="sdot">5</div><div class="slabel">וידאו</div></div>
+  <div class="sn" id="sn5" onclick="openMergeDirect()" style="cursor:pointer;"><div class="sdot">4</div><div class="slabel">מיזוג</div></div>
 </div>
 
 <main>
@@ -431,8 +431,7 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
     <textarea id="ganDesc" style="width:100%;min-height:100px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Heebo',sans-serif;font-size:.88rem;line-height:1.8;padding:10px;outline:none;resize:vertical;direction:rtl;" placeholder="תאר במילים מה אתה רוצה בסרטון..."></textarea>
     <div style="margin-top:8px;font-size:.74rem;color:var(--muted);" id="ganSceneInfo"></div>
     <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-      <button class="btn btn-ghost" id="btnStyleAnimGan" onclick="setVideoStyle('animation')">🎨 אנימציה</button>
-      <button class="btn btn-ghost" id="btnStyleRealGan" onclick="setVideoStyle('realistic')">🎬 ריאליסטי</button>
+      <button class="btn btn-ghost style-active" id="btnStyleAnimGan">🎨 אנימציה</button>
     </div>
     <button class="btn btn-gold btn-full" style="margin-top:12px;" onclick="buildGanScript()">שלח לג׳ימיני ←</button>
   </div>
@@ -480,10 +479,9 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
       <div id="ovMsg"></div>
     </div>
     <div id="scenesList"></div>
-    <div class="cost-box"><span>עלות ייצור מלא</span><span class="cost-val" id="costVal">—</span></div>
+
     <div class="row-c">
-      <button class="btn btn-green" onclick="goGenerate()" id="btnGenerate">🎬 צור סרטון</button>
-      <button class="btn btn-blue" onclick="copyAllToGemini()">🤖 צור הכל בגמיני</button>
+      <button class="btn btn-gold btn-full" onclick="copyAllToGemini()">🤖 צור הכל בגמיני</button>
       <button class="btn btn-ghost" onclick="showScriptAgain()">📜 חזור לתסריט</button>
       <button class="btn btn-ghost" onclick="goBack1()">← חזור</button>
     </div>
@@ -491,50 +489,8 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
 
 </div>
 
-<div class="screen" id="s3">
-  <div class="sh"><h2 id="s3title">מייצר סצנה...</h2><p id="s3sub">סצנה 1 מתוך 25</p></div>
-  <div class="card">
-    <div class="prog-top"><span class="prog-title" id="s3progTitle">⚙️ מעבד...</span><span class="prog-pct" id="progPct">0%</span></div>
-    <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
-  </div>
-  <!-- תצוגת הסצנה הנוכחית -->
-  <div class="card" id="s3preview" style="display:none;">
-    <div class="ch" id="s3previewTitle">סצנה 1</div>
-    <video id="s3video" controls playsinline style="width:100%;border-radius:8px;background:#000;"></video>
-    <div style="margin-top:12px;font-size:.82rem;color:var(--muted);text-align:center;" id="s3desc"></div>
-    <div style="display:flex;gap:10px;margin-top:14px;justify-content:center;" id="s3actions">
-      <button class="btn btn-green" id="btnContinue" onclick="continueGen()">המשך לסצנה הבאה ←</button>
-      <button class="btn btn-ghost" id="btnStopGen" onclick="stopGen()">עצור ושמור</button>
-    </div>
-  </div>
-  <!-- סצנה בתהליך -->
-  <div class="card" id="s3generating">
-    <div style="display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.84rem;">
-      <span class="spin"></span><span id="s3genMsg">שולח ל-Veo...</span>
-    </div>
-  </div>
-  <!-- רשימת סצנות שהושלמו -->
-  <div class="card" id="s3doneList" style="display:none;">
-    <div class="ch">✅ סצנות שהושלמו</div>
-    <div id="s3doneItems"></div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════
-     S4: תוצאות
-═══════════════════════════════ -->
-<div class="screen" id="s4">
-  <div class="sh"><h2>הסרטון מוכן 🎉</h2><p id="s4sub"></p></div>
-  <div class="card">
-    <div class="ch">🎬 קליפים</div>
-    <div class="res-grid" id="resGrid"></div>
-    <div class="row-c" style="margin-top:14px;">
-      <button class="btn btn-green" onclick="dlAll()">⬇️ הורד הכל</button>
-      <button class="btn btn-gold" onclick="showScreen(5)">🎬 ערוך ומזג לסרטון אחד</button>
-      <button class="btn btn-ghost" onclick="newVideo()">🔄 פרשה חדשה</button>
-    </div>
-  </div>
-</div>
+<div class="screen" id="s3" style="display:none;"></div>
+<div class="screen" id="s4" style="display:none;"></div>
 
 
 <!-- S5: VIDEO EDITOR -->
@@ -618,13 +574,13 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
     <div id="narStep1">
       <div style="font-size:.84rem;font-weight:600;color:var(--glt);margin-bottom:8px;">שלב 1 — טקסט קריינות</div>
       <div class="fld" style="margin-bottom:10px;">
-        <label style="font-size:.78rem;color:var(--muted);">מספר קליפים בסרטון (כל קליפ = 8 שניות)</label>
+        <label style="font-size:.78rem;color:var(--muted);">מספר קליפים בסרטון (כל קליפ = 10 שניות)</label>
         <input type="number" id="narClips" min="1" max="60" value="24" style="width:90px;text-align:center;">
         <span style="font-size:.74rem;color:var(--muted);margin-right:8px;">= <span id="narDurDisplay">192</span> שניות</span>
       </div>
       <div class="fld" style="margin-bottom:10px;">
         <label style="font-size:.78rem;color:var(--muted);">תאר את הסרטון (אופציונלי — לסרטון חיצוני)</label>
-        <textarea id="narVideoDesc" style="width:100%;min-height:60px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Heebo',sans-serif;font-size:.82rem;line-height:1.6;padding:8px;outline:none;resize:vertical;direction:rtl;" placeholder="לדוגמה: משה עולה להר סיני, השם מדבר אליו מתוך הענן, 3 קליפים של 8 שניות"></textarea>
+        <textarea id="narVideoDesc" style="width:100%;min-height:60px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Heebo',sans-serif;font-size:.82rem;line-height:1.6;padding:8px;outline:none;resize:vertical;direction:rtl;" placeholder="לדוגמה: משה עולה להר סיני, השם מדבר אליו מתוך הענן, 3 קליפים של 10 שניות"></textarea>
       </div>
       <div class="row-c" style="justify-content:flex-start;margin-bottom:10px;gap:8px;">
         <button class="btn btn-ghost" onclick="generateNarText()" id="btnGenNar">✨ קריינות עם Gemini</button>
@@ -747,7 +703,7 @@ const PARSHIOT = [
 // ════════════════════════════════════════
 // VEO 3 BEST PRACTICES (Google official)
 // ════════════════════════════════════════
-const VEO_STYLE = 'Cinematic 3D biblical animation, Pixar-quality photorealistic render, ancient Middle East setting, 8 seconds';
+const VEO_STYLE = 'Cinematic 3D biblical animation, Pixar-quality photorealistic render, ancient Middle East setting, 10 seconds';
 const VEO_CHECKS = [
   {k:'subject',   label:'נושא ברור',     q:'האם ברור מה/מי נמצא בסצנה?'},
   {k:'action',    label:'פעולה',         q:'האם יש תנועה/פעולה ברורה?'},
@@ -755,7 +711,7 @@ const VEO_CHECKS = [
   {k:'lighting',  label:'תאורה',         q:'האם יש תיאור תאורה?'},
   {k:'style',     label:'סגנון',         q:'האם הסגנון מוגדר בבירור?'},
   {k:'no_text',   label:'ללא טקסט',      q:'האם הפרומפט לא מבקש כיתוב בוידאו?'},
-  {k:'duration',  label:'8 שניות',       q:'האם מתאים לקליפ קצר של 8 שניות?'},
+  {k:'duration',  label:'10 שניות',      q:'האם מתאים לקליפ קצר של 10 שניות?'},
   {k:'emotion',   label:'אווירה/רגש',    q:'האם יש תיאור רגשי/אווירתי?'},
 ];
 
@@ -898,7 +854,7 @@ function calcDur(){
   const m=parseInt(document.getElementById('durM').value)||0;
   const s=parseInt(document.getElementById('durS').value)||0;
   S.durSec=m*60+s;
-  const clips=Math.max(1,Math.ceil(S.durSec/8));
+  const clips=Math.max(1,Math.ceil(S.durSec/10));
   const rate=S.model==='fast'?0.15:0.40;
   document.getElementById('durInfo').innerHTML=
     `<strong>${S.durSec} שניות</strong>${clips} קליפים | עלות: $${(S.durSec*rate).toFixed(2)}`;
@@ -906,7 +862,7 @@ function calcDur(){
 function gotoParasha(){
   const k=document.getElementById('apiKey').value.trim();
   if(k){S.apiKey=k; localStorage.setItem('veo_key',k);}
-  if(S.durSec<8){toast('אורך מינימלי: 8 שניות'); return;}
+  if(S.durSec<10){toast('אורך מינימלי: 10 שניות'); return;}
   showScreen(1); // פרשה תמיד ל-s1
 }
 
@@ -1059,6 +1015,7 @@ async function buildGanScript(){
   const numScenes = S.ganType === 'birthday' ? 4 : 9;
   S.durSec = numScenes * 10;
   S.numScenes = numScenes;
+  S.videoStyle = 'animation'; // גן בשן — תמיד אנימציה
   S.parashaText = '';
   S.parasha = { h: S.ganTopic, r: '', b: '' };
 
@@ -1132,7 +1089,7 @@ function setVideoStyle(style){
 }
 
 function _clearStyleBtns(){
-  ['btnStyleAnim','btnStyleReal','btnStyleAnimGan','btnStyleRealGan'].forEach(id => {
+  ['btnStyleAnim','btnStyleReal','btnStyleAnimGan'].forEach(id => {
     const b = document.getElementById(id);
     if(b){ b.classList.remove('style-active'); b.style.borderColor=''; b.style.color=''; }
   });
@@ -1141,7 +1098,7 @@ function _clearStyleBtns(){
 function _updateStyleBtns(style){
   _clearStyleBtns();
   const animIds = ['btnStyleAnim','btnStyleAnimGan'];
-  const realIds = ['btnStyleReal','btnStyleRealGan'];
+  const realIds = ['btnStyleReal'];
   const activeIds = style === 'animation' ? animIds : realIds;
   activeIds.forEach(id => {
     const b = document.getElementById(id);
@@ -1202,8 +1159,8 @@ function flatText(arr){
 }
 
 async function buildHebrewScript(){
-  S.numScenes = null; // פרשה — חישוב לפי durSec/8
-  const numScenes = Math.ceil(S.durSec/8);
+  S.numScenes = null; // פרשה — חישוב לפי durSec/10
+  const numScenes = Math.ceil(S.durSec/10);
 
   const prompt = `כלל ברזל — ציות מלא 100%:
 עליך ליישם כל הוראה שניתנת לך בדיוק כפי שנכתבה.
@@ -1220,7 +1177,7 @@ async function buildHebrewScript(){
 ${S.parashaText}
 ---
 
-המשימה: כתוב תסריט קולנועי מלא ב-${numScenes} סצנות (כל סצנה = 8 שניות).
+המשימה: כתוב תסריט קולנועי מלא ב-${numScenes} סצנות (כל סצנה = 10 שניות).
 
 כללים:
 • הסיפור חייב להיות רציף מהסצנה הראשונה עד האחרונה — עלילה עם התחלה, אמצע וסוף
@@ -1232,7 +1189,7 @@ ${S.parashaText}
 • קרבות ומלחמות — תאר מרחוק כתנועת צבאות, ללא אלימות ישירה
 
 כללי ברזל לדיאלוג:
-• כל סצנה היא 8 שניות בלבד — מקסימום משפט אחד או שניים קצרים לכל הסצנה
+• כל סצנה היא 10 שניות בלבד — מקסימום משפט אחד או שניים קצרים לכל הסצנה
 • הדיאלוג חייב להיות מתוך הפרשה עצמה — ציטוט מדויק או פרפראזה צמודה
 • פזר את הדיאלוגים על פני כל הסצנות — אל תעמיס הכל בסצנה אחת
 • משפט דיאלוג = עד 8 מילים בלבד
@@ -1303,7 +1260,7 @@ async function approveScript(){
 }
 
 function showScriptAgain(){
-  goBack1();
+  showScreen(2);
   document.getElementById('s2loading').style.display = 'none';
   document.getElementById('s2script').style.display = 'block';
   document.getElementById('s2content').style.display = 'none';
@@ -1315,7 +1272,7 @@ function showScriptAgain(){
 }
 
 async function buildPromptsFromScript(){
-  const numClips = S.numScenes || Math.ceil(S.durSec/8);
+  const numClips = S.numScenes || Math.ceil(S.durSec/10);
 
   // Show progress
   setMsg('Gemini בונה ' + numClips + ' פרומפטים... (זה לוקח כ-30 שניות)');
@@ -1323,7 +1280,7 @@ async function buildPromptsFromScript(){
   const effectiveStyle = S.videoStyle || 'animation';
   const isRealistic = effectiveStyle === 'realistic';
   const isAnimation = effectiveStyle === 'animation';
-  const clipDur = S.numScenes ? 10 : 8; // גן בשן = 10 שניות, פרשה = 8 שניות
+  const clipDur = 10; // תמיד 10 שניות לקליפ
 
   const styleBlock = isRealistic
     ? `[STYLE]: Photorealistic live-action 4K cinematic film. Real human actors with authentic appearance. Shot on RED camera, anamorphic lens. ${clipDur} seconds per clip. FAMILY FRIENDLY — suitable for all ages. NO text overlays. NO subtitles. NO on-screen writing. Clean screen only. AUDIO: maintain FULL VOLUME throughout the entire ${clipDur} seconds — NO fade in, NO fade out. Consistent audio level from first frame to last frame.`
@@ -1400,7 +1357,7 @@ ${charsBlock}
 [TRANSITION]: FADE — every clip MUST start with a 0.5 second FADE_IN and end with a 0.5 second FADE_OUT. This is an IRON LAW — no exceptions. Every single clip fades in and fades out.
 
 JSON format ONLY:
-{"scenes":[{"id":1,"hebrewDesc":"תיאור בעברית","hebrewDialogue":"משפט הדיאלוג מהתסריט — או ריק אם אין","transition":"HARD_CUT","prompt":"full English prompt","duration":8}]}`;
+{"scenes":[{"id":1,"hebrewDesc":"תיאור בעברית","hebrewDialogue":"משפט הדיאלוג מהתסריט — או ריק אם אין","transition":"HARD_CUT","prompt":"full English prompt","duration":10}]}`;
 
   let raw, clean, parsed;
 
@@ -1437,7 +1394,7 @@ JSON format ONLY:
     parsed = JSON.parse(clean);
   } catch(e) {
     // Try to extract individual scene objects
-    const sceneMatches = [...clean.matchAll(/\{"id"\s*:\s*\d+[\s\S]*?"duration"\s*:\s*8\s*\}/g)];
+    const sceneMatches = [...clean.matchAll(/\{"id"\s*:\s*\d+[\s\S]*?"duration"\s*:\s*10\s*\}/g)];
     const scenes = [];
     for(const m of sceneMatches) {
       try { scenes.push(JSON.parse(m[0])); } catch(e2) {}
@@ -1874,7 +1831,7 @@ async function genClip(sc,idx){
     BASE+'/models/'+MODEL_ID[S.model]+':predictLongRunning',
     {method:'POST',
      headers:{'Content-Type':'application/json','x-goog-api-key':S.apiKey},
-     body:JSON.stringify({instances:[{prompt:sc.prompt}],parameters:{aspectRatio:'16:9',durationSeconds:8,sampleCount:1}})}
+     body:JSON.stringify({instances:[{prompt:sc.prompt}],parameters:{aspectRatio:'16:9',durationSeconds:10,sampleCount:1}})}
   );
   if(!resp.ok){const e=await resp.json();throw new Error(e.error?.message||'שגיאת שליחה '+resp.status);}
   const op=await resp.json();
@@ -2093,7 +2050,7 @@ async function startMerge(){
     for(let i = 0; i < vids.length; i++){
       const curr    = vids[i];
       const gCurr   = gains[i];
-      const durMs   = (isNaN(curr.duration)||!isFinite(curr.duration) ? 8 : curr.duration) * 1000;
+      const durMs   = (isNaN(curr.duration)||!isFinite(curr.duration) ? 10 : curr.duration) * 1000;
       const next    = vids[i+1] || null;
       const gNext   = gains[i+1] || null;
       const isFirst = i === 0;
@@ -2285,7 +2242,7 @@ function openNarDirect(){
     document.getElementById('duckVal').textContent = this.value;
   };
   document.getElementById('narClips').oninput = function(){
-    document.getElementById('narDurDisplay').textContent = (parseInt(this.value)||0)*8;
+    document.getElementById('narDurDisplay').textContent = (parseInt(this.value)||0)*10;
   };
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -2298,7 +2255,7 @@ function showNarration(){
     document.getElementById('duckVal').textContent = this.value;
   };
   document.getElementById('narClips').oninput = function(){
-    document.getElementById('narDurDisplay').textContent = (parseInt(this.value)||0)*8;
+    document.getElementById('narDurDisplay').textContent = (parseInt(this.value)||0)*10;
   };
 }
 
@@ -2312,7 +2269,7 @@ async function generateNarText(){
   ttsBtn.onclick = generateTTS;
   try{
     const clips = parseInt(document.getElementById('narClips').value) || 24;
-    const dur = clips * 8;
+    const dur = clips * 10;
     const parasha = S.parasha?.h || '';
     const scenes = S.scenes || [];
     const videoDesc = document.getElementById('narVideoDesc').value.trim();
@@ -2325,7 +2282,7 @@ async function generateNarText(){
       for(let i=0;i<clips;i++){
         const sc = scenes[i];
         const title = sc ? sc.title || ('סצנה '+(i+1)) : ('סצנה '+(i+1));
-        scenesDesc += (i+1)+'. ['+((i*8)+'–'+((i+1)*8)+' שניות')+'] '+title+'\n';
+        scenesDesc += (i+1)+'. ['+((i*10)+'–'+((i+1)*10)+' שניות')+'] '+title+'\n';
       }
     }
 
@@ -2397,7 +2354,7 @@ function renderNarBlocks(blocks, clips){
     const text = blocks[i] || '';
     const wc = countWords(text);
     const over = wc > MAX_WORDS_PER_BLOCK;
-    const start = i*8, end = (i+1)*8;
+    const start = i*10, end = (i+1)*10;
     html += '<div style="margin-bottom:8px;">'+
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">'+
         '<span style="font-size:.7rem;color:var(--gold);font-weight:600;">'+(i+1)+'. ['+start+'–'+end+' שניות]</span>'+
@@ -2466,9 +2423,9 @@ async function generateTTS(){
 
   try{
     const voice = document.getElementById('narVoice').value;
-    const CLIP_SEC = 8;
+    const CLIP_SEC = 10;
     const OVERLAP = 0.2;
-    const BLOCK_START = CLIP_SEC - OVERLAP; // 7.8 — כל בלוק מתחיל ב-i×7.8
+    const BLOCK_START = CLIP_SEC - OVERLAP; // 9.8 — כל בלוק מתחיל ב-i×9.8
 
     // פצל לבלוקים לפי [BLOCK_N]
     const rawBlocks = [];
@@ -2528,8 +2485,8 @@ async function generateTTS(){
       }
     }
 
-    // שלב 2 — הרכב buffer בדיוק N×8 שניות
-    // בלוק i מתחיל ב: i × 7.8 שניות
+    // שלב 2 — הרכב buffer בדיוק N×10 שניות
+    // בלוק i מתחיל ב: i × 9.8 שניות
     btn.textContent = '⏳ מרכיב...';
     const SR = decoded[0].sampleRate;
     const TOTAL_SAMPLES = Math.round(N * CLIP_SEC * SR);
@@ -2537,7 +2494,7 @@ async function generateTTS(){
 
     for(let i=0;i<decoded.length;i++){
       const startSample = Math.round(i * BLOCK_START * SR);
-      const maxSamples = Math.round(BLOCK_START * SR); // חותך בדיוק ל-7.8 שניות
+      const maxSamples = Math.round(BLOCK_START * SR); // חותך בדיוק ל-9.8 שניות
       const src = decoded[i].getChannelData(0);
       const len = Math.min(src.length, maxSamples, TOTAL_SAMPLES - startSample);
       for(let j=0;j<len;j++) out[startSample+j] += src[j];
@@ -2759,7 +2716,7 @@ async function generateVoiceAct(){
       for(let i=0;i<clips;i++){
         const sc = scenes[i];
         const title = sc ? sc.title || ('סצנה '+(i+1)) : ('סצנה '+(i+1));
-        scenesDesc += (i+1)+'. ['+(i*8)+'–'+((i+1)*8)+' שניות] '+title+'\n';
+        scenesDesc += (i+1)+'. ['+(i*10)+'–'+((i+1)*10)+' שניות] '+title+'\n';
       }
     }
 
@@ -2949,7 +2906,7 @@ function openManualNar(){
   const narClipsEl = document.getElementById('narClips');
   narClipsEl.oninput = function(){
     const n = Math.min(25, Math.max(1, parseInt(this.value)||1));
-    document.getElementById('narDurDisplay').textContent = n * 8;
+    document.getElementById('narDurDisplay').textContent = n * 10;
     renderManualBlocks(n);
   };
 
@@ -2970,7 +2927,7 @@ function renderManualBlocks(n){
 
   let html = '';
   for(let i = 0; i < n; i++){
-    const start = i * 8, end = (i + 1) * 8;
+    const start = i * 10, end = (i + 1) * 10;
     html += `
     <div style="margin-bottom:12px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
@@ -3019,9 +2976,9 @@ async function generateManualTTS(){
   btn.disabled = true;
   btn.textContent = '⏳ יוצר קול...';
 
-  const CLIP_SEC = 8;
+  const CLIP_SEC = 10;
   const OVERLAP = 0.2;
-  const BLOCK_START = CLIP_SEC - OVERLAP; // 7.8 שניות
+  const BLOCK_START = CLIP_SEC - OVERLAP; // 9.8 שניות
 
   try{
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -3093,7 +3050,7 @@ async function generateManualTTS(){
 
     if(!decoded.length) throw new Error('לא התקבל אודיו');
 
-    // שלב ג — הרכב buffer בדיוק N×8 שניות עם OVERLAP 0.2 — בדיוק כמו generateTTS
+    // שלב ג — הרכב buffer בדיוק N×10 שניות עם OVERLAP 0.2 — בדיוק כמו generateTTS
     btn.textContent = '⏳ מרכיב...';
     const SR = decoded[0].sampleRate;
     const TOTAL_SAMPLES = Math.round(N * CLIP_SEC * SR);
