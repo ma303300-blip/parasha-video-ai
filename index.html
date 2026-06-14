@@ -1308,7 +1308,7 @@ ${S.hebrewScript}
 Convert EACH of the ${numClips} scenes into a Veo 3.1 prompt with ALL sections MANDATORY.
 
 CRITICAL: Every single prompt MUST contain ALL of these sections — if ANY section is missing the prompt is REJECTED:
-[NO DIALOGUE] ✓ [STYLE] ✓ [CHARACTERS] ✓ [SETTING] ✓ [ACTION] ✓ [CAMERA] ✓ [LIGHTING] ✓ [DRAMA] ✓ [AUDIO] ✓ [COLOR_GRADE] ✓ [TRANSITION: FADE with 0.5s FADE_IN and FADE_OUT] ✓
+[NO DIALOGUE] ✓ [STYLE] ✓ [CHARACTERS] ✓ [SETTING] ✓ [ACTION] ✓ [CAMERA] ✓ [LIGHTING] ✓ [DRAMA] ✓ [AUDIO] ✓ [COLOR_GRADE] ✓ [TRANSITION] ✓
 
 DO NOT skip any section. DO NOT merge sections. Write each section explicitly with its label.
 
@@ -1321,11 +1321,12 @@ CRITICAL MUSIC RULE — treat the music like a real film score:
 - Scene ${numClips}: music resolves and fades to silence
 - FORBIDDEN: starting a completely new musical idea in consecutive HARD_CUT scenes
 
-IRON LAW — FADE FOR EVERY CLIP — NO EXCEPTIONS:
-Every single clip MUST begin with a 0.5 second FADE_IN and end with a 0.5 second FADE_OUT.
-This applies to ALL clips without exception — first, middle, and last.
-FORBIDDEN: any clip that does not have both FADE_IN at start and FADE_OUT at end.
-FORBIDDEN: HARD_CUT, CUT, or any other transition type.
+CRITICAL CHARACTER DIVERSITY RULE — IRON LAW:
+When multiple characters appear in a scene, EVERY character MUST look distinctly different from all others.
+Different face structure, different age, different hair color/style, different beard/no beard, different clothing color and style, different height and build.
+FORBIDDEN: two characters that look similar or identical to each other.
+FORBIDDEN: copy-paste appearances — each person is a unique individual with unique visual traits.
+If there are 5 people — 5 completely different looks. If there are 100 people — maximum visual variety.
 
 CRITICAL CHARACTER CONSISTENCY RULE — IRON LAW:
 - Every character introduced in scene 1 MUST look IDENTICAL in every subsequent scene
@@ -1354,7 +1355,7 @@ ${charsBlock}
 (5) AUDIO DYNAMICS: does sound build to peak? sudden silence? whisper to roar? specify the arc
 (6) ABSOLUTE SILENCE for all human voices — NO speaking, NO dialogue, NO narration, NO singing of any kind. Ambient sounds and music ONLY throughout the entire clip.
 [COLOR_GRADE]: Unique color palette.
-[TRANSITION]: FADE — every clip MUST start with a 0.5 second FADE_IN and end with a 0.5 second FADE_OUT. This is an IRON LAW — no exceptions. Every single clip fades in and fades out.
+[TRANSITION]: HARD_CUT — the editor handles all transitions between clips.
 
 JSON format ONLY:
 {"scenes":[{"id":1,"hebrewDesc":"תיאור בעברית","hebrewDialogue":"משפט הדיאלוג מהתסריט — או ריק אם אין","transition":"HARD_CUT","prompt":"full English prompt","duration":10}]}`;
