@@ -2065,106 +2065,102 @@ async function startMerge(){
     rec.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
     rec.start(100);
 
-    const JCUT_MS = 200;   // J-cut: אודיו מתחיל 0.2 שניות לפני החלפת תמונה
-    const XFADE_MS = 800;  // cross-fade אודיו בסצנות FADE
-    const FADE_MS = 600;   // fade in/out לסצנה ראשונה ואחרונה
+    const OVERLAP_MS = 500; // כלל ברזל — 0.5 שניות overlap בין כל קליפ
 
     // STEP 3: Play each clip
     for(let i = 0; i < vids.length; i++){
       const curr    = vids[i];
       const gCurr   = gains[i];
-      const clip    = VE.clips[i];
       const durMs   = (isNaN(curr.duration)||!isFinite(curr.duration) ? 8 : curr.duration) * 1000;
       const next    = vids[i+1] || null;
       const gNext   = gains[i+1] || null;
       const isFirst = i === 0;
       const isLast  = i === vids.length - 1;
 
-      // קרא transition מה-S.clips אם קיים
-      const clipData = S.clips && S.clips[i];
-      const trans = clipData?.scene?.transition || 'HARD_CUT';
-      const nextTrans = S.clips && S.clips[i+1] ? (S.clips[i+1].scene?.transition || 'HARD_CUT') : 'FADE_OUT';
-
       setMergeStatus('מעבד קליפ ' + (i+1) + ' מתוך ' + vids.length);
       setMergePct(18 + Math.round(i / vids.length * 75));
 
-      // Fade in אודיו — רק לסצנה ראשונה
+      // FADE IN אודיו — רק לקליפ הראשון
+      // קליפים שניים ואילך כבר מקבלים FADE IN מה-crossfade של הקליפ הקודם
       const now = audioCtx.currentTime;
-      gCurr.gain.cancelScheduledValues(now);
       if(isFirst){
+        gCurr.gain.cancelScheduledValues(now);
         gCurr.gain.setValueAtTime(0, now);
-        gCurr.gain.linearRampToValueAtTime(1, now + FADE_MS/1000);
-      } else {
-        gCurr.gain.setValueAtTime(1, now);
+        gCurr.gain.linearRampToValueAtTime(1, now + OVERLAP_MS/1000);
       }
 
-      // Reset and play
-      curr.currentTime = 0;
-      await curr.play();
+      // Reset and play — רק אם הקליפ לא כבר רץ (הופעל מהסיבוב הקודם כ-next)
+      if(curr.paused || curr.ended || curr.currentTime < 0.01){
+        curr.currentTime = 0;
+        await curr.play();
+      }
 
-      // Draw loop
+      // Draw loop — משתמש ב-video.currentTime לסנכרון מדויק (לא performance.now)
       await new Promise(resolve => {
-        const t0 = performance.now();
+        const clipDurSec = durMs / 1000;
+        const overlapSec = OVERLAP_MS / 1000;
         let transitionStarted = false;
+        let ended = false;
 
         function frame(){
-          const elapsed = performance.now() - t0;
-          const remaining = durMs - elapsed;
+          if(ended) return;
+          // currentTime הוא הזמן האמיתי של הוידאו — מדויק ב-Android
+          const elapsed = curr.currentTime;
+          const remaining = clipDurSec - elapsed;
 
-          // ציור רציף
-          ctx.drawImage(curr, 0, 0, canvas.width, canvas.height);
-
-          if(!transitionStarted){
-            if(isLast){
-              // סצנה אחרונה — fade out אודיו + תמונה
-              if(remaining <= FADE_MS){
-                transitionStarted = true;
-                const t = audioCtx.currentTime;
-                gCurr.gain.cancelScheduledValues(t);
-                gCurr.gain.setValueAtTime(1, t);
-                gCurr.gain.linearRampToValueAtTime(0, t + FADE_MS/1000);
-              }
-            } else if(nextTrans === 'FADE' || nextTrans === 'FADE_IN'){
-              // FADE — cross-fade אודיו + תמונה
-              if(next && remaining <= XFADE_MS){
-                transitionStarted = true;
-                next.currentTime = 0;
-                next.play().catch(()=>{});
-                const t = audioCtx.currentTime;
-                if(gNext){
-                  gNext.gain.cancelScheduledValues(t);
-                  gNext.gain.setValueAtTime(0, t);
-                  gNext.gain.linearRampToValueAtTime(1, t + XFADE_MS/1000);
-                }
-                gCurr.gain.cancelScheduledValues(t);
-                gCurr.gain.setValueAtTime(1, t);
-                gCurr.gain.linearRampToValueAtTime(0, t + XFADE_MS/1000);
-              }
-            } else {
-              // HARD_CUT — J-cut: אודיו הבא מתחיל לפני החלפת תמונה
-              if(next && remaining <= JCUT_MS){
-                transitionStarted = true;
-                next.currentTime = 0;
-                next.play().catch(()=>{});
-                if(gNext){
-                  const t = audioCtx.currentTime;
-                  gNext.gain.cancelScheduledValues(t);
-                  gNext.gain.setValueAtTime(0, t);
-                  gNext.gain.linearRampToValueAtTime(1, t + JCUT_MS/1000);
-                }
-              }
-            }
+          // FADE IN alpha — 0.5 שניות ראשונות
+          let currAlpha = 1;
+          if(elapsed < overlapSec){
+            currAlpha = Math.max(0, Math.min(1, elapsed / overlapSec));
+          }
+          // FADE OUT alpha — 0.5 שניות אחרונות
+          if(remaining < overlapSec && remaining >= 0){
+            currAlpha = Math.min(currAlpha, Math.max(0, remaining / overlapSec));
           }
 
-          if(elapsed < durMs){
-            requestAnimationFrame(frame);
+          // נקה canvas עם שחור
+          ctx.fillStyle = '#000';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          // cross-fade: ציור שני קליפים יחד בזמן המעבר
+          if(transitionStarted && next){
+            const nextAlpha = Math.max(0, Math.min(1, (overlapSec - remaining) / overlapSec));
+            ctx.globalAlpha = nextAlpha;
+            try { ctx.drawImage(next, 0, 0, canvas.width, canvas.height); } catch(e){}
+            ctx.globalAlpha = currAlpha;
+            try { ctx.drawImage(curr, 0, 0, canvas.width, canvas.height); } catch(e){}
           } else {
-            curr.pause();
-            if(trans === 'HARD_CUT' || trans === 'FADE_IN'){
-              gCurr.gain.setValueAtTime(0, audioCtx.currentTime);
-            }
-            resolve();
+            ctx.globalAlpha = currAlpha;
+            try { ctx.drawImage(curr, 0, 0, canvas.width, canvas.height); } catch(e){}
           }
+          ctx.globalAlpha = 1;
+
+          // התחל מעבר כש-0.5 שניות נשארו
+          if(!transitionStarted && remaining <= overlapSec && remaining >= 0){
+            transitionStarted = true;
+            const t = audioCtx.currentTime;
+            gCurr.gain.cancelScheduledValues(t);
+            gCurr.gain.setValueAtTime(gCurr.gain.value, t);
+            gCurr.gain.linearRampToValueAtTime(0, t + overlapSec);
+            if(next && gNext){
+              next.currentTime = 0;
+              next.play().catch(()=>{});
+              gNext.gain.cancelScheduledValues(t);
+              gNext.gain.setValueAtTime(0, t);
+              gNext.gain.linearRampToValueAtTime(1, t + overlapSec);
+            }
+          }
+
+          // סיום קליפ
+          if(remaining <= 0 || curr.ended){
+            ended = true;
+            curr.pause();
+            // לא מאפסים gain מיידית — ה-ramp של crossfade כבר מוריד אותו בחלקות
+            resolve();
+            return;
+          }
+
+          requestAnimationFrame(frame);
         }
         requestAnimationFrame(frame);
       });
