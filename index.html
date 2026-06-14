@@ -1116,13 +1116,6 @@ async function buildGanScript(){
 }
 
 function setVideoStyle(style){
-  // לחיצה שנייה על אותו כפתור — ביטול
-  if(S.videoStyle === style){
-    S.videoStyle = null;
-    localStorage.removeItem('saved_videoStyle');
-    _clearStyleBtns();
-    return;
-  }
   S.videoStyle = style;
   localStorage.setItem('saved_videoStyle', style);
   _updateStyleBtns(style);
@@ -1311,13 +1304,10 @@ async function buildPromptsFromScript(){
   // Show progress
   setMsg('Gemini בונה ' + numClips + ' פרומפטים... (זה לוקח כ-30 שניות)');
 
-  const isRealistic = S.videoStyle === 'realistic';
-  const isAnimation = !S.videoStyle || S.videoStyle === 'animation';
+  const effectiveStyle = S.videoStyle || 'animation';
+  const isRealistic = effectiveStyle === 'realistic';
+  const isAnimation = effectiveStyle === 'animation';
   const clipDur = S.numScenes ? 10 : 8; // גן בשן = 10 שניות, פרשה = 8 שניות
-
-  if(!S.videoStyle){
-    toast('⚠️ לא נבחר סגנון — ברירת מחדל: אנימציה');
-  }
 
   const styleBlock = isRealistic
     ? `[STYLE]: Photorealistic live-action 4K cinematic film. Real human actors with authentic appearance. Shot on RED camera, anamorphic lens. ${clipDur} seconds per clip. FAMILY FRIENDLY — suitable for all ages. NO text overlays. NO subtitles. NO on-screen writing. Clean screen only. AUDIO: maintain FULL VOLUME throughout the entire ${clipDur} seconds — NO fade in, NO fade out. Consistent audio level from first frame to last frame.`
