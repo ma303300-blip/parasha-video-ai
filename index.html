@@ -1060,7 +1060,7 @@ async function buildGanScript(){
 
     document.getElementById('s2loading').style.display = 'none';
     document.getElementById('s2script').style.display = 'block';
-    document.getElementById('scriptParashaName').textContent = S.ganTopic;
+    const spn3 = document.getElementById('scriptParashaName'); if(spn3) spn3.textContent = S.ganTopic || '';
     document.getElementById('scriptMeta').textContent = numScenes + ' סצנות · ' + S.durSec + ' שניות';
     document.getElementById('scriptView').textContent = S.hebrewScript;
     document.getElementById('scriptEdit').value = S.hebrewScript;
@@ -1214,7 +1214,7 @@ ${S.parashaText}
 
   document.getElementById('s2loading').style.display = 'none';
   document.getElementById('s2script').style.display = 'block';
-  document.getElementById('scriptParashaName').textContent = S.parasha.h;
+  const spn1 = document.getElementById('scriptParashaName'); if(spn1) spn1.textContent = S.parasha?.h || S.ganTopic || '';
   document.getElementById('scriptMeta').textContent = numScenes + ' סצנות · ' + S.durSec + ' שניות';
   document.getElementById('scriptView').textContent = S.hebrewScript;
   document.getElementById('scriptEdit').value = S.hebrewScript;
@@ -1254,7 +1254,7 @@ function showScriptAgain(){
   document.getElementById('s2script').style.display = 'block';
   document.getElementById('s2content').style.display = 'none';
   if(S.hebrewScript){
-    document.getElementById('scriptParashaName').textContent = S.parasha?.h || '';
+    const spn2 = document.getElementById('scriptParashaName'); if(spn2) spn2.textContent = S.parasha?.h || S.ganTopic || '';
     document.getElementById('scriptView').textContent = S.hebrewScript;
     document.getElementById('scriptEdit').value = S.hebrewScript;
   }
