@@ -1061,7 +1061,7 @@ async function buildGanScript(){
     document.getElementById('s2loading').style.display = 'none';
     document.getElementById('s2script').style.display = 'block';
     const spn3 = document.getElementById('scriptParashaName'); if(spn3) spn3.textContent = S.ganTopic || '';
-    document.getElementById('scriptMeta').textContent = numScenes + ' סצנות · ' + S.durSec + ' שניות';
+    const smEl = document.getElementById('scriptMeta'); if(smEl) smEl.textContent = numScenes + ' סצנות · ' + S.durSec + ' שניות';
     document.getElementById('scriptView').textContent = S.hebrewScript;
     document.getElementById('scriptEdit').value = S.hebrewScript;
   } catch(e) {
@@ -1215,7 +1215,7 @@ ${S.parashaText}
   document.getElementById('s2loading').style.display = 'none';
   document.getElementById('s2script').style.display = 'block';
   const spn1 = document.getElementById('scriptParashaName'); if(spn1) spn1.textContent = S.parasha?.h || S.ganTopic || '';
-  document.getElementById('scriptMeta').textContent = numScenes + ' סצנות · ' + S.durSec + ' שניות';
+  const smEl = document.getElementById('scriptMeta'); if(smEl) smEl.textContent = numScenes + ' סצנות · ' + S.durSec + ' שניות';
   document.getElementById('scriptView').textContent = S.hebrewScript;
   document.getElementById('scriptEdit').value = S.hebrewScript;
 }
@@ -1238,7 +1238,7 @@ async function approveScript(){
   saveState();
   document.getElementById('s2script').style.display = 'none';
   document.getElementById('s2loading').style.display = 'block';
-  document.getElementById('s2loadMsg').textContent = 'Gemini בונה פרומפטים לVeo 3...';
+  const s2lm = document.getElementById('s2loadMsg'); if(s2lm) s2lm.textContent = 'Gemini בונה פרומפטים לVeo 3...';
   try{
     await buildPromptsFromScript();
   }catch(e){
@@ -1472,7 +1472,7 @@ function renderS2(){
 
   // Cost
   const rate=S.model==='fast'?0.15:0.40;
-  document.getElementById('costVal').textContent='$'+(S.durSec*rate).toFixed(2);
+  const cvEl = document.getElementById('costVal'); if(cvEl) cvEl.textContent='$'+(S.durSec*rate).toFixed(2);
 }
 
 function buildCard(sc,i){
@@ -1647,18 +1647,18 @@ async function genNext(){
     return;
   }
   const total=S.scenes.length;
-  document.getElementById('s3title').textContent='מייצר סצנה '+(i+1)+' מתוך '+total;
+  const s3t = document.getElementById('s3title'); if(s3t) s3t.textContent='מייצר סצנה '+(i+1)+' מתוך '+total;
   document.getElementById('s3sub').textContent=(ganMode?'':'פרשת ')+S.parasha.h;
-  document.getElementById('s3progTitle').textContent='⚙️ סצנה '+(i+1)+' מתוך '+total;
-  document.getElementById('progPct').textContent=Math.round(i/total*100)+'%';
+  const s3pt = document.getElementById('s3progTitle'); if(s3pt) s3pt.textContent='⚙️ סצנה '+(i+1)+' מתוך '+total;
+  const ppEl = document.getElementById('progPct'); if(ppEl) ppEl.textContent=Math.round(i/total*100)+'%';
   document.getElementById('progFill').style.width=Math.round(i/total*100)+'%';
   document.getElementById('s3preview').style.display='none';
   document.getElementById('s3generating').style.display='block';
-  document.getElementById('s3genMsg').textContent='שולח סצנה '+(i+1)+' ל-Veo...';
+  const s3gm1 = document.getElementById('s3genMsg'); if(s3gm1) s3gm1.textContent='שולח סצנה '+(i+1)+' ל-Veo...';
 
   const t0=Date.now();
   try{
-    document.getElementById('s3genMsg').textContent='ממתין לVeo... (עד 3 דקות)';
+    const s3gm2 = document.getElementById('s3genMsg'); if(s3gm2) s3gm2.textContent='ממתין לVeo... (עד 3 דקות)';
     const url=await genClip(S.scenes[i],i);
     S.clips.push({url,scene:S.scenes[i],i});
 
@@ -1868,7 +1868,7 @@ function buildResCard(c,i){
 
 function showResults(){
   showScreen(4);
-  document.getElementById('s4sub').textContent='פרשת '+S.parasha.h+' — '+S.clips.length+' קליפים';
+  const s4subEl = document.getElementById('s4sub'); if(s4subEl) s4subEl.textContent=(S.parasha?.h||S.ganTopic||'')+' — '+S.clips.length+' קליפים';
   document.getElementById('resGrid').innerHTML=S.clips.map((c,i)=>buildResCard(c,i)).join('');
 }
 function dlAll(){
