@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>פרשת השבוע — יוצר סרטונים AI</title>
+<title>עורך וידאו AI</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#c8a44a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="פרשה AI">
+<meta name="apple-mobile-web-app-title" content="עורך וידאו">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;900&family=Frank+Ruhl+Libre:wght@400;700;900&display=swap" rel="stylesheet">
@@ -44,7 +44,6 @@ body::before{
   pointer-events:none;
 }
 main,nav,.filmstrip,#toast{position:relative;z-index:1;}
-.steps{position:relative;z-index:1;}
 
 /* FILM STRIP */
 .filmstrip{height:20px;background:var(--s1);border-bottom:1px solid var(--border);overflow:hidden;display:flex;align-items:center;}
@@ -58,22 +57,11 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
 .logo-mark{width:30px;height:30px;background:var(--gdim);border:1px solid var(--gold);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.9rem;}
 .nbadge{font-size:.68rem;font-weight:600;background:var(--gdim);border:1px solid rgba(200,164,74,.35);color:var(--gold);padding:3px 9px;border-radius:20px;}
 
-/* STEPS */
-.steps{display:flex;justify-content:center;padding:20px 16px 0;gap:0;}
-.sn{display:flex;flex-direction:column;align-items:center;min-width:60px;position:relative;}
-.sn:not(:last-child)::after{content:'';position:absolute;top:13px;left:50%;width:100%;height:1px;background:var(--border);z-index:0;}
-.sdot{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);background:var(--s1);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--muted);position:relative;z-index:1;transition:all .3s;}
-.sn.active .sdot{border-color:var(--gold);background:var(--gdim);color:var(--gold);box-shadow:0 0 10px var(--gglow);}
-.sn.done .sdot{border-color:var(--green);background:rgba(79,191,150,.12);color:var(--green);}
-.slabel{font-size:.6rem;color:var(--muted);margin-top:4px;text-align:center;transition:color .3s;}
-.sn.active .slabel{color:var(--gold);}
-.sn.done .slabel{color:var(--green);}
-
-/* MAIN */
+/* SCREENS */
 main{max-width:840px;margin:0 auto;padding:24px 16px 80px;}
 .screen{display:none;}
 .screen.active{display:block;animation:fi2 .3s ease;}
-@keyframes fi2{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fi2{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
 /* SECTION HEADER */
 .sh{margin-bottom:20px;}
@@ -99,76 +87,8 @@ input[type=number]{width:78px;text-align:center;direction:ltr;}
 .btn-full{width:100%;}
 .btn-ghost{background:var(--s2);border:1px solid var(--border);color:var(--text);font-size:.84rem;padding:8px 15px;}
 .btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
-.btn-ghost.style-active{border-color:var(--gold);color:var(--gold);background:var(--gdim);}
 .btn-green{background:linear-gradient(135deg,#3a9e74,#2a7a58);color:white;font-size:.88rem;padding:12px 20px;}
 .btn-green:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px rgba(79,191,150,.25);}
-.btn-blue{background:linear-gradient(135deg,#4a7ac8,#2a4a90);color:white;font-size:.82rem;padding:8px 14px;}
-.btn-blue:hover{transform:translateY(-1px);}
-.btn-copy{background:var(--gdim);border:1px solid var(--gold);color:var(--glt);font-size:.82rem;padding:7px 14px;}
-.btn-copy:hover{background:rgba(200,164,74,.25);}
-
-/* PARASHA GRID */
-.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(115px,1fr));gap:6px;max-height:270px;overflow-y:auto;padding-left:2px;}
-.pgrid::-webkit-scrollbar{width:3px;}
-.pgrid::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
-.pbtn{background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-family:'Heebo',sans-serif;font-size:.78rem;cursor:pointer;text-align:right;transition:all .18s;display:flex;flex-direction:column;gap:2px;width:100%;}
-.pbtn:hover{border-color:var(--gold);color:var(--gold);}
-.pbtn.active{background:var(--gdim);border-color:var(--gold);color:var(--glt);}
-.pbtn .ph{font-weight:700;font-size:.82rem;}
-.pbtn .pp{color:var(--muted);font-size:.64rem;}
-.pbtn.active .pp{color:rgba(232,204,128,.5);}
-
-/* SCENE CARDS */
-.scene-card{background:var(--s2);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;}
-.scene-card.qa{border-color:rgba(79,191,150,.5);}
-.scene-card.qb{border-color:rgba(90,138,212,.5);}
-.scene-card.qc{border-color:rgba(212,137,74,.5);}
-.scene-card.qd{border-color:rgba(217,95,95,.5);}
-.sc-head{display:flex;align-items:center;gap:9px;padding:11px 13px;cursor:pointer;}
-.sc-num{min-width:24px;height:24px;border-radius:5px;background:var(--gdim);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--gold);flex-shrink:0;}
-.sc-title{flex:1;font-size:.84rem;font-weight:600;line-height:1.4;}
-.sc-score{padding:3px 8px;border-radius:20px;font-size:.68rem;font-weight:700;white-space:nowrap;}
-.ssa{background:rgba(79,191,150,.15);border:1px solid rgba(79,191,150,.4);color:#80d4b0;}
-.ssb{background:rgba(90,138,212,.15);border:1px solid rgba(90,138,212,.4);color:#90b4e8;}
-.ssc{background:rgba(212,137,74,.15);border:1px solid rgba(212,137,74,.4);color:#e8a870;}
-.ssd{background:rgba(217,95,95,.15);border:1px solid rgba(217,95,95,.4);color:#f09090;}
-.sc-arr{font-size:.68rem;color:var(--muted);transition:transform .2s;flex-shrink:0;}
-.sc-arr.open{transform:rotate(180deg);}
-.sc-body{display:none;padding:0 13px 13px;}
-.sc-body.open{display:block;}
-.plabel{font-size:.66rem;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:6px;}
-.pbox{background:var(--s3);border:1px solid var(--border);border-radius:6px;padding:10px;font-size:.78rem;line-height:1.7;color:var(--text);direction:ltr;text-align:left;font-family:monospace;white-space:pre-wrap;}
-textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold);border-radius:6px;color:var(--text);font-family:monospace;font-size:.78rem;line-height:1.7;padding:10px;outline:none;resize:vertical;direction:ltr;}
-.checks-wrap{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:9px 0;}
-.ci{display:flex;align-items:flex-start;gap:6px;padding:6px 8px;background:var(--s1);border-radius:5px;font-size:.73rem;line-height:1.4;}
-.ci strong{display:block;color:var(--text);margin-bottom:1px;}
-.ci span{color:var(--muted);}
-.sugg{border-radius:6px;padding:9px;margin:7px 0;}
-.sugg.warn{background:rgba(212,137,74,.08);border:1px solid rgba(212,137,74,.2);}
-.sugg.tip{background:rgba(79,191,150,.06);border:1px solid rgba(79,191,150,.2);}
-.sugg-title{font-size:.7rem;font-weight:600;margin-bottom:5px;}
-.sugg.warn .sugg-title{color:var(--orange);}
-.sugg.tip .sugg-title{color:var(--green);}
-.sugg-item{font-size:.74rem;color:var(--text);line-height:1.5;margin-bottom:2px;padding-right:11px;position:relative;}
-.sugg-item::before{content:'→';position:absolute;right:0;color:var(--muted);}
-
-/* OVERVIEW */
-.ov-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
-.ov-card{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:11px;text-align:center;}
-.ov-val{font-size:1.6rem;font-weight:900;line-height:1;}
-.ov-lbl{font-size:.64rem;color:var(--muted);margin-top:2px;}
-.ov-card.good .ov-val{color:var(--green);}
-.ov-card.ok .ov-val{color:var(--blue);}
-.ov-card.warn .ov-val{color:var(--orange);}
-.ov-card.bad .ov-val{color:var(--red);}
-
-/* PROMPT DISPLAY */
-.prompt-area{background:var(--s2);border:1px solid var(--border);border-radius:9px;overflow:hidden;}
-.prompt-toolbar{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--s3);border-bottom:1px solid var(--border);}
-.prompt-toolbar span{font-size:.7rem;color:var(--muted);}
-.prompt-content{padding:14px;font-size:.8rem;line-height:1.8;direction:ltr;text-align:left;font-family:monospace;color:#90b4e8;white-space:pre-wrap;max-height:320px;overflow-y:auto;}
-.prompt-content::-webkit-scrollbar{width:3px;}
-.prompt-content::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 
 /* PROGRESS */
 .prog-top{display:flex;justify-content:space-between;margin-bottom:9px;}
@@ -176,76 +96,48 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
 .prog-pct{color:var(--gold);font-weight:700;font-size:1.05rem;}
 .prog-track{width:100%;height:4px;background:var(--s2);border-radius:2px;overflow:hidden;margin-bottom:16px;}
 .prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--glt));border-radius:2px;width:0%;transition:width .5s ease;}
-.sp-list{display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto;}
-.sp-row{display:flex;align-items:center;gap:9px;padding:8px 11px;background:var(--s2);border-radius:7px;font-size:.8rem;border:1px solid transparent;transition:all .3s;}
-.sp-row.act{border-color:var(--gold);}
-.sp-row.done{border-color:rgba(79,191,150,.35);}
-.sp-row.err{border-color:rgba(217,95,95,.35);}
-.sp-ic{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:var(--muted);flex-shrink:0;transition:all .3s;}
-.sp-row.act .sp-ic{border-color:var(--gold);color:var(--gold);animation:bl 1s infinite;}
-.sp-row.done .sp-ic{background:var(--green);border-color:var(--green);color:#07070f;}
-.sp-row.err .sp-ic{background:var(--red);border-color:var(--red);color:white;}
-@keyframes bl{0%,100%{opacity:1}50%{opacity:.25}}
-.sp-txt{flex:1;color:var(--muted);}
-.sp-row.act .sp-txt,.sp-row.done .sp-txt{color:var(--text);}
-.sp-tm{font-size:.68rem;color:var(--muted);white-space:nowrap;}
-
-/* RESULTS */
-.res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px;}
-.res-card{background:var(--s2);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .2s;}
-.res-card:hover{border-color:var(--gold);}
-.res-thumb{width:100%;aspect-ratio:16/9;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:1.6rem;overflow:hidden;}
-.res-thumb video{width:100%;height:100%;object-fit:cover;}
-.res-foot{padding:7px 10px;display:flex;justify-content:space-between;}
-.res-lbl{font-size:.72rem;color:var(--muted);}
-.res-dur{font-size:.68rem;color:var(--gold);font-weight:700;}
 
 /* MISC */
 .msg{padding:9px 13px;border-radius:7px;font-size:.8rem;line-height:1.5;margin-top:9px;}
 .msg.info{background:var(--gdim);border:1px solid rgba(200,164,74,.35);color:var(--glt);}
 .msg.error{background:rgba(217,95,95,.1);border:1px solid rgba(217,95,95,.4);color:#f09090;}
 .msg.success{background:rgba(79,191,150,.1);border:1px solid var(--green);color:#80d4b0;}
-.msg.warn{background:rgba(212,137,74,.1);border:1px solid rgba(212,137,74,.4);color:#e8a870;}
 .spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:currentColor;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;flex-shrink:0;}
 @keyframes spin{to{transform:rotate(360deg)}}
 .row{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;}
 .row-c{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:14px;}
-.badge-week{display:inline-flex;align-items:center;gap:5px;background:var(--gdim);border:1px solid var(--gold);border-radius:20px;padding:4px 11px;font-size:.72rem;color:var(--glt);font-weight:600;}
 .fld{display:flex;flex-direction:column;gap:4px;}
 .fld label{font-size:.74rem;color:var(--muted);font-weight:500;}
-.dur-info{flex:1;min-width:160px;background:var(--gdim);border:1px solid rgba(200,164,74,.25);border-radius:7px;padding:9px 13px;font-size:.8rem;color:var(--glt);line-height:1.6;}
-.dur-info strong{display:block;font-size:.9rem;}
-.mrow{display:flex;gap:8px;}
-.mopt{flex:1;padding:10px;background:var(--s2);border:1px solid var(--border);border-radius:8px;cursor:pointer;text-align:center;transition:all .2s;}
-.mopt:hover{border-color:var(--gold);}
-.mopt.active{background:var(--gdim);border-color:var(--gold);}
-.mopt .mn{font-weight:700;font-size:.82rem;}
-.mopt .md{font-size:.67rem;color:var(--muted);margin-top:2px;}
-.mopt.active .mn{color:var(--glt);}
 .cost-box{display:flex;justify-content:space-between;align-items:center;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:10px 14px;font-size:.82rem;margin:11px 0;}
 .cost-box span{color:var(--muted);}
 .cost-val{color:var(--gold);font-weight:700;}
-.step-badge{display:inline-flex;align-items:center;gap:6px;background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:.76rem;color:var(--muted);margin-bottom:12px;}
-.step-badge strong{color:var(--glt);}
 #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--s2);border:1px solid var(--border);border-radius:22px;padding:7px 16px;font-size:.82rem;color:var(--text);opacity:0;transition:all .3s;z-index:9999;white-space:nowrap;pointer-events:none;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+/* CLIP ITEMS */
 .clip-item{display:flex;align-items:center;gap:9px;padding:9px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;cursor:grab;transition:all .2s;user-select:none;}
 .clip-item:active{cursor:grabbing;opacity:.7;}
 .clip-item.drag-over{border-color:var(--gold);background:var(--gdim);}
 .clip-thumb{width:54px;height:32px;object-fit:cover;border-radius:4px;background:var(--s3);flex-shrink:0;}
 .clip-num{min-width:24px;height:24px;border-radius:5px;background:var(--gdim);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--gold);flex-shrink:0;}
 .clip-name{flex:1;font-size:.78rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.clip-dur{font-size:.68rem;color:var(--muted);flex-shrink:0;}
 .clip-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:0 3px;flex-shrink:0;}
 .clip-del:hover{color:var(--red);}
 
+/* ENTRY CARDS */
+.entry-cards{display:flex;flex-direction:column;gap:16px;width:100%;max-width:380px;margin:0 auto;}
+.entry-card{border-radius:18px;padding:28px 24px;cursor:pointer;text-align:center;transition:all .22s;font-family:'Heebo',sans-serif;border:2px solid transparent;}
+.entry-card:hover{transform:translateY(-3px);}
+.entry-card .ec-icon{font-size:2.6rem;margin-bottom:10px;}
+.entry-card .ec-title{font-size:1.15rem;font-weight:700;margin-bottom:5px;}
+.entry-card .ec-desc{font-size:.78rem;opacity:.75;}
 
-@media(max-width:560px){
-  .ov-grid{grid-template-columns:1fr 1fr;}
-  .checks-wrap{grid-template-columns:1fr;}
-  .mrow{flex-direction:column;}
-}
+.ec-merge{background:linear-gradient(135deg,rgba(200,164,74,.18),rgba(200,164,74,.06));border-color:var(--gold);}
+.ec-merge .ec-title{color:var(--glt);}
+.ec-nar{background:linear-gradient(135deg,rgba(79,191,150,.18),rgba(79,191,150,.06));border-color:rgba(79,191,150,.6);}
+.ec-nar .ec-title{color:#80d4b0;}
+.ec-conv{background:linear-gradient(135deg,rgba(90,138,212,.18),rgba(90,138,212,.06));border-color:rgba(90,138,212,.6);}
+.ec-conv .ec-title{color:#90b4e8;}
 </style>
 </head>
 <body>
@@ -253,243 +145,53 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
 <div class="filmstrip"><div class="fi" id="fiEl"></div></div>
 
 <nav>
-  <div class="logo"><div class="logo-mark" id="logoMark">📜</div><span id="logoText">פרשת השבוע — AI</span></div>
+  <div class="logo"><div class="logo-mark">🎬</div><span id="navTitle">עורך וידאו AI</span></div>
   <div style="display:flex;gap:8px;align-items:center;">
-    <button class="btn btn-ghost" onclick="openMergeDirect()" style="padding:6px 12px;font-size:.76rem;">🎬 מיזוג</button>
-    <button class="btn btn-ghost" onclick="openNarDirect()" style="padding:6px 12px;font-size:.76rem;">🎙️ קריינות</button>
-    <span class="nbadge" id="navBadge">Veo 3 · Sefaria</span>
+    <button class="btn btn-ghost" id="btnBack" onclick="goHome()" style="display:none;padding:6px 14px;font-size:.78rem;">← בית</button>
+    <span class="nbadge">WebM · MP4 · TTS</span>
   </div>
 </nav>
-
-<div class="steps">
-  <div class="sn active" id="sn0" onclick="showScreen(0)" style="cursor:pointer;"><div class="sdot">1</div><div class="slabel">הגדרות</div></div>
-  <div class="sn" id="sn1" onclick="goBack1()" style="cursor:pointer;"><div class="sdot">2</div><div class="slabel">נושא</div></div>
-  <div class="sn" id="sn2" onclick="S.hebrewScript?showScriptAgain():showScreen(2)" style="cursor:pointer;"><div class="sdot">3</div><div class="slabel">פרומפטים</div></div>
-  <div class="sn" id="sn3" style="cursor:pointer;display:none;"><div class="sdot">4</div><div class="slabel">אימות</div></div>
-  <div class="sn" id="sn4" style="cursor:pointer;display:none;"><div class="sdot">5</div><div class="slabel">וידאו</div></div>
-  <div class="sn" id="sn5" onclick="openMergeDirect()" style="cursor:pointer;"><div class="sdot">4</div><div class="slabel">מיזוג</div></div>
-</div>
 
 <main>
 
 <!-- ═══════════════════════════════
-     ENTRY: דף כניסה
+     ENTRY — דף כניסה
 ═══════════════════════════════ -->
 <div class="screen active" id="sEntry">
-  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;gap:28px;text-align:center;">
-    <div style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:900;background:linear-gradient(135deg,var(--glt),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.3;">יוצר סרטונים AI</div>
-    <div style="font-size:.9rem;color:var(--muted);">בחר את סוג הסרטון שברצונך ליצור</div>
-    <div style="display:flex;flex-direction:column;gap:14px;width:100%;max-width:320px;">
-      <button onclick="chooseMode('parasha')" style="background:linear-gradient(135deg,rgba(200,164,74,.2),rgba(200,164,74,.08));border:2px solid var(--gold);border-radius:16px;padding:24px 20px;cursor:pointer;text-align:center;transition:all .2s;font-family:'Heebo',sans-serif;">
-        <div style="font-size:2.2rem;margin-bottom:8px;">📖</div>
-        <div style="font-size:1.1rem;font-weight:700;color:var(--glt);">פרשת השבוע</div>
-        <div style="font-size:.78rem;color:var(--muted);margin-top:4px;">סרטון על פרשת התורה השבועית</div>
-      </button>
-      <button onclick="chooseMode('gan')" style="background:linear-gradient(135deg,rgba(79,191,150,.15),rgba(79,191,150,.05));border:2px solid rgba(79,191,150,.5);border-radius:16px;padding:24px 20px;cursor:pointer;text-align:center;transition:all .2s;font-family:'Heebo',sans-serif;background-image:url('data:image/webp;base64,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');background-size:cover;background-position:center;position:relative;overflow:hidden;">
-        <div style="position:absolute;inset:0;background:rgba(0,0,0,0.35);border-radius:14px;"></div>
-        <div style="position:relative;z-index:1;font-size:1.6rem;font-weight:900;color:#ffffff;text-shadow:0 2px 8px rgba(0,0,0,0.7);letter-spacing:2px;margin-bottom:6px;">גן בשן</div>
-        <div style="position:relative;z-index:1;font-size:.78rem;color:rgba(255,255,255,0.85);margin-top:4px;text-shadow:0 1px 4px rgba(0,0,0,0.6);">סרטון לחגים, אירועים ויום הולדת</div>
-      </button>
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:72vh;gap:32px;text-align:center;">
+    <div>
+      <div style="font-family:'Frank Ruhl Libre',serif;font-size:2.1rem;font-weight:900;background:linear-gradient(135deg,var(--glt),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.3;margin-bottom:8px;">עורך וידאו AI</div>
+      <div style="font-size:.9rem;color:var(--muted);">בחר את הכלי שברצונך להשתמש</div>
+    </div>
+    <div class="entry-cards">
+      <div class="entry-card ec-merge" onclick="showScreen('merge')">
+        <div class="ec-icon">🎞️</div>
+        <div class="ec-title">מיזוג קליפים</div>
+        <div class="ec-desc">ייבוא, סידור וחיבור קליפים לסרטון אחד עם מעברים חלקים</div>
+      </div>
+      <div class="entry-card ec-nar" onclick="showScreen('nar')">
+        <div class="ec-icon">🎙️</div>
+        <div class="ec-title">קריינות</div>
+        <div class="ec-desc">צור קריינות עברית והוסף אותה על הסרטון שלך</div>
+      </div>
+      <div class="entry-card ec-conv" onclick="showScreen('conv')">
+        <div class="ec-icon">🔄</div>
+        <div class="ec-title">ממיר WebM → MP4</div>
+        <div class="ec-desc">המר קובץ WebM ל-MP4 כדי לשתף בוואטסאפ ורשתות חברתיות</div>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- ═══════════════════════════════
-     S0: הגדרות
+     MERGE — מיזוג קליפים
 ═══════════════════════════════ -->
-<div class="screen" id="s0">
-  <div class="sh"><h2>הגדרות</h2><p>הכנס API key לשלב האימות והיצירה בלבד</p></div>
+<div class="screen" id="sMerge">
+  <div class="sh"><h2>🎞️ מיזוג קליפים</h2><p>ייבוא, סידור וחיבור קליפים לסרטון אחד</p></div>
 
-  <div class="card">
-    <div class="ch">🔑 Google AI API Key</div>
-    <div class="row">
-      <div style="position:relative;flex:1;">
-        <input type="password" id="apiKey" placeholder="AIza... — נדרש לבניית פרומפטים וליצירת סרטון" autocomplete="off" style="padding-left:36px;">
-        <button onclick="toggleKey()" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:0;">👁</button>
-      </div>
-      <button class="btn btn-ghost" onclick="saveKey()" style="flex-shrink:0;">שמור</button>
-    </div>
-    <div class="msg info" style="font-size:.74rem;margin-top:8px;">
-      🔗 מפתח חינמי: <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--glt)">aistudio.google.com/apikey</a>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="ch">🔑 Google Cloud TTS API Key (קריינות)</div>
-    <div class="row">
-      <div style="position:relative;flex:1;">
-        <input type="password" id="ttsKey" placeholder="AIza... — נדרש לקריינות בלבד" autocomplete="off" style="padding-left:36px;">
-        <button onclick="toggleTtsKey()" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:0;">👁</button>
-      </div>
-      <button class="btn btn-ghost" onclick="saveTtsKey()" style="flex-shrink:0;">שמור</button>
-    </div>
-    <div class="msg info" style="font-size:.74rem;margin-top:8px;">
-      🔗 מפרויקט Subhe: <a href="https://console.cloud.google.com/apis/credentials?project=subhe-496919" target="_blank" style="color:var(--glt)">console.cloud.google.com</a>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="ch">⏱ אורך הסרטון</div>
-    <div class="row" style="align-items:flex-end;">
-      <div class="fld"><label>דקות</label><input type="number" id="durM" value="3" min="0" max="10" oninput="calcDur()"></div>
-      <div class="fld"><label>שניות</label><input type="number" id="durS" value="20" min="0" max="59" oninput="calcDur()"></div>
-      <div class="dur-info" id="durInfo"><strong>240 שניות</strong>30 קליפים | Fast: $36</div>
-    </div>
-  </div>
-
-  <button class="btn btn-gold btn-full" id="btnGotoNext" onclick="ganMode ? showGanScreen() : gotoParasha()">המשך ←</button>
-</div>
-
-<!-- ═══════════════════════════════
-     S1: בחירת פרשה
-═══════════════════════════════ -->
-<div class="screen" id="s1">
-  <div class="sh"><h2>בחר פרשת השבוע</h2><p>ללא API — שולף טקסט מ-Sefaria</p></div>
-
-  <div class="card">
-    <div class="ch">📅 פרשה נוכחית</div>
-    <div id="thisWeek"><div style="color:var(--muted);font-size:.82rem;display:flex;align-items:center;gap:7px;"><span class="spin"></span>טוען...</div></div>
-  </div>
-
-  <div class="card">
-    <div class="ch">📚 כל הפרשות</div>
-    <input type="text" id="psearch" placeholder="חפש פרשה..." oninput="filterP(this.value)" style="margin-bottom:10px;direction:rtl;">
-    <div class="pgrid" id="pgrid"></div>
-  </div>
-
-  <div class="card" id="selCard" style="display:none;">
-    <div class="ch">✅ נבחרה</div>
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:9px;">
-      <div>
-        <div style="font-family:'Frank Ruhl Libre',serif;font-size:1.15rem;font-weight:700;color:var(--glt);" id="selName"></div>
-        <div style="font-size:.74rem;color:var(--muted);" id="selRef"></div>
-      </div>
-      <div style="margin-bottom:10px;">
-        <div style="font-size:.72rem;color:var(--muted);margin-bottom:7px;font-weight:600;">סגנון הסרטון:</div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-ghost" id="btnStyleAnim" onclick="setVideoStyle('animation')" style="flex:1;">🎨 אנימציה</button>
-          <button class="btn btn-ghost" id="btnStyleReal" onclick="setVideoStyle('realistic')" style="flex:1;">🎬 ריאליסטי</button>
-        </div>
-      </div>
-      <button class="btn btn-gold" onclick="fetchAndBuild()">בנה פרומפטים לVeo ←</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════
-     S1GAN: גן בשן
-═══════════════════════════════ -->
-<div class="screen" id="s1gan">
-  <div class="sh"><h2>🌸 גן בשן</h2><p>בחר נושא הסרטון</p></div>
-
-  <div class="card">
-    <div class="ch">🕍 חגי השנה העברית</div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;">
-      <button class="btn btn-ghost" onclick="selectGanTopic('ראש השנה','holiday')">🍎 ראש השנה</button>
-      <button class="btn btn-ghost" onclick="selectGanTopic('יום כיפור','holiday')">🤍 יום כיפור</button>
-      <button class="btn btn-ghost" onclick="selectGanTopic('סוכות','holiday')">🌿 סוכות</button>
-      <button class="btn btn-ghost" onclick="selectGanTopic('שמחת תורה','holiday')">📜 שמחת תורה</button>
-      <button class="btn btn-ghost" onclick="selectGanTopic('חנוכה','holiday')">🕎 חנוכה</button>
-      <button class="btn btn-ghost" onclick="selectGanTopic('ט״ו בשבט','holiday')">🌳 ט״ו בשבט</button>
-      <button class="btn btn-ghost" onclick="selectGanTopic('פורים','holiday')">🎭 פורים</button>
-      <button class="btn btn-ghost" onclick="selectGanTopic('פסח','holiday')">🫓 פסח</button>
-      <button class="btn btn-ghost" onclick="selectGanTopic('ל״ג בעומר','holiday')">🔥 ל״ג בעומר</button>
-      <button class="btn btn-ghost" onclick="selectGanTopic('שבועות','holiday')">📖 שבועות</button>
-      <button class="btn btn-ghost" onclick="selectGanTopic('שבת','holiday')">✨ שבת</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="ch">🇮🇱 אירועים לאומיים</div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;">
-      <button class="btn btn-ghost" onclick="selectGanTopic('יום השואה','national')">🕯️ יום השואה</button>
-      <button class="btn btn-ghost" onclick="selectGanTopic('יום הזיכרון','national')">🪖 יום הזיכרון</button>
-      <button class="btn btn-ghost" onclick="selectGanTopic('יום העצמאות','national')">🎆 יום העצמאות</button>
-      <button class="btn btn-ghost" onclick="selectGanTopic('יום ירושלים','national')">🏛️ יום ירושלים</button>
-      <button class="btn btn-ghost" onclick="selectGanTopic('יום העלייה','national')">✈️ יום העלייה</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="ch">🎂 יום הולדת</div>
-    <button class="btn btn-ghost btn-full" onclick="selectGanTopic('יום הולדת','birthday')">🎂 יום הולדת</button>
-  </div>
-
-  <div class="card" id="ganTopicCard" style="display:none;">
-    <div class="ch">✏️ תאר את הסרטון — <span id="ganTopicName" style="color:var(--glt);"></span></div>
-    <textarea id="ganDesc" style="width:100%;min-height:100px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Heebo',sans-serif;font-size:.88rem;line-height:1.8;padding:10px;outline:none;resize:vertical;direction:rtl;" placeholder="תאר במילים מה אתה רוצה בסרטון..."></textarea>
-    <div style="margin-top:8px;font-size:.74rem;color:var(--muted);" id="ganSceneInfo"></div>
-    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-      <button class="btn btn-ghost style-active" id="btnStyleAnimGan">🎨 אנימציה</button>
-    </div>
-    <button class="btn btn-gold btn-full" style="margin-top:12px;" onclick="buildGanScript()">שלח לג׳ימיני ←</button>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════
-     S2: פרומפטים + בדיקה
-═══════════════════════════════ -->
-<div class="screen" id="s2">
-
-  <!-- LOADING -->
-  <div id="s2loading" class="card" style="display:block;">
-    <div style="display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.84rem;">
-      <span class="spin"></span><span id="s2loadMsg">שולף פרשה מ-Sefaria...</span>
-    </div>
-  </div>
-
-  <!-- STEP A: SCRIPT APPROVAL -->
-  <div id="s2script" style="display:none;">
-    <div class="sh"><h2>📜 תסריט הסרטון</h2><p>קרא, ערוך אם צריך — ואשר לבניית הסצנות</p></div>
-    <div class="card">
-      <div class="ch" id="scriptChTitle">תסריט קולנועי — פרשת <span id="scriptParashaName"></span></div>
-      <div style="font-size:.78rem;color:var(--muted);margin-bottom:10px;" id="scriptMeta"></div>
-      <div class="script-wrap">
-        <div class="script-toolbar">
-          <span style="font-size:.7rem;color:var(--muted);">ערוך לפי הצורך לפני אישור</span>
-          <button class="btn btn-ghost" style="padding:5px 10px;font-size:.73rem;" onclick="toggleScriptEdit()" id="scriptEditBtn">✏️ ערוך</button>
-        </div>
-        <div id="scriptView" style="padding:16px;font-family:'Frank Ruhl Libre',serif;font-size:.93rem;line-height:2.1;direction:rtl;white-space:pre-wrap;max-height:65vh;overflow-y:auto;color:var(--text);"></div>
-        <textarea id="scriptEdit" style="display:none;width:100%;min-height:420px;background:var(--s2);border:none;color:var(--text);font-family:'Frank Ruhl Libre',serif;font-size:.93rem;line-height:2.1;padding:16px;outline:none;resize:vertical;direction:rtl;"></textarea>
-      </div>
-      <div class="row-c" style="margin-top:16px;">
-        <button class="btn btn-green" onclick="approveScript()" id="approveScriptBtn">✅ אשר — בנה סצנות</button>
-        <button class="btn btn-ghost" onclick="goBack1()">← חזור</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- STEP B: PROMPTS -->
-  <div id="s2content" style="display:none;">
-    <div class="sh"><h2>פרומפטים לVeo 3</h2><p>בדוק כל פרומפט — בחינם ב-AI Studio לפני שמוציאים כסף</p></div>
-    <div class="card" id="overviewCard">
-      <div class="ch">📊 סקירה כללית</div>
-      <div class="ov-grid" id="ovGrid"></div>
-      <div id="ovMsg"></div>
-    </div>
-    <div id="scenesList"></div>
-
-    <div class="row-c">
-      <button class="btn btn-gold btn-full" onclick="copyAllToGemini()">🤖 צור הכל בגמיני</button>
-      <button class="btn btn-ghost" onclick="showScriptAgain()">📜 חזור לתסריט</button>
-      <button class="btn btn-ghost" onclick="goBack1()">← חזור</button>
-    </div>
-  </div>
-
-</div>
-
-<div class="screen" id="s3" style="display:none;"></div>
-<div class="screen" id="s4" style="display:none;"></div>
-
-
-<!-- S5: VIDEO EDITOR -->
-<div class="screen" id="s5">
-  <div class="sh"><h2>🎬 עורך וידאו</h2><p>בחר קליפים, סדר, מזג לסרטון אחד</p></div>
-
-  <!-- IMPORT -->
   <div class="card" id="importCard">
     <div class="ch">📁 ייבוא קליפים</div>
-    <p style="font-size:.82rem;color:var(--muted);margin-bottom:12px;">בחר את קובצי ה-MP4 שהורדת מ-AI Studio</p>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:12px;">בחר את קובצי ה-MP4 שהורדת</p>
     <label style="display:block;background:var(--gdim);border:2px dashed rgba(200,164,74,.4);border-radius:10px;padding:24px;text-align:center;cursor:pointer;">
       <input type="file" id="clipFiles" accept="video/mp4,video/*" multiple style="display:none;" onchange="loadClips(this)">
       <div style="font-size:2rem;margin-bottom:8px;">📂</div>
@@ -498,7 +200,6 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
     </label>
   </div>
 
-  <!-- CLIP LIST -->
   <div class="card" id="clipListCard" style="display:none;">
     <div class="ch">🎞️ קליפים <span id="clipCount" style="color:var(--gold);"></span></div>
     <p style="font-size:.78rem;color:var(--muted);margin-bottom:10px;">גרור לסידור מחדש</p>
@@ -512,7 +213,6 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
     </div>
   </div>
 
-  <!-- MERGE -->
   <div class="card" id="mergeCard" style="display:none;">
     <div class="ch">⚙️ מיזוג</div>
     <div class="cost-box" style="margin-bottom:12px;">
@@ -526,35 +226,45 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
     </div>
     <div class="row-c">
       <button class="btn btn-green" onclick="startMerge()" id="btnMerge">🎬 מזג לסרטון אחד</button>
-      <button class="btn btn-ghost" onclick="showScreen(4)">← חזור</button>
     </div>
   </div>
 
-  <!-- RESULT -->
   <div class="card" id="mergeResult" style="display:none;">
     <div class="ch">✅ הסרטון מוכן!</div>
     <video id="mergedVideo" controls style="width:100%;border-radius:8px;margin-bottom:12px;"></video>
     <div class="row-c">
       <button class="btn btn-green" onclick="downloadMerged()">⬇️ שמור לגלריה</button>
-      <button class="btn btn-gold" onclick="showNarration()">🎙️ הוסף קריינות</button>
+      <button class="btn btn-gold" onclick="showScreen('nar')">🎙️ הוסף קריינות</button>
       <button class="btn btn-ghost" onclick="mergAgain()">🔄 מזג שוב</button>
     </div>
   </div>
+</div>
 
-  <!-- MP4 CONVERTER -->
-  <div class="card" id="mp4ConverterCard">
-    <div class="ch">🔄 המר ל-MP4</div>
-    <p style="font-size:.82rem;color:var(--muted);margin-bottom:12px;">המר קובץ WebM ל-MP4 דרך CloudConvert — מהיר ובחינם</p>
-    <button class="btn btn-green btn-full" onclick="window.open('https://cloudconvert.com/webm-to-mp4','_blank')">🔄 פתח ממיר WebM → MP4</button>
+<!-- ═══════════════════════════════
+     NARRATION — קריינות
+═══════════════════════════════ -->
+<div class="screen" id="sNar">
+  <div class="sh"><h2>🎙️ קריינות</h2><p>צור קריינות עברית והוסף אותה על הסרטון</p></div>
+
+  <div class="card">
+    <div class="ch">🔑 API Key (לקריינות)</div>
+    <div class="row">
+      <div style="position:relative;flex:1;">
+        <input type="password" id="apiKey" placeholder="AIza... — Google Cloud TTS" autocomplete="off" style="padding-left:36px;">
+        <button onclick="toggleKey()" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:0;">👁</button>
+      </div>
+      <button class="btn btn-ghost" onclick="saveKey()" style="flex-shrink:0;">שמור</button>
+    </div>
+    <div class="msg info" style="font-size:.74rem;margin-top:8px;">
+      🔗 מפתח חינמי: <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--glt)">aistudio.google.com/apikey</a>
+    </div>
   </div>
 
-  <!-- NARRATION -->
-  <div class="card" id="narrationCard" style="display:none;">
+  <div class="card">
     <div class="ch">🎙️ קריינות AI</div>
-    <p style="font-size:.82rem;color:var(--muted);margin-bottom:12px;">Gemini כותב קריינות ← Google TTS ממיר לקול ← מוזג על הסרטון</p>
 
     <div style="background:var(--s2);border:1px dashed var(--border);border-radius:8px;padding:12px;margin-bottom:14px;">
-      <div style="font-size:.78rem;color:var(--muted);margin-bottom:8px;">📂 או טען סרטון קיים (MP4 / WebM)</div>
+      <div style="font-size:.78rem;color:var(--muted);margin-bottom:8px;">📂 טען סרטון (MP4 / WebM)</div>
       <input type="file" id="existingVideoFile" accept="video/mp4,video/webm" style="display:none;" onchange="loadExistingVideo(this)">
       <button class="btn btn-ghost btn-full" onclick="document.getElementById('existingVideoFile').click()">📁 בחר סרטון מהגלריה</button>
       <div id="existingVideoName" style="font-size:.74rem;color:var(--green);margin-top:6px;display:none;"></div>
@@ -565,15 +275,9 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
       <div class="fld" style="margin-bottom:10px;">
         <label style="font-size:.78rem;color:var(--muted);">מספר קליפים בסרטון (כל קליפ = 10 שניות)</label>
         <input type="number" id="narClips" min="1" max="60" value="24" style="width:90px;text-align:center;">
-        <span style="font-size:.74rem;color:var(--muted);margin-right:8px;">= <span id="narDurDisplay">192</span> שניות</span>
-      </div>
-      <div class="fld" style="margin-bottom:10px;">
-        <label style="font-size:.78rem;color:var(--muted);">תאר את הסרטון (אופציונלי — לסרטון חיצוני)</label>
-        <textarea id="narVideoDesc" style="width:100%;min-height:60px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Heebo',sans-serif;font-size:.82rem;line-height:1.6;padding:8px;outline:none;resize:vertical;direction:rtl;" placeholder="לדוגמה: משה עולה להר סיני, השם מדבר אליו מתוך הענן, 3 קליפים של 10 שניות"></textarea>
+        <span style="font-size:.74rem;color:var(--muted);margin-right:8px;">= <span id="narDurDisplay">240</span> שניות</span>
       </div>
       <div class="row-c" style="justify-content:flex-start;margin-bottom:10px;gap:8px;">
-        <button class="btn btn-ghost" onclick="generateNarText()" id="btnGenNar">✨ קריינות עם Gemini</button>
-        <button class="btn btn-ghost" onclick="generateVoiceAct()" id="btnGenVoice">🎭 דיבוב דמויות</button>
         <button class="btn btn-ghost" onclick="openManualNar()" id="btnManualNar">✍️ עריכה עצמאית</button>
       </div>
       <div id="manualNarWrap" style="display:none;margin-bottom:10px;">
@@ -588,47 +292,15 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
       <div class="fld" style="margin-bottom:10px;">
         <label>קול</label>
         <select id="narVoice" style="direction:ltr;text-align:right;">
-          <optgroup label="🌟 Gemini 3.1 Flash TTS">
-            <option value="gemini-Achird" selected>Achird — ידידותי (מומלץ)</option>
-            <option value="gemini-Sulafat">Sulafat — חמים</option>
-            <option value="gemini-Charon">Charon — אינפורמטיבי</option>
-            <option value="gemini-Sadaltager">Sadaltager — בקיא</option>
-            <option value="gemini-Gacrux">Gacrux — בוגר</option>
-            <option value="gemini-Rasalgethi">Rasalgethi — אינפורמטיבי</option>
-            <option value="gemini-Alnilam">Alnilam — יציב</option>
-            <option value="gemini-Schedar">Schedar — אחיד</option>
-            <option value="gemini-Iapetus">Iapetus — ברור</option>
-            <option value="gemini-Algenib">Algenib — גרגרני/עמוק</option>
-            <option value="gemini-Orus">Orus — יציב</option>
-            <option value="gemini-Kore">Kore — נחרץ</option>
-            <option value="gemini-Fenrir">Fenrir — נרגש</option>
-            <option value="gemini-Umbriel">Umbriel — קל</option>
-            <option value="gemini-Algieba">Algieba — חלק</option>
-            <option value="gemini-Despina">Despina — חלק</option>
-            <option value="gemini-Zubenelgenubi">Zubenelgenubi — קז'ואל</option>
-            <option value="gemini-Vindemiatrix">Vindemiatrix — עדין</option>
-            <option value="gemini-Sadachbia">Sadachbia — חיוני</option>
-            <option value="gemini-Pulcherrima">Pulcherrima — קדמי</option>
-            <option value="gemini-Aoede">Aoede — קליל</option>
-            <option value="gemini-Autonoe">Autonoe — בהיר</option>
-            <option value="gemini-Laomedeia">Laomedeia — עליז</option>
-            <option value="gemini-Puck">Puck — עליז</option>
-            <option value="gemini-Achernar">Achernar — רך</option>
-            <option value="gemini-Leda">Leda — צעיר</option>
-            <option value="gemini-Zephyr">Zephyr — בהיר</option>
-            <option value="gemini-Enceladus">Enceladus — נשימתי</option>
-            <option value="gemini-Erinome">Erinome — ברור</option>
-            <option value="gemini-Callirrhoe">Callirrhoe — קל</option>
-          </optgroup>
-          <optgroup label="WaveNet — גיבוי">
+          <optgroup label="WaveNet — עברית">
             <option value="he-IL-Wavenet-A">WaveNet — נשי (A)</option>
-            <option value="he-IL-Wavenet-B">WaveNet — גברי (B)</option>
+            <option value="he-IL-Wavenet-B" selected>WaveNet — גברי (B)</option>
             <option value="he-IL-Wavenet-C">WaveNet — נשי (C)</option>
             <option value="he-IL-Wavenet-D">WaveNet — גברי (D)</option>
           </optgroup>
         </select>
       </div>
-      <button class="btn btn-ghost btn-full" onclick="generateTTS()" id="btnTTS">🎙️ צור קול</button>
+      <button class="btn btn-ghost btn-full" onclick="generateManualTTS()" id="btnTTS">🎙️ צור קול</button>
       <audio id="narAudio" controls style="width:100%;margin-top:10px;display:none;"></audio>
     </div>
 
@@ -652,1244 +324,87 @@ textarea.pedit{min-height:70px;background:var(--s3);border:1px solid var(--gold)
   </div>
 </div>
 
+<!-- ═══════════════════════════════
+     CONVERT — ממיר
+═══════════════════════════════ -->
+<div class="screen" id="sConv">
+  <div class="sh"><h2>🔄 ממיר WebM → MP4</h2><p>המר קובץ WebM ל-MP4 לשיתוף בוואטסאפ ורשתות חברתיות</p></div>
+  <div class="card">
+    <div class="ch">🔄 המרה מיידית</div>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px;">הסרטונים שיוצאים מהמיזוג הם WebM. CloudConvert ממירה אותם ל-MP4 בחינם ובמהירות.</p>
+    <button class="btn btn-green btn-full" onclick="window.open('https://cloudconvert.com/webm-to-mp4','_blank')" style="font-size:.95rem;padding:14px;">🔄 פתח ממיר WebM → MP4</button>
+  </div>
+  <div class="card">
+    <div class="ch">💡 הוראות</div>
+    <div style="font-size:.82rem;color:var(--muted);line-height:1.9;">
+      <div>1. לחץ על הכפתור למעלה</div>
+      <div>2. גרור את קובץ ה-WebM לאתר</div>
+      <div>3. לחץ Convert</div>
+      <div>4. הורד את ה-MP4</div>
+    </div>
+  </div>
+</div>
+
 </main>
 <div id="toast"></div>
 
 <script>
 // ════════════════════════════════════════
-// PARSHIOT DATA (54 פרשות)
+// NAVIGATION
 // ════════════════════════════════════════
-const PARSHIOT = [
-  {h:'בראשית',r:'Genesis 1:1-6:8',b:'בראשית'},{h:'נח',r:'Genesis 6:9-11:32',b:'בראשית'},
-  {h:'לך לך',r:'Genesis 12:1-17:27',b:'בראשית'},{h:'וירא',r:'Genesis 18:1-22:24',b:'בראשית'},
-  {h:'חיי שרה',r:'Genesis 23:1-25:18',b:'בראשית'},{h:'תולדות',r:'Genesis 25:19-28:9',b:'בראשית'},
-  {h:'ויצא',r:'Genesis 28:10-32:3',b:'בראשית'},{h:'וישלח',r:'Genesis 32:4-36:43',b:'בראשית'},
-  {h:'וישב',r:'Genesis 37:1-40:23',b:'בראשית'},{h:'מקץ',r:'Genesis 41:1-44:17',b:'בראשית'},
-  {h:'ויגש',r:'Genesis 44:18-47:27',b:'בראשית'},{h:'ויחי',r:'Genesis 47:28-50:26',b:'בראשית'},
-  {h:'שמות',r:'Exodus 1:1-6:1',b:'שמות'},{h:'וארא',r:'Exodus 6:2-9:35',b:'שמות'},
-  {h:'בא',r:'Exodus 10:1-13:16',b:'שמות'},{h:'בשלח',r:'Exodus 13:17-17:16',b:'שמות'},
-  {h:'יתרו',r:'Exodus 18:1-20:23',b:'שמות'},{h:'משפטים',r:'Exodus 21:1-24:18',b:'שמות'},
-  {h:'תרומה',r:'Exodus 25:1-27:19',b:'שמות'},{h:'תצווה',r:'Exodus 27:20-30:10',b:'שמות'},
-  {h:'כי תשא',r:'Exodus 30:11-34:35',b:'שמות'},{h:'ויקהל',r:'Exodus 35:1-38:20',b:'שמות'},
-  {h:'פקודי',r:'Exodus 38:21-40:38',b:'שמות'},{h:'ויקרא',r:'Leviticus 1:1-5:26',b:'ויקרא'},
-  {h:'צו',r:'Leviticus 6:1-8:36',b:'ויקרא'},{h:'שמיני',r:'Leviticus 9:1-11:47',b:'ויקרא'},
-  {h:'תזריע',r:'Leviticus 12:1-13:59',b:'ויקרא'},{h:'מצורע',r:'Leviticus 14:1-15:33',b:'ויקרא'},
-  {h:'אחרי מות',r:'Leviticus 16:1-18:30',b:'ויקרא'},{h:'קדושים',r:'Leviticus 19:1-20:27',b:'ויקרא'},
-  {h:'אמור',r:'Leviticus 21:1-24:23',b:'ויקרא'},{h:'בהר',r:'Leviticus 25:1-26:2',b:'ויקרא'},
-  {h:'בחוקותי',r:'Leviticus 26:3-27:34',b:'ויקרא'},{h:'במדבר',r:'Numbers 1:1-4:20',b:'במדבר'},
-  {h:'נשא',r:'Numbers 4:21-7:89',b:'במדבר'},{h:'בהעלותך',r:'Numbers 8:1-12:16',b:'במדבר'},
-  {h:'שלח',r:'Numbers 13:1-15:41',b:'במדבר'},{h:'קורח',r:'Numbers 16:1-18:32',b:'במדבר'},
-  {h:'חוקת',r:'Numbers 19:1-22:1',b:'במדבר'},{h:'בלק',r:'Numbers 22:2-25:9',b:'במדבר'},
-  {h:'פינחס',r:'Numbers 25:10-30:1',b:'במדבר'},{h:'מטות',r:'Numbers 30:2-32:42',b:'במדבר'},
-  {h:'מסעי',r:'Numbers 33:1-36:13',b:'במדבר'},{h:'דברים',r:'Deuteronomy 1:1-3:22',b:'דברים'},
-  {h:'ואתחנן',r:'Deuteronomy 3:23-7:11',b:'דברים'},{h:'עקב',r:'Deuteronomy 7:12-11:25',b:'דברים'},
-  {h:'ראה',r:'Deuteronomy 11:26-16:17',b:'דברים'},{h:'שופטים',r:'Deuteronomy 16:18-21:9',b:'דברים'},
-  {h:'כי תצא',r:'Deuteronomy 21:10-25:19',b:'דברים'},{h:'כי תבוא',r:'Deuteronomy 26:1-29:8',b:'דברים'},
-  {h:'נצבים',r:'Deuteronomy 29:9-30:20',b:'דברים'},{h:'וילך',r:'Deuteronomy 31:1-31:30',b:'דברים'},
-  {h:'האזינו',r:'Deuteronomy 32:1-32:52',b:'דברים'},{h:'וזאת הברכה',r:'Deuteronomy 33:1-34:12',b:'דברים'},
-];
+const SCREENS = { entry:'sEntry', merge:'sMerge', nar:'sNar', conv:'sConv' };
+const TITLES  = { entry:'עורך וידאו AI', merge:'מיזוג קליפים', nar:'קריינות', conv:'ממיר WebM → MP4' };
 
-// ════════════════════════════════════════
-// VEO 3 BEST PRACTICES (Google official)
-// ════════════════════════════════════════
-const VEO_STYLE = 'Cinematic 3D biblical animation, Pixar-quality photorealistic render, ancient Middle East setting, 10 seconds';
-const VEO_CHECKS = [
-  {k:'subject',   label:'נושא ברור',     q:'האם ברור מה/מי נמצא בסצנה?'},
-  {k:'action',    label:'פעולה',         q:'האם יש תנועה/פעולה ברורה?'},
-  {k:'camera',    label:'מצלמה',         q:'האם יש הוראת זווית/תנועת מצלמה?'},
-  {k:'lighting',  label:'תאורה',         q:'האם יש תיאור תאורה?'},
-  {k:'style',     label:'סגנון',         q:'האם הסגנון מוגדר בבירור?'},
-  {k:'no_text',   label:'ללא טקסט',      q:'האם הפרומפט לא מבקש כיתוב בוידאו?'},
-  {k:'duration',  label:'10 שניות',      q:'האם מתאים לקליפ קצר של 10 שניות?'},
-  {k:'emotion',   label:'אווירה/רגש',    q:'האם יש תיאור רגשי/אווירתי?'},
-];
-
-function scorePrompt(p){
-  return VEO_CHECKS.map(c=>{
-    let pass=false;
-    if(c.k==='subject')  pass=p.length>100;
-    if(c.k==='action')   pass=/shot|tracking|push|pull|pan|crane|walk|run|speak|gesture|movement/i.test(p);
-    if(c.k==='camera')   pass=/camera|shot|angle|pan|zoom|close.up|wide|tracking|drone|tilt|crane/i.test(p);
-    if(c.k==='lighting') pass=/light|shadow|golden|dramatic|warm|cool|sun|glow|dawn|dusk|bright|dark|beam/i.test(p);
-    if(c.k==='style')    pass=/cinematic|animation|render|quality|Pixar|biblical|3D|CGI|photorealistic|live.action|RED camera/i.test(p);
-    if(c.k==='no_text')  pass=/NO text overlays|NO subtitles|NO on.screen/i.test(p);
-    if(c.k==='duration') pass=/\d+ second/i.test(p);
-    if(c.k==='emotion')  pass=/atmosphere|emotion|dramatic|feeling|tension|epic|grand|solemn|joyful|fearful|mood/i.test(p);
-    return {...c,pass};
+function showScreen(name){
+  Object.values(SCREENS).forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.classList.remove('active');
   });
+  const target = SCREENS[name] || 'sEntry';
+  const el = document.getElementById(target);
+  if(el) el.classList.add('active');
+  document.getElementById('navTitle').textContent = TITLES[name] || 'עורך וידאו AI';
+  document.getElementById('btnBack').style.display = name === 'entry' ? 'none' : 'inline-flex';
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
-// ════════════════════════════════════════
-// STATE
-// ════════════════════════════════════════
-const S = {
-  apiKey:'', ttsKey:'', durSec:200, model:'fast',
-  parasha:null, parashaText:'', scenes:[], clips:[],
-  videoStyle:'animation'
-};
+function goHome(){
+  showScreen('entry');
+}
 
 // ════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
-  // Film strip
   const fi = document.getElementById('fiEl');
   let h = ''; for(let i=0;i<80;i++) h += '<div class="fh"></div>';
   fi.innerHTML = h + h;
-  // Restore key
   const k = localStorage.getItem('veo_key');
-  if(k){ document.getElementById('apiKey').value = k; S.apiKey = k; }
-  const tk = localStorage.getItem('tts_key');
-  if(tk){ document.getElementById('ttsKey').value = tk; S.ttsKey = tk; }
-  calcDur();
-  renderParshiot();
-  fetchThisWeek();
-  // שחזר videoStyle
-  const savedVS = localStorage.getItem('saved_videoStyle');
-  if(savedVS){ S.videoStyle = savedVS; setTimeout(()=>_updateStyleBtns(savedVS),0); }
-  // שחזר מצב אפליקציה
-  const savedMode = localStorage.getItem('app_mode');
-  if(savedMode === 'gan'){ ganMode = true; setTimeout(()=>updateNavForMode(),0); }
-
-  // Restore saved state
-  if(loadState() && S.scenes.length > 0){
-    // Restore duration and model UI
-    if(S.durSec){
-      const m = Math.floor(S.durSec/60);
-      const s = S.durSec % 60;
-      document.getElementById('durM').value = m;
-      document.getElementById('durS').value = s;
-      calcDur();
-    }
-    setModel(S.model || 'fast');
-
-    // Show restore banner
-    const banner = document.createElement('div');
-    banner.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0f0f1c;border:1px solid #c8a44a;border-radius:12px;padding:11px 16px;display:flex;align-items:center;gap:10px;z-index:9999;max-width:320px;width:calc(100% - 32px);box-shadow:0 8px 24px rgba(0,0,0,.6);font-family:Heebo,sans-serif;';
-    banner.innerHTML = '<div style="flex:1;"><div style="font-size:.82rem;font-weight:700;color:#e8cc80;">📂 יש סצנות שמורות מפרשת '+(S.parasha?.h||'')+'</div><div style="font-size:.72rem;color:#7a7568;">'+S.scenes.length+' סצנות</div></div><button onclick="restoreScenes()" style="background:linear-gradient(135deg,#c8a44a,#9a7828);border:none;border-radius:7px;color:#07070f;font-family:Heebo,sans-serif;font-size:.78rem;font-weight:700;padding:7px 11px;cursor:pointer;flex-shrink:0;">שחזר</button><button onclick="this.parentElement.remove()" style="background:none;border:none;color:#7a7568;cursor:pointer;font-size:1rem;flex-shrink:0;">✕</button>';
-    document.body.appendChild(banner);
-    setTimeout(()=>{ if(banner.parentElement) banner.remove(); }, 8000);
-  }
+  if(k){ document.getElementById('apiKey').value = k; S.apiKey = k; S.ttsKey = k; }
+  document.getElementById('duckLevel').oninput = function(){
+    document.getElementById('duckVal').textContent = this.value;
+  };
+  document.getElementById('narClips').oninput = function(){
+    document.getElementById('narDurDisplay').textContent = (parseInt(this.value)||0)*10;
+  };
 });
 
-function restoreScenes(){
-  if(!S.scenes.length) return;
-  document.querySelector('[onclick="this.parentElement.remove()"]')?.closest('div[style]')?.remove();
-  showScreen(2);
-  renderS2();
-}
-
 // ════════════════════════════════════════
-// NAVIGATION
+// STATE + API KEY
 // ════════════════════════════════════════
-function goBack1(){
-  ganMode ? showGanScreen() : showScreen(1);
-}
+const S = { apiKey: '', ttsKey: '' };
 
-function showScreen(n) {
-  // הסתר sEntry ו-s1gan תמיד
-  const entryEl = document.getElementById('sEntry');
-  const ganEl = document.getElementById('s1gan');
-  if(entryEl) entryEl.classList.remove('active');
-  if(ganEl) ganEl.classList.remove('active');
-
-  // מסכים רגילים: s0–s5 (אינדקסים 1–6 ב-querySelectorAll אחרי sEntry ו-s1gan)
-  const screens = document.querySelectorAll('.screen:not(#sEntry):not(#s1gan)');
-  screens.forEach((el,i) => el.classList.toggle('active', i===n));
-
-  for(let i=0;i<6;i++){
-    const sn = document.getElementById('sn'+i);
-    if(!sn) continue;
-    sn.classList.remove('active','done');
-    if(i < n) sn.classList.add('done');
-    else if(i === n) sn.classList.add('active');
-  }
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function showGanScreen(){
-  // הסתר כל המסכים הרגילים
-  document.querySelectorAll('.screen:not(#sEntry):not(#s1gan)').forEach(el => el.classList.remove('active'));
-  document.getElementById('sEntry').classList.remove('active');
-  document.getElementById('s1gan').classList.add('active');
-  // עדכן steps
-  for(let i=0;i<6;i++){
-    const sn = document.getElementById('sn'+i);
-    if(!sn) continue;
-    sn.classList.remove('active','done');
-    if(i===1) sn.classList.add('active');
-  }
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-// ════════════════════════════════════════
-// SETTINGS (S0)
-// ════════════════════════════════════════
 function toggleKey(){const i=document.getElementById('apiKey');i.type=i.type==='password'?'text':'password';}
-function toggleTtsKey(){const i=document.getElementById('ttsKey');i.type=i.type==='password'?'text':'password';}
-function saveTtsKey(){const k=document.getElementById('ttsKey').value.trim();if(!k){toast('נא להזין TTS key');return;}localStorage.setItem('tts_key',k);S.ttsKey=k;toast('✓ TTS Key נשמר');}
 function saveKey(){
   const k=document.getElementById('apiKey').value.trim();
   if(!k){toast('הכנס מפתח'); return;}
-  localStorage.setItem('veo_key',k); S.apiKey=k; toast('✓ נשמר');
-}
-function setModel(m){
-  S.model=m;
-  document.getElementById('mFast').classList.toggle('active',m==='fast');
-  document.getElementById('mFull').classList.toggle('active',m==='full');
-  calcDur();
-}
-function calcDur(){
-  const m=parseInt(document.getElementById('durM').value)||0;
-  const s=parseInt(document.getElementById('durS').value)||0;
-  S.durSec=m*60+s;
-  const clips=Math.max(1,Math.ceil(S.durSec/10));
-  const rate=S.model==='fast'?0.15:0.40;
-  document.getElementById('durInfo').innerHTML=
-    `<strong>${S.durSec} שניות</strong>${clips} קליפים | עלות: $${(S.durSec*rate).toFixed(2)}`;
-}
-function gotoParasha(){
-  const k=document.getElementById('apiKey').value.trim();
-  if(k){S.apiKey=k; localStorage.setItem('veo_key',k);}
-  if(S.durSec<10){toast('אורך מינימלי: 10 שניות'); return;}
-  showScreen(1); // פרשה תמיד ל-s1
-}
-
-// ════════════════════════════════════════
-// PARASHA (S1)
-// ════════════════════════════════════════
-function renderParshiot(filter=''){
-  const list = filter ? PARSHIOT.filter(p=>p.h.includes(filter)) : PARSHIOT;
-  document.getElementById('pgrid').innerHTML = list.map(p=>
-    `<button class="pbtn ${S.parasha&&S.parasha.h===p.h?'active':''}" onclick="selParasha('${p.h}')">
-      <span class="ph">${p.h}</span><span class="pp">${p.b}</span>
-    </button>`
-  ).join('');
-}
-function filterP(v){renderParshiot(v);}
-function selParasha(heb){
-  S.parasha=PARSHIOT.find(p=>p.h===heb);
-  renderParshiot(document.getElementById('psearch').value);
-  document.getElementById('selCard').style.display='block';
-  document.getElementById('selName').textContent='פרשת '+heb;
-  document.getElementById('selRef').textContent=S.parasha.r;
-  localStorage.setItem('last_parasha', heb);
-}
-async function fetchThisWeek(){
-  try{
-    const r=await fetch('https://www.hebcal.com/shabbat?cfg=json&geonameid=281184&M=on&_nocache='+Date.now());
-    const d=await r.json();
-    const pw=(d.items||[]).find(i=>i.category==='parashat');
-    if(pw&&pw.hebrew){
-      const hn=pw.hebrew;
-      const ref=pw.title?pw.title.replace('Parashat ','').trim():'';
-      document.getElementById('thisWeek').innerHTML=
-        `<div class="badge-week" style="margin-bottom:9px;">⭐ ${hn}</div>
-         <button class="btn btn-ghost" onclick="selByCalendar('${ref}','${hn}')">בחר פרשה זו ←</button>`;
-    } else {
-      document.getElementById('thisWeek').innerHTML='<div style="color:var(--muted);font-size:.8rem;">בחר ידנית מהרשימה</div>';
-    }
-  }catch(e){
-    document.getElementById('thisWeek').innerHTML='<div style="color:var(--muted);font-size:.8rem;">בחר ידנית מהרשימה</div>';
-  }
-}
-function selByCalendar(ref,hn){
-  const match=PARSHIOT.find(p=>hn.includes(p.h)||ref.includes(p.h));
-  if(match){selParasha(match.h);}
-  else{
-    S.parasha={h:hn,r:ref,b:''};
-    document.getElementById('selCard').style.display='block';
-    document.getElementById('selName').textContent='פרשת '+hn;
-    document.getElementById('selRef').textContent=ref;
-  }
-}
-
-// ════════════════════════════════════════
-// FETCH + BUILD PROMPTS (S2) — NO API KEY
-// ════════════════════════════════════════
-// ════════════════════════════════════════
-// FETCH PARASHA + BUILD PROMPTS WITH GEMINI
-// Gemini = חינמי | Veo = בתשלום
-// ════════════════════════════════════════
-// ════════════════════════════════════════
-// ENTRY + GAN BSHAN MODE
-// ════════════════════════════════════════
-let ganMode = false;
-let ganTopicType = 'holiday'; // holiday / national / birthday
-
-function chooseMode(mode){
-  ganMode = (mode === 'gan');
-  localStorage.setItem('app_mode', mode);
-  // הסתר דף כניסה
-  document.getElementById('sEntry').classList.remove('active');
-  // עדכן step 2 label
-  document.getElementById('sn1').querySelector('.slabel').textContent = ganMode ? 'נושא' : 'פרשה';
-  // עדכן לוגו, badge וכותרות לפי מצב
-  updateNavForMode();
-  showScreen(0);
-  // אחרי הגדרות → שלב 1 המתאים
-  document.getElementById('btnGotoNext') && (document.getElementById('btnGotoNext').onclick =
-    ganMode ? showGanScreen : () => showScreen(1));
-}
-
-function updateNavForMode(){
-  const logoMark = document.getElementById('logoMark');
-  const logoText = document.getElementById('logoText');
-  const navBadge = document.getElementById('navBadge');
-  const scriptChTitle = document.getElementById('scriptChTitle');
-  if(ganMode){
-    if(logoMark) logoMark.textContent = '🌸';
-    if(logoText) logoText.textContent = 'גן בשן — AI';
-    if(navBadge) navBadge.textContent = 'Veo 3 · Gemini';
-    if(scriptChTitle) scriptChTitle.innerHTML = 'תסריט קולנועי — <span id="scriptParashaName"></span>';
-  } else {
-    if(logoMark) logoMark.textContent = '📜';
-    if(logoText) logoText.textContent = 'פרשת השבוע — AI';
-    if(navBadge) navBadge.textContent = 'Veo 3 · Sefaria';
-    if(scriptChTitle) scriptChTitle.innerHTML = 'תסריט קולנועי — פרשת <span id="scriptParashaName"></span>';
-  }
-}
-
-async function autoFillGanDesc(name, type){
-  const numScenes = type === 'birthday' ? 4 : 9;
-  const ta = document.getElementById('ganDesc');
-  ta.value = '';
-  ta.placeholder = 'Gemini ממלא תיאור...';
-  const typeDesc = type === 'birthday'
-    ? 'יום הולדת לילד/ה'
-    : type === 'national'
-    ? 'אירוע לאומי ישראלי'
-    : 'חג יהודי';
-
-  try {
-    const prompt = `אתה עוזר ליצירת סרטון לילדי גן (גיל 3-6).
-תאר את "${name}" בצורה קצרה, פשוטה וצבעונית המתאימה לילדים קטנים.
-כלול: מה האירוע/החג מסמל, 3-4 סמלים או אלמנטים מרכזיים, האווירה הכללית.
-הכתיבה תשמש כבסיס לסרטון של ${numScenes} סצנות לילדי גן.
-כתוב בעברית פשוטה, עד 5 משפטים קצרים. ללא כותרות. ללא נקודות. רק טקסט רציף.`;
-
-    const raw = await callGemini(prompt, 500);
-    ta.value = raw.trim();
-    ta.placeholder = '';
-  } catch(e) {
-    ta.placeholder = 'תאר במילים מה אתה רוצה בסרטון על ' + name + '...';
-    toast('לא הצלחתי למלא אוטומטית — תאר בעצמך');
-  }
-}
-
-function selectGanTopic(name, type){
-  ganTopicType = type;
-  const numScenes = type === 'birthday' ? 4 : 9;
-  const totalSec = numScenes * 10;
-  document.getElementById('ganTopicName').textContent = name;
-  document.getElementById('ganSceneInfo').textContent = numScenes + ' סצנות × 10 שניות = ' + totalSec + ' שניות';
-  document.getElementById('ganTopicCard').style.display = 'block';
-  document.getElementById('ganTopicCard').scrollIntoView({behavior:'smooth', block:'center'});
-  // שמור בחירה ב-S
-  S.ganTopic = name;
-  S.ganType = type;
-  // מילוי אוטומטי מ-Gemini
-  autoFillGanDesc(name, type);
-}
-
-async function buildGanScript(){
-  const desc = document.getElementById('ganDesc').value.trim();
-  if(!desc){ toast('תאר את הסרטון קודם'); return; }
-
-  S.apiKey = document.getElementById('apiKey').value.trim()
-           || localStorage.getItem('veo_key') || S.apiKey || '';
-  if(!S.apiKey){ toast('נא להזין API key בהגדרות'); showScreen(0); return; }
-  localStorage.setItem('veo_key', S.apiKey);
-
-  const numScenes = S.ganType === 'birthday' ? 4 : 9;
-  S.durSec = numScenes * 10;
-  S.numScenes = numScenes;
-  S.videoStyle = 'animation'; // גן בשן — תמיד אנימציה
-  S.parashaText = '';
-  S.parasha = { h: S.ganTopic, r: '', b: '' };
-
-  showScreen(2);
-  document.getElementById('s2loading').style.display = 'block';
-  document.getElementById('s2script').style.display = 'none';
-  document.getElementById('s2content').style.display = 'none';
-  setMsg('Gemini כותב תסריט עבור ' + S.ganTopic + '...');
-
-  try {
-    const prompt = `כלל ברזל — ציות מלא 100%:
-עליך ליישם כל הוראה שניתנת לך בדיוק כפי שנכתבה.
-ללא קיצורים. ללא פישוטים. ללא דילוג על שום פרט.
-כל ויזואל, כל פעולה, כל תיאור, כל מעבר — חייב להופיע בפלט שלך.
-ציות חלקי = כישלון מוחלט. חובה לספק 100% ממה שהתבקש.
-
-אתה תסריטאי קולנועי מוכשר המתמחה בסרטונים לילדים בגן.
-
-נושא הסרטון: "${S.ganTopic}"
-תיאור: ${desc}
-
-המשימה: כתוב תסריט קולנועי מלא בעברית ב-${numScenes} סצנות (כל סצנה = 10 שניות).
-
-כללים:
-• הסיפור חייב להיות רציף מהסצנה הראשונה עד האחרונה — עלילה עם התחלה, אמצע וסוף
-• כל סצנה ממשיכה ישירות מהקודמת
-• כתוב כמו תסריטאי הוליוודי — שמחה, צבע, חיות, רגש חיובי
-• מותאם לגיל גן — תיאורים צבעוניים, פשוטים, מעוררי השראה
-• ללא אלימות בשום צורה
-
-כללי ברזל לדיאלוג:
-• כל סצנה היא 10 שניות — מקסימום משפט אחד קצר
-• פזר את הדיאלוגים על פני כל הסצנות
-
-כלל ברזל למעברים:
-• לכל סצנה קבע מעבר: HARD_CUT או FADE
-• סצנה 1 תמיד FADE_IN, סצנה אחרונה תמיד FADE_OUT
-
-לכל סצנה כתוב בפורמט הזה:
-
-**סצנה [מספר]: [כותרת]**
-🎬 ויזואל: [מה רואים]
-🗣️ דיאלוג: [משפט קצר — או "אין"]
-🎵 סאונד: [מוזיקה ואפקטים]
-🎞️ מעבר: [HARD_CUT / FADE / FADE_IN / FADE_OUT]
-📢 נרטיב: [קריין קצר]`;
-
-    const raw = await callGemini(prompt, 65000);
-    if(!raw || raw.length < 100) throw new Error('לא התקבל תסריט');
-
-    S.hebrewScript = raw.trim();
-    saveState();
-
-    document.getElementById('s2loading').style.display = 'none';
-    document.getElementById('s2script').style.display = 'block';
-    const spn3 = document.getElementById('scriptParashaName'); if(spn3) spn3.textContent = S.ganTopic || '';
-    const smEl = document.getElementById('scriptMeta'); if(smEl) smEl.textContent = numScenes + ' סצנות · ' + S.durSec + ' שניות';
-    document.getElementById('scriptView').textContent = S.hebrewScript;
-    document.getElementById('scriptEdit').value = S.hebrewScript;
-  } catch(e) {
-    document.getElementById('s2loading').innerHTML =
-      '<div class="msg error">❌ ' + e.message +
-      '<br><button class="btn btn-ghost" style="margin-top:9px;" onclick="goBack1()">← חזור</button></div>';
-  }
-}
-
-function setVideoStyle(style){
-  S.videoStyle = style;
-  localStorage.setItem('saved_videoStyle', style);
-  _updateStyleBtns(style);
-}
-
-function _clearStyleBtns(){
-  ['btnStyleAnim','btnStyleReal','btnStyleAnimGan'].forEach(id => {
-    const b = document.getElementById(id);
-    if(b){ b.classList.remove('style-active'); b.style.borderColor=''; b.style.color=''; }
-  });
-}
-
-function _updateStyleBtns(style){
-  _clearStyleBtns();
-  const animIds = ['btnStyleAnim','btnStyleAnimGan'];
-  const realIds = ['btnStyleReal'];
-  const activeIds = style === 'animation' ? animIds : realIds;
-  activeIds.forEach(id => {
-    const b = document.getElementById(id);
-    if(b){ b.classList.add('style-active'); }
-  });
-}
-
-async function fetchAndBuild(){
-  if(!S.parasha){ toast('בחר פרשה'); return; }
-
-  S.apiKey = document.getElementById('apiKey').value.trim()
-           || localStorage.getItem('veo_key')
-           || S.apiKey || '';
-  if(!S.apiKey){
-    toast('נא להזין API key בהגדרות');
-    showScreen(0);
-    return;
-  }
-  localStorage.setItem('veo_key', S.apiKey);
-
-  showScreen(2);
-  document.getElementById('s2loading').style.display = 'block';
-  document.getElementById('s2script').style.display = 'none';
-  document.getElementById('s2content').style.display = 'none';
-  setMsg('שולף פרשה מ-Sefaria...');
-
-  try{
-    const ref = encodeURIComponent(S.parasha.r.replace(/ /g,'.'));
-    const resp = await fetch('https://www.sefaria.org/api/texts/'+ref+'?lang=he&context=0');
-    if(!resp.ok) throw new Error('שגיאה בשליפה מ-Sefaria');
-    const data = await resp.json();
-    let he = data.he || data.text;
-    let txt = Array.isArray(he) ? flatText(he).join(' ') : String(he);
-    txt = txt.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
-    if(txt.length > 9000) txt = txt.substring(0,9000)+'...';
-    S.parashaText = txt;
-    setMsg('Gemini כותב תסריט קולנועי בעברית...');
-    await buildHebrewScript();
-  }catch(e){
-    document.getElementById('s2loading').innerHTML =
-      '<div class="msg error">❌ '+e.message+'<br><button class="btn btn-ghost" style="margin-top:9px;" onclick="goBack1()">← חזור</button></div>';
-  }
-}
-
-function setMsg(m){
-  const el = document.getElementById('s2loadMsg');
-  if(el) el.textContent = m;
-}
-
-
-function flatText(arr){
-  const o=[];
-  for(const x of arr){
-    if(Array.isArray(x)) o.push(...flatText(x));
-    else if(typeof x==='string'&&x.trim()) o.push(x.trim());
-  }
-  return o;
-}
-
-async function buildHebrewScript(){
-  S.numScenes = null; // פרשה — חישוב לפי durSec/10
-  const numScenes = Math.ceil(S.durSec/10);
-
-  const prompt = `כלל ברזל — ציות מלא 100%:
-עליך ליישם כל הוראה שניתנת לך בדיוק כפי שנכתבה.
-ללא קיצורים. ללא פישוטים. ללא דילוג על שום פרט.
-כל סצנה, כל תיאור, כל דיאלוג, כל מעבר — חייב להופיע בפלט שלך.
-ציות חלקי = כישלון מוחלט. חובה לספק 100% ממה שהתבקש.
-
-אתה תסריטאי קולנועי מוכשר המתמחה בסרטים על התנ"ך.
-
-קרא את פרשת "${S.parasha.h}" ובנה תסריט קולנועי שלם בעברית.
-
-טקסט הפרשה:
----
-${S.parashaText}
----
-
-המשימה: כתוב תסריט קולנועי מלא ב-${numScenes} סצנות (כל סצנה = 10 שניות).
-
-כללים:
-• הסיפור חייב להיות רציף מהסצנה הראשונה עד האחרונה — עלילה עם התחלה, אמצע וסוף
-• כל סצנה ממשיכה ישירות מהקודמת — ללא חזרות, ללא הסברים מחדש
-• כתוב כמו תסריטאי הוליוודי — דרמה, רגש, מתח
-• כאשר יש המוני בני ישראל — תאר אלפי אנשים
-• ללא אלימות בשום צורה — ללא דם, ללא פצעים, ללא קרבות אלימים
-• מותאם לכל הגילאים כולל ילדים — תיאורים חיוביים ומעוררי השראה
-• קרבות ומלחמות — תאר מרחוק כתנועת צבאות, ללא אלימות ישירה
-
-כללי ברזל לדיאלוג:
-• כל סצנה היא 10 שניות בלבד — מקסימום משפט אחד או שניים קצרים לכל הסצנה
-• הדיאלוג חייב להיות מתוך הפרשה עצמה — ציטוט מדויק או פרפראזה צמודה
-• פזר את הדיאלוגים על פני כל הסצנות — אל תעמיס הכל בסצנה אחת
-• משפט דיאלוג = עד 8 מילים בלבד
-• לא כל סצנה חייבת דיאלוג — סצנות ויזואליות שקטות הן חלק מהסיפור
-• הדיאלוג צריך לקדם את הסיפור, לא לחזור על מה שרואים
-• כלל ברזל לניקוד: כל דיאלוג חייב להיות כתוב עם ניקוד מלא — כל אות עם הסימן המתאים (פָּתַח, קָמַץ, חִירִיק, שְׁוָא, דָּגֵשׁ וכו׳). הניקוד הוא חובה כדי שVeo יבטא את העברית כמו בן אדם אמיתי. לדוגמה: "לֶךְ־לְךָ֛" ולא "לך לך".
-
-כלל ברזל למוזיקה:
-• המוזיקה בונה arc לאורך הסרטון כולו — לא מתאפסת בכל סצנה
-• סצנות רצופות חולקות אלמנט מוזיקלי משותף שמתפתח — אותם כלי נגינה בסיסיים עם שינויים
-• שינוי מוזיקה דרמטי רק כשיש מעבר עלילתי גדול
-
-כלל ברזל למעברים:
-• לכל סצנה קבע מעבר: HARD_CUT (כשהפעולה ממשיכה ישירות) או FADE (שינוי דרמטי, זמן, מקום, רגש גדול)
-• סצנה 1 תמיד FADE_IN (פתיחת סרטון)
-• סצנה אחרונה תמיד FADE_OUT (סיום סרטון)
-
-לכל סצנה כתוב בפורמט הזה:
-
-**סצנה [מספר]: [כותרת]**
-🎬 ויזואל: [מה רואים — סביבה, דמויות, פעולה, מצלמה]
-🗣️ דיאלוג: [משפט אחד קצר מהפרשה — או "אין" אם סצנה שקטה]
-🎙️ קריינות: [חובה אם אין דיאלוג — משפט קצר בעברית מנוקדת שמתאר מה שרואים. אם יש דיאלוג — כתוב "אין"]
-🎵 סאונד: [מוזיקה ספציפית — חייבת להמשיך את הסצנה הקודמת ולהתפתח]
-🎞️ מעבר: [HARD_CUT / FADE / FADE_IN / FADE_OUT]
-📢 נרטיב: [קריין ממשיך ישירות מהסצנה הקודמת — אסור לחזור על מילים]`;
-
-  const raw = await callGemini(prompt, 65000);
-  if(!raw || raw.length < 100) throw new Error('לא התקבל תסריט');
-
-  S.hebrewScript = raw.trim();
-  saveState();
-
-  document.getElementById('s2loading').style.display = 'none';
-  document.getElementById('s2script').style.display = 'block';
-  const spn1 = document.getElementById('scriptParashaName'); if(spn1) spn1.textContent = S.parasha?.h || S.ganTopic || '';
-  const smEl = document.getElementById('scriptMeta'); if(smEl) smEl.textContent = numScenes + ' סצנות · ' + S.durSec + ' שניות';
-  document.getElementById('scriptView').textContent = S.hebrewScript;
-  document.getElementById('scriptEdit').value = S.hebrewScript;
-}
-
-let scriptEditing = false;
-function toggleScriptEdit(){
-  scriptEditing = !scriptEditing;
-  document.getElementById('scriptView').style.display = scriptEditing ? 'none' : 'block';
-  document.getElementById('scriptEdit').style.display = scriptEditing ? 'block' : 'none';
-  document.getElementById('scriptEditBtn').textContent = scriptEditing ? '💾 שמור' : '✏️ ערוך';
-  if(!scriptEditing){
-    S.hebrewScript = document.getElementById('scriptEdit').value;
-    document.getElementById('scriptView').textContent = S.hebrewScript;
-  }
-}
-
-async function approveScript(){
-  if(scriptEditing) toggleScriptEdit();
-  S.hebrewScript = document.getElementById('scriptEdit').value || S.hebrewScript;
-  saveState();
-  document.getElementById('s2script').style.display = 'none';
-  document.getElementById('s2loading').style.display = 'block';
-  const s2lm = document.getElementById('s2loadMsg'); if(s2lm) s2lm.textContent = 'Gemini בונה פרומפטים לVeo 3...';
-  try{
-    await buildPromptsFromScript();
-  }catch(e){
-    document.getElementById('s2loading').innerHTML =
-      '<div class="msg error">❌ '+e.message+
-      '<br><br><button class="btn btn-ghost" style="margin-top:9px;" onclick="showScriptAgain()">← חזור לתסריט</button></div>';
-  }
-}
-
-function showScriptAgain(){
-  showScreen(2);
-  document.getElementById('s2loading').style.display = 'none';
-  document.getElementById('s2script').style.display = 'block';
-  document.getElementById('s2content').style.display = 'none';
-  if(S.hebrewScript){
-    const spn2 = document.getElementById('scriptParashaName'); if(spn2) spn2.textContent = S.parasha?.h || S.ganTopic || '';
-    document.getElementById('scriptView').textContent = S.hebrewScript;
-    document.getElementById('scriptEdit').value = S.hebrewScript;
-  }
-}
-
-async function buildPromptsFromScript(){
-  const numClips = S.numScenes || Math.ceil(S.durSec/10);
-
-  // Show progress
-  setMsg('Gemini בונה ' + numClips + ' פרומפטים... (זה לוקח כ-30 שניות)');
-
-  const effectiveStyle = S.videoStyle || 'animation';
-  const isRealistic = effectiveStyle === 'realistic';
-  const isAnimation = effectiveStyle === 'animation';
-  const clipDur = 10; // תמיד 10 שניות לקליפ
-
-  const styleBlock = isRealistic
-    ? `[STYLE]: Photorealistic live-action 4K cinematic film. Real human actors with authentic appearance. Shot on RED camera, anamorphic lens. ${clipDur} seconds per clip. FAMILY FRIENDLY — suitable for all ages. NO random text overlays. NO subtitles. NO on-screen writing UNLESS the script explicitly calls for on-screen text — in that case the text MUST appear in Hebrew exactly as written in the script. AUDIO: maintain FULL VOLUME throughout the entire ${clipDur} seconds. The editor handles all transitions between clips.`
-    : `[STYLE]: High-budget 3D animated film, photorealistic CGI 4K. Prince of Egypt meets Pixar. FULLY RENDERED 3D ANIMATION. ${clipDur} seconds. FAMILY FRIENDLY — suitable for all ages including young children. NO random text overlays. NO subtitles. NO on-screen writing UNLESS the script explicitly calls for on-screen text — in that case the text MUST appear in Hebrew exactly as written in the script. AUDIO: maintain FULL VOLUME throughout the entire ${clipDur} seconds. The editor handles all transitions between clips.`;
-
-  const charsBlock = isRealistic
-    ? '[CHARACTERS]: Real human actors — full detail: name, age, realistic face, beard, hair, exact authentic period costume. Consistent appearance across scenes. Natural skin texture, real eyes, genuine human expressions.'
-    : '[CHARACTERS]: Full detail — name, age, face, beard, hair, exact clothing. Consistent across scenes.';
-
-  const prompt = `IRON LAW — 100% COMPLIANCE REQUIRED:
-You MUST implement EVERY SINGLE instruction in this prompt exactly as written.
-NO shortcuts. NO simplifications. NO skipping any detail.
-Every visual, every action, every character description, every camera move, every lighting detail, every audio layer — ALL must be present in your output.
-Partial compliance = complete failure. You must deliver 100% of what is requested.
-
-You are a professional Hollywood cinematographer converting a Hebrew script to Veo 3.1 prompts.
-
-Torah portion: "${S.parasha.h}" — ${numClips} scenes of ${clipDur} seconds each.
-
-Hebrew script:
----
-${S.hebrewScript}
----
-
-Convert EACH of the ${numClips} scenes into a Veo 3.1 prompt with ALL sections MANDATORY.
-
-CRITICAL: Every single prompt MUST contain ALL of these sections — if ANY section is missing the prompt is REJECTED:
-[NO DIALOGUE] ✓ [STYLE] ✓ [CHARACTERS] ✓ [SETTING] ✓ [ACTION] ✓ [CAMERA] ✓ [LIGHTING] ✓ [DRAMA] ✓ [AUDIO] ✓ [COLOR_GRADE] ✓ [TRANSITION] ✓
-
-DO NOT skip any section. DO NOT merge sections. Write each section explicitly with its label.
-
-CRITICAL MUSIC RULE — treat the music like a real film score:
-- Music builds a continuous arc across ALL scenes — like one long piece of music, not separate tracks
-- Consecutive scenes MUST share the same base instruments, evolving gradually (e.g. oud solo → oud + cello → oud + cello + strings → full orchestra)
-- HARD_CUT scenes: music continues at same energy level — no restart, no change in instrumentation
-- FADE scenes: music may shift to new mood/instrumentation — this is the transition point
-- Scene 1: music starts gently from nothing
-- Scene ${numClips}: music resolves and fades to silence
-- FORBIDDEN: starting a completely new musical idea in consecutive HARD_CUT scenes
-
-CRITICAL CHARACTER DIVERSITY RULE — IRON LAW:
-When multiple characters appear in a scene, EVERY character MUST look distinctly different from all others.
-Different face structure, different age, different hair color/style, different beard/no beard, different clothing color and style, different height and build.
-FORBIDDEN: two characters that look similar or identical to each other.
-FORBIDDEN: copy-paste appearances — each person is a unique individual with unique visual traits.
-If there are 5 people — 5 completely different looks. If there are 100 people — maximum visual variety.
-
-CRITICAL CHARACTER CONSISTENCY RULE — IRON LAW:
-- Every character introduced in scene 1 MUST look ABSOLUTELY IDENTICAL in EVERY subsequent scene — no exceptions, no variations
-- Same face structure, same eye color, same nose shape, same skin tone, same age, same beard length and color, same hair color and style, same exact clothing including colors and patterns, same height and build, same accessories
-- If a character wears a pink dress with white flowers in scene 1 — the EXACT same pink dress with white flowers in ALL scenes
-- MANDATORY: In scene 1, describe EVERY main character with MAXIMUM physical detail (at least 5 specific visual features)
-- MANDATORY: In EVERY subsequent scene — copy-paste the EXACT same character description word for word — do NOT paraphrase or summarize
-- The birthday child or main character MUST be described identically in ALL 4 scenes — same face, same outfit, same hair — no exceptions
-- FORBIDDEN: changing ANY character detail between scenes — not hair, not clothing, not face, not accessories
-- FORBIDDEN: a "similar looking" character — it must be the EXACT SAME character with identical description
-- FORBIDDEN: skipping character description in any scene where the character appears
-
-IMPORTANT: Return ONLY a JSON array. No markdown. No explanation. Start with { immediately.
-
-${styleBlock}
-${charsBlock}
-[ACTION]: Precise movements and micro-expressions.
-[NO DIALOGUE]: NO spoken words, NO dialogue, NO narration, NO voices of any kind. Complete vocal silence throughout the entire clip.
-[SETTING]: Detailed environment. Massive crowds when script mentions בני ישראל.
-[CAMERA]: Shot + movement + DOF + angle. Vary across scenes.
-[LIGHTING]: Match scene emotion. Include color grade.
-[DRAMA]: Emotional atmosphere — specify: (1) Primary emotion: joy/sadness/fear/wonder/grief/celebration/tension/awe/anger/hope. (2) How it shows on faces: tears streaming / wide eyes of wonder / trembling lips / raised hands in joy / hunched in grief / frozen in fear / laughing / falling to knees. (3) Crowd body language: weeping together / cheering with raised arms / frozen in silence / bowing in reverence / running in fear. (4) Environment matching emotion: storm for turmoil / golden light for joy / grey desaturated for grief / divine glow for awe. (5) Peak emotional second. (6) Silence before peak if relevant.
-[AUDIO]: Full cinematic sound design — specify ALL layers:
-(1) AMBIENT: exact environmental sounds matching the scene — crowd whispering and murmuring between themselves / horses hooves on stone / camels grunting / sheep bleating / wind through desert sand / river flowing / fire crackling / rain on tent leather / distant thunder / birds calling / marketplace chatter
-(2) MUSIC: specific instruments matching emotion — single oud melody for intimacy / full orchestra swell for epic moments / solo flute for sadness / powerful percussion building tension / choir for divine moments / silence with single note for shock
-(3) HUMAN SOUNDS: if crowd — background chatter, gasps, collective silence, crying, cheering; if individual — breathing, footsteps, fabric rustling. IRON LAW: NEVER repeat the same human sound effect in consecutive clips. If clip 1 has gasps of wonder — clip 2 MUST use a different sound (cheering, silence, crying, chatter, etc.) or no human sound at all. Every clip must have a DIFFERENT human sound effect that matches its specific situation. Repeating the same effect destroys the emotional arc of the film.
-(4) ANIMAL SOUNDS if present: horses neighing / camels / sheep / birds — at appropriate volume
-(5) AUDIO DYNAMICS: does sound build to peak? sudden silence? whisper to roar? specify the arc
-(6) ABSOLUTE SILENCE for all human voices — NO speaking, NO dialogue, NO narration, NO singing of any kind. Ambient sounds and music ONLY throughout the entire clip. IRON LAW: ANY human voice heard in the clip — singing, speaking, background chatter, crowd noise, whispers, any dialogue — MUST be in HEBREW ONLY. NO English, NO Arabic, NO other languages. Every single word must be in Hebrew.
-[COLOR_GRADE]: Unique color palette.
-[TRANSITION]: HARD_CUT — the editor handles all transitions between clips.
-
-JSON format ONLY:
-{"scenes":[{"id":1,"hebrewDesc":"תיאור בעברית","hebrewDialogue":"משפט הדיאלוג מהתסריט — או ריק אם אין","transition":"HARD_CUT","prompt":"full English prompt","duration":10}]}`;
-
-  let raw, clean, parsed;
-
-  try {
-    setMsg('שולח בקשה לGemini...');
-    raw = await callGemini(prompt, 65000);
-  } catch(e) {
-    throw new Error('שגיאת Gemini API: ' + e.message);
-  }
-
-
-  if(!raw || raw.trim().length < 50) {
-    throw new Error('Gemini לא החזיר תשובה (אורך: ' + (raw||'').length + ') — נסה שוב');
-  }
-
-  setMsg('קיבלתי תשובה (' + raw.length + ' תווים) — מעבד...');
-
-  // Clean the response aggressively
-  clean = raw
-    .replace(/```json/gi, '')
-    .replace(/```/g, '')
-    .trim();
-
-  // Try to find JSON object in response
-  const jsonStart = clean.indexOf('{');
-  const jsonEnd = clean.lastIndexOf('}');
-  if(jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
-    clean = clean.substring(jsonStart, jsonEnd + 1);
-  } else {
-    throw new Error('לא נמצא JSON בתשובה. תחילת התשובה: ' + clean.substring(0,200));
-  }
-
-  try {
-    parsed = JSON.parse(clean);
-  } catch(e) {
-    // Try to extract individual scene objects
-    const sceneMatches = [...clean.matchAll(/\{"id"\s*:\s*\d+[\s\S]*?"duration"\s*:\s*10\s*\}/g)];
-    const scenes = [];
-    for(const m of sceneMatches) {
-      try { scenes.push(JSON.parse(m[0])); } catch(e2) {}
-    }
-    if(scenes.length > 0) {
-      parsed = {scenes};
-      toast('שוחזרו ' + scenes.length + ' סצנות');
-    } else {
-      throw new Error('Gemini החזיר תשובה לא תקינה. נסה שוב — לפעמים זה קורה.');
-    }
-  }
-
-  if(!parsed || !parsed.scenes || !parsed.scenes.length) {
-    throw new Error('לא התקבלו סצנות מGemini — נסה שוב');
-  }
-
-  S.scenes = parsed.scenes.map(sc => {
-    const checks = scorePrompt(sc.prompt);
-    const score = Math.round(checks.filter(c => c.pass).length / checks.length * 10);
-    return {...sc, checks, score};
-  });
-
-  saveState();
-  document.getElementById('s2loading').style.display = 'none';
-  document.getElementById('s2content').style.display = 'block';
-  renderS2();
-}
-
-
-async function buildPromptsWithGemini(){
-  await buildPromptsFromScript();
-}
-
-async function callGemini(prompt, maxTokens=2000){
-  const resp = await fetch(
-    'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key='+S.apiKey,
-    {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        contents:[{parts:[{text:prompt}]}],
-        generationConfig:{temperature:0.7, maxOutputTokens:maxTokens}
-      })
-    }
-  );
-  if(!resp.ok){
-    const e=await resp.json();
-    throw new Error(e.error?.message||'שגיאת Gemini API');
-  }
-  const d=await resp.json();
-  return d.candidates?.[0]?.content?.parts?.[0]?.text||'';
-}
-
-function renderS2(){
-  document.getElementById('s2loading').style.display='none';
-  document.getElementById('s2content').style.display='block';
-
-  // Guard against empty scenes
-  if(!S.scenes || S.scenes.length === 0){
-    document.getElementById('s2content').innerHTML =
-      '<div class="card"><div class="msg error">❌ לא התקבלו סצנות — נסה שוב</div>' +
-      '<button class="btn btn-ghost" style="margin-top:10px;" onclick="goBack1()">← חזור</button></div>';
-    return;
-  }
-
-  // Overview
-  const scores=S.scenes.map(s=>s.score);
-  const avg=(scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1);
-  const ex=scores.filter(s=>s>=8).length;
-  const gd=scores.filter(s=>s>=6&&s<8).length;
-  const wk=scores.filter(s=>s<6).length;
-  document.getElementById('ovGrid').innerHTML=`
-    <div class="ov-card ${avg>=8?'good':avg>=6?'ok':'warn'}"><div class="ov-val">${avg}</div><div class="ov-lbl">ציון ממוצע</div></div>
-    <div class="ov-card good"><div class="ov-val">${ex}</div><div class="ov-lbl">מצוין (8+)</div></div>
-    <div class="ov-card ${gd>0?'ok':'good'}"><div class="ov-val">${gd}</div><div class="ov-lbl">טוב (6-7)</div></div>
-    <div class="ov-card ${wk>0?'bad':'good'}"><div class="ov-val">${wk}</div><div class="ov-lbl">חלש (&lt;6)</div></div>`;
-  document.getElementById('ovMsg').innerHTML = avg>=8
-    ? '<div class="msg success">🎉 פרומפטים מצוינים — מוכן לייצור</div>'
-    : avg>=7
-    ? '<div class="msg info">✅ פרומפטים טובים — שקול לשפר סצנות חלשות</div>'
-    : '<div class="msg warn">⚠️ מומלץ לשפר פרומפטים לפני ייצור</div>';
-
-  // Scene cards
-  document.getElementById('scenesList').innerHTML = S.scenes.map((sc,i)=>buildCard(sc,i)).join('');
-
-  // Cost
-  const rate=S.model==='fast'?0.15:0.40;
-  const cvEl = document.getElementById('costVal'); if(cvEl) cvEl.textContent='$'+(S.durSec*rate).toFixed(2);
-}
-
-function buildCard(sc,i){
-  const g=sc.score>=8?'a':sc.score>=6?'b':sc.score>=4?'c':'d';
-  const gl=sc.score>=8?'מצוין':sc.score>=6?'טוב':sc.score>=4?'בינוני':'חלש';
-  const checksHtml=sc.checks.map(c=>`
-    <div class="ci">
-      <span style="flex-shrink:0;">${c.pass?'✅':'❌'}</span>
-      <div><strong>${c.label}</strong><span>${c.pass?'תקין':'חסר'}</span></div>
-    </div>`).join('');
-  return `
-    <div class="scene-card q${g}" id="sc${i}">
-      <div class="sc-head" onclick="toggleCard(${i})">
-        <div class="sc-num">${i+1}</div>
-        <div class="sc-title">${sc.hebrewDesc}</div>
-        <span class="sc-score ss${g}">${sc.score}/10 ${gl}</span>
-        <span class="sc-arr" id="arr${i}">▼</span>
-      </div>
-      <div class="sc-body" id="scb${i}">
-        <div class="plabel">📋 פרומפט Veo 3</div>
-        <div class="pbox" id="pt${i}">${esc(sc.prompt)}</div>
-        <textarea class="pedit" id="pe${i}" style="display:none;">${sc.prompt}</textarea>
-        <div style="display:flex;gap:7px;margin-top:8px;flex-wrap:wrap;">
-          <button class="btn btn-copy" onclick="copyScene(${i})">📋 העתק לAI Studio</button>
-          <button class="btn btn-ghost" style="font-size:.74rem;padding:6px 11px;" onclick="togglePE(${i})">✏️ ערוך</button>
-          <button class="btn btn-blue" style="font-size:.74rem;padding:6px 11px;" onclick="openInStudio(${i})">🧪 בדוק חינם</button>
-        </div>
-        <div class="checks-wrap">${checksHtml}</div>
-      </div>
-    </div>`;
-}
-
-function toggleCard(i){
-  document.getElementById('scb'+i).classList.toggle('open');
-  document.getElementById('arr'+i).classList.toggle('open');
-}
-
-function copyScene(i){
-  const txt=S.scenes[i].prompt;
-  navigator.clipboard.writeText(txt).then(()=>toast('✅ הועתק! הדבק ב-AI Studio')).catch(()=>{
-    const ta=document.createElement('textarea');
-    ta.value=txt; document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); document.body.removeChild(ta);
-    toast('✅ הועתק!');
-  });
-}
-
-function copyAllToGemini(){
-  if(!S.scenes || !S.scenes.length){ toast('אין סצנות'); return; }
-  const n = S.scenes.length;
-  const topic = S.parasha?.h || 'הסרטון';
-
-  // בנה טקסט מלא עם כל הפרומפטים
-  let txt = `אתה יוצר סרטון וידאו על "${topic}" ב-${n} סצנות.\n`;
-  txt += `חשוב מאוד: שמור על אותן דמויות בדיוק לאורך כל הסצנות — אותו פרצוף, אותה תלבושת, אותו גיל.\n\n`;
-  txt += `צור ${n} קליפים קצרים לפי הפרומפטים הבאים, אחד אחד:\n\n`;
-
-  S.scenes.forEach((sc, i) => {
-    txt += `--- סצנה ${i+1} ---\n${sc.prompt}\n\n`;
-  });
-
-  txt += `התחל בסצנה 1. כשתסיים כל סצנה — אני אגיד לך "הבא" ותמשיך לסצנה הבאה.`;
-
-  // העתק ללוח
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(txt)
-      .then(()=>{ toast('✅ כל הפרומפטים הועתקו — הדבק בגמיני'); setTimeout(()=>window.open('https://gemini.google.com','_blank'),300); })
-      .catch(()=> fallbackCopyAll(txt));
-  } else {
-    fallbackCopyAll(txt);
-  }
-}
-
-function fallbackCopyAll(txt){
-  const ta = document.createElement('textarea');
-  ta.value = txt; ta.style.cssText='position:fixed;top:0;left:0;opacity:0;';
-  document.body.appendChild(ta); ta.focus(); ta.select();
-  document.execCommand('copy'); document.body.removeChild(ta);
-  toast('✅ כל הפרומפטים הועתקו — הדבק בגמיני');
-  setTimeout(()=>window.open('https://gemini.google.com','_blank'),300);
-}
-
-function openInStudio(i){
-  const txt = S.scenes[i].prompt;
-  const n = S.scenes.length;
-  const msg = '✅ סצנה '+(i+1)+' מתוך '+n+' הועתקה — הדבק בגמיני';
-
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    // העתק קודם — פתח גמיני רק אחרי שההעתקה הסתיימה
-    navigator.clipboard.writeText(txt)
-      .then(()=>{
-        toast(msg);
-        setTimeout(()=> window.open('https://gemini.google.com','_blank'), 150);
-      })
-      .catch(()=>{
-        // fallback — execCommand לא מושפע מ-window.open
-        fallbackCopy(txt);
-        toast(msg);
-        setTimeout(()=> window.open('https://gemini.google.com','_blank'), 150);
-      });
-  } else {
-    fallbackCopy(txt);
-    toast(msg);
-    setTimeout(()=> window.open('https://gemini.google.com','_blank'), 150);
-  }
-}
-
-function fallbackCopy(txt){
-  const ta = document.createElement('textarea');
-  ta.value = txt; ta.style.cssText='position:fixed;top:0;left:0;opacity:0;';
-  document.body.appendChild(ta); ta.focus(); ta.select();
-  document.execCommand('copy'); document.body.removeChild(ta);
-}
-
-function showCopyToast(i, isFirst){
-  const n = S.scenes.length;
-  if(isFirst){
-    // פעם ראשונה — toast עם קישור לגמיני
-    const t = document.getElementById('toast');
-    t.innerHTML = '✅ סצנה 1 הועתקה — <a href="https://gemini.google.com" target="_blank" style="color:var(--gold);text-decoration:underline;">פתח גמיני</a> והדבק';
-    t.classList.add('show');
-    setTimeout(()=>{ t.classList.remove('show'); t.innerHTML=''; }, 5000);
-  } else {
-    toast('✅ סצנה '+(i+1)+' מתוך '+n+' הועתקה — הדבק בגמיני');
-  }
-}
-
-function togglePE(i){
-  const pt=document.getElementById('pt'+i);
-  const pe=document.getElementById('pe'+i);
-  const open=pe.style.display==='block';
-  if(open){
-    const v=pe.value.trim();
-    S.scenes[i].prompt=v;
-    pt.textContent=v;
-    pe.style.display='none'; pt.style.display='block';
-    // Re-score
-    S.scenes[i].checks=scorePrompt(v);
-    S.scenes[i].score=Math.round(S.scenes[i].checks.filter(c=>c.pass).length/S.scenes[i].checks.length*10);
-    // Update badge
-    const g=S.scenes[i].score>=8?'a':S.scenes[i].score>=6?'b':S.scenes[i].score>=4?'c':'d';
-    const gl=S.scenes[i].score>=8?'מצוין':S.scenes[i].score>=6?'טוב':S.scenes[i].score>=4?'בינוני':'חלש';
-    const card=document.getElementById('sc'+i);
-    card.className='scene-card q'+g;
-    card.querySelector('.sc-score').className='sc-score ss'+g;
-    card.querySelector('.sc-score').textContent=S.scenes[i].score+'/10 '+gl;
-    toast('✓ נשמר ונבדק');
-  } else {
-    pt.style.display='none'; pe.style.display='block'; pe.focus();
-  }
-}
-
-// ════════════════════════════════════════
-// VIDEO GENERATION (S3)
-// ════════════════════════════════════════
-const MODEL_ID={fast:'veo-3.1-fast-generate-preview',full:'veo-3.1-generate-preview'};
-
-function goGenerate(){
-  S.apiKey=document.getElementById('apiKey').value.trim()||localStorage.getItem('veo_key')||S.apiKey||'';
-  if(!S.apiKey){toast('נא להזין API key בהגדרות לפני יצירת סרטון'); return;}
-  showScreen(3);
-  S.genIndex=0;
-  S.clips=[];
-  S.genStopped=false;
-  genNext();
-}
-
-async function genNext(){
-  const i=S.genIndex;
-  if(i>=S.scenes.length || S.genStopped){
-    showResults();
-    return;
-  }
-  const total=S.scenes.length;
-  const s3t = document.getElementById('s3title'); if(s3t) s3t.textContent='מייצר סצנה '+(i+1)+' מתוך '+total;
-  document.getElementById('s3sub').textContent=(ganMode?'':'פרשת ')+S.parasha.h;
-  const s3pt = document.getElementById('s3progTitle'); if(s3pt) s3pt.textContent='⚙️ סצנה '+(i+1)+' מתוך '+total;
-  const ppEl = document.getElementById('progPct'); if(ppEl) ppEl.textContent=Math.round(i/total*100)+'%';
-  document.getElementById('progFill').style.width=Math.round(i/total*100)+'%';
-  document.getElementById('s3preview').style.display='none';
-  document.getElementById('s3generating').style.display='block';
-  const s3gm1 = document.getElementById('s3genMsg'); if(s3gm1) s3gm1.textContent='שולח סצנה '+(i+1)+' ל-Veo...';
-
-  const t0=Date.now();
-  try{
-    const s3gm2 = document.getElementById('s3genMsg'); if(s3gm2) s3gm2.textContent='ממתין לVeo... (עד 3 דקות)';
-    const url=await genClip(S.scenes[i],i);
-    S.clips.push({url,scene:S.scenes[i],i});
-
-    // הצג את הסרטון
-    document.getElementById('s3generating').style.display='none';
-    document.getElementById('s3preview').style.display='block';
-    document.getElementById('s3previewTitle').textContent='✅ סצנה '+(i+1)+' — '+Math.round((Date.now()-t0)/1000)+'שנ׳';
-    document.getElementById('s3desc').textContent=S.scenes[i].hebrewDesc||'';
-    const vid=document.getElementById('s3video');
-    vid.src=url;
-    vid.load();
-    setTimeout(()=>vid.play().catch(()=>{}),300);
-
-    // עדכן רשימת מוכנות
-    addDoneItem(i, url);
-
-    // עדכן כפתור המשך
-    const isLast=(i+1>=total);
-    document.getElementById('btnContinue').textContent=isLast?'סיים ←':'המשך לסצנה '+(i+2)+' ←';
-    document.getElementById('btnStopGen').style.display=isLast?'none':'inline-flex';
-
-  }catch(e){
-    S.clips.push({url:null,error:e.message,scene:S.scenes[i],i});
-    document.getElementById('s3generating').style.display='none';
-    document.getElementById('s3preview').style.display='block';
-    document.getElementById('s3previewTitle').textContent='❌ סצנה '+(i+1)+' — שגיאה';
-    document.getElementById('s3desc').textContent=e.message;
-    document.getElementById('s3video').style.display='none';
-    // אם השגיאה היא URI חסר — הצג כפתור "נסה שוב לקבל URI"
-    if(e.message.includes('URI') && S.lastPollUrl){
-      document.getElementById('btnContinue').textContent='המשך לסצנה הבאה ←';
-      document.getElementById('s3actions').innerHTML =
-        `<button class="btn btn-green" onclick="retryGetURI(${i})">🔄 נסה שוב לקבל URI</button>
-         <button class="btn btn-ghost" onclick="continueGen()">המשך לסצנה הבאה ←</button>
-         <button class="btn btn-ghost" onclick="stopGen()">עצור ושמור</button>`;
-    } else {
-      document.getElementById('btnContinue').textContent='המשך לסצנה הבאה ←';
-    }
-  }
-}
-
-async function retryGetURI(i){
-  document.getElementById('s3actions').innerHTML =
-    `<div style="display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.84rem;"><span class="spin"></span><span>מנסה שוב לקבל URI...</span></div>`;
-  try{
-    for(let a=0;a<12;a++){
-      await sleep(5000);
-      const pr=await fetch(S.lastPollUrl+'?key='+S.apiKey);
-      if(!pr.ok) continue;
-      const pd=await pr.json();
-      if(pd.done===true){
-        const uri=
-          pd.response?.generatedVideos?.[0]?.video?.uri ||
-          pd.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.uri;
-        if(!uri) continue;
-        const vr=await fetch(uri,{headers:{'x-goog-api-key':S.apiKey}});
-        if(!vr.ok) throw new Error('שגיאה בהורדת וידאו: '+vr.status);
-        const blob=await vr.blob();
-        const url=URL.createObjectURL(blob);
-        // עדכן את ה-clip
-        S.clips[S.clips.length-1]={url,scene:S.scenes[i],i};
-        // הצג
-        document.getElementById('s3previewTitle').textContent='✅ סצנה '+(i+1)+' — התקבל!';
-        document.getElementById('s3desc').textContent=S.scenes[i].hebrewDesc||'';
-        const vid=document.getElementById('s3video');
-        vid.style.display='block';
-        vid.src=url;
-        vid.load();
-        setTimeout(()=>vid.play().catch(()=>{}),300);
-        addDoneItem(i,url);
-        const isLast=(i+1>=S.scenes.length);
-        document.getElementById('s3actions').innerHTML=
-          `<button class="btn btn-green" onclick="continueGen()">${isLast?'סיים ←':'המשך לסצנה '+(i+2)+' ←'}</button>
-           ${isLast?'':'<button class="btn btn-ghost" onclick="stopGen()">עצור ושמור</button>'}`;
-        return;
-      }
-    }
-    throw new Error('לא התקבל URI גם אחרי ניסיון נוסף');
-  }catch(e){
-    document.getElementById('s3actions').innerHTML=
-      `<button class="btn btn-ghost" onclick="continueGen()">המשך לסצנה הבאה ←</button>
-       <button class="btn btn-ghost" onclick="stopGen()">עצור ושמור</button>`;
-    toast('שגיאה: '+e.message);
-  }
-}
-
-function continueGen(){
-  document.getElementById('s3video').style.display='block';
-  const isLast=(S.genIndex+1>=S.scenes.length);
-  if(isLast){
-    showResults();
-    return;
-  }
-  S.genIndex++;
-  genNext();
-}
-
-function stopGen(){
-  S.genStopped=true;
-  showResults();
-}
-
-function addDoneItem(i, url){
-  const list=document.getElementById('s3doneItems');
-  document.getElementById('s3doneList').style.display='block';
-  const div=document.createElement('div');
-  div.style.cssText='display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);';
-  div.innerHTML=`<span style="color:var(--green);font-weight:700;">✓ סצנה ${i+1}</span>
-    <span style="flex:1;font-size:.8rem;color:var(--muted);">${S.scenes[i].hebrewDesc||''}</span>
-    <video src="${url}" style="width:80px;height:45px;border-radius:5px;object-fit:cover;" muted playsinline onclick="this.paused?this.play():this.pause()"></video>`;
-  list.appendChild(div);
-}
-
-function setSP(i,cls,tm){
-  const spEl = document.getElementById('sp'+i);
-  if(!spEl) return;
-  spEl.className='sp-row '+cls;
-  const spI = document.getElementById('spI'+i);
-  if(spI) spI.textContent=cls==='done'?'✓':cls==='err'?'✕':'⟳';
-  const spTm = document.getElementById('spTm'+i);
-  if(spTm) spTm.textContent=tm;
-  const retryBtn = document.getElementById('spRetry'+i);
-  if(cls==='err'){
-    if(!retryBtn){
-      const btn=document.createElement('button');
-      btn.id='spRetry'+i;
-      btn.className='btn btn-ghost';
-      btn.style.cssText='font-size:.7rem;padding:4px 9px;margin-right:6px;';
-      btn.textContent='🔄 נסה שוב';
-      btn.onclick=()=>retryClip(i);
-      document.getElementById('sp'+i).appendChild(btn);
-    }
-  } else {
-    if(retryBtn) retryBtn.remove();
-  }
-}
-
-async function retryClip(i){
-  setSP(i,'act','מייצר...');
-  const t0=Date.now();
-  try{
-    const url=await genClip(S.scenes[i],i);
-    // עדכן ב-S.clips
-    const idx=S.clips.findIndex(c=>c.i===i);
-    if(idx>=0) S.clips[idx]={url,scene:S.scenes[i],i};
-    else S.clips.push({url,scene:S.scenes[i],i});
-    setSP(i,'done','✓ '+Math.round((Date.now()-t0)/1000)+'שנ׳');
-    // עדכן בתצוגת התוצאות אם פתוחה
-    const resCard=document.getElementById('resCard'+i);
-    if(resCard) resCard.outerHTML=buildResCard(S.clips.find(c=>c.i===i),i);
-  }catch(e){
-    setSP(i,'err','שגיאה');
-  }
-}
-
-async function genClip(sc,idx){
-  const BASE='https://generativelanguage.googleapis.com/v1beta';
-  // שלב 1: שלח בקשה ל-Veo
-  const resp=await fetch(
-    BASE+'/models/'+MODEL_ID[S.model]+':predictLongRunning',
-    {method:'POST',
-     headers:{'Content-Type':'application/json','x-goog-api-key':S.apiKey},
-     body:JSON.stringify({instances:[{prompt:sc.prompt}],parameters:{aspectRatio:'16:9',durationSeconds:10,sampleCount:1}})}
-  );
-  if(!resp.ok){const e=await resp.json();throw new Error(e.error?.message||'שגיאת שליחה '+resp.status);}
-  const op=await resp.json();
-  if(!op.name) throw new Error('לא התקבל operation name');
-  // שלב 2: polling לפי התיעוד הרשמי — BASE/op.name
-  const pollUrl=BASE+'/'+op.name;
-  S.lastPollUrl = pollUrl;
-  let retryCount=0;
-  for(let a=0;a<120;a++){
-    await sleep(5000);
-    const spTmEl=document.getElementById('spTm'+idx); if(spTmEl) spTmEl.textContent=(a+1)*5+'שנ׳...';
-    const s3gMsg=document.getElementById('s3genMsg'); if(s3gMsg) s3gMsg.textContent='ממתין לVeo... '+(a+1)*5+' שנ׳';
-    const pr=await fetch(pollUrl+'?key='+S.apiKey);
-    if(!pr.ok) continue;
-    const pd=await pr.json();
-    if(pd.done===true){
-      if(pd.error) throw new Error(pd.error.message||'שגיאת יצירה');
-      // לפי תיעוד רשמי: response.generatedVideos[0].video.uri
-      const uri =
-        pd.response?.generatedVideos?.[0]?.video?.uri ||
-        pd.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.uri;
-      if(!uri){
-        retryCount = (retryCount||0) + 1;
-        if(retryCount <= 3){ await sleep(3000); continue; }
-        throw new Error('הושלם אך לא התקבל URI');
-      }
-      const vr=await fetch(uri,{headers:{'x-goog-api-key':S.apiKey}});
-      if(!vr.ok) throw new Error('שגיאה בהורדת וידאו: '+vr.status);
-      const blob=await vr.blob();
-      return URL.createObjectURL(blob);
-    }
-  }
-  throw new Error('פסק זמן — Veo לא הגיב תוך 10 דקות');
-}
-
-// ════════════════════════════════════════
-// RESULTS (S4)
-// ════════════════════════════════════════
-function buildResCard(c,i){
-  if(c.error)
-    return `<div class="res-card" id="resCard${i}"><div class="res-thumb" style="color:var(--red)">❌</div><div class="res-foot"><span class="res-lbl">סצנה ${i+1} — שגיאה</span><button class="btn btn-ghost" style="font-size:.7rem;padding:4px 9px;margin-top:6px;" onclick="retryClip(${i})">🔄 נסה שוב</button></div></div>`;
-  return `<div class="res-card" id="resCard${i}"><div class="res-thumb"><video src="${c.url}" controls muted loop playsinline></video></div><div class="res-foot"><span class="res-lbl">סצנה ${i+1}</span><span class="res-dur">8שנ׳</span><a href="${c.url}" download="${'סצנה_'+(i+1)+'.mp4'}" class="btn btn-ghost" style="font-size:.7rem;padding:4px 9px;">⬇️ הורד</a></div></div>`;
-}
-
-function showResults(){
-  showScreen(4);
-  const s4subEl = document.getElementById('s4sub'); if(s4subEl) s4subEl.textContent=(S.parasha?.h||S.ganTopic||'')+' — '+S.clips.length+' קליפים';
-  document.getElementById('resGrid').innerHTML=S.clips.map((c,i)=>buildResCard(c,i)).join('');
-}
-function dlAll(){
-  S.clips.forEach((c,i)=>{
-    if(!c.url) return;
-    const a=document.createElement('a');
-    a.href=c.url; a.download=S.parasha.h+'_scene'+(i+1)+'.mp4'; a.click();
-  });
-}
-function newVideo(){
-  S.parasha=null; S.parashaText=''; S.scenes=[]; S.clips=[];
-  renderParshiot(); goBack1();
+  localStorage.setItem('veo_key',k); S.apiKey=k; S.ttsKey=k; toast('✓ נשמר');
 }
 
 // ════════════════════════════════════════
 // UTILS
 // ════════════════════════════════════════
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
-function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function toast(msg,dur=2500){
   const t=document.getElementById('toast');
   t.textContent=msg; t.classList.add('show');
@@ -1897,7 +412,7 @@ function toast(msg,dur=2500){
 }
 
 // ════════════════════════════════════════
-// VIDEO EDITOR
+// VIDEO EDITOR — CLIPS
 // ════════════════════════════════════════
 const VE = { clips: [], dragIdx: null };
 
@@ -1917,7 +432,6 @@ function addMoreClips(input){
 function addClipFile(file){
   const url = URL.createObjectURL(file);
   VE.clips.push({ file, url, name: file.name, dur: 0 });
-  // Sort by filename number if possible
   VE.clips.sort((a,b) => {
     const na = parseInt(a.name.match(/\d+/)?.[0]||'999');
     const nb = parseInt(b.name.match(/\d+/)?.[0]||'999');
@@ -1941,10 +455,8 @@ function updateClipUI(){
   document.getElementById('mergeCard').style.display = hasClips ? 'block' : 'none';
   document.getElementById('mergeCount').textContent = VE.clips.length;
   document.getElementById('clipCount').textContent = '(' + VE.clips.length + ')';
-
   const list = document.getElementById('clipList');
-  list.innerHTML = VE.clips.map((cl,i) => {
-    return `
+  list.innerHTML = VE.clips.map((cl,i) => `
     <div class="clip-item" id="ci${i}" draggable="true"
       ondragstart="dragStart(${i})" ondragover="dragOver(event,${i})"
       ondrop="dropOn(${i})" ondragleave="dragLeave(${i})">
@@ -1952,11 +464,9 @@ function updateClipUI(){
       <video class="clip-thumb" src="${cl.url}" muted></video>
       <div class="clip-name">${cl.name}</div>
       <button class="clip-del" onclick="removeClip(${i})">✕</button>
-    </div>`;
-  }).join('');
+    </div>`).join('');
 }
 
-// Drag and drop sorting
 function dragStart(idx){ VE.dragIdx = idx; }
 function dragOver(e, idx){ e.preventDefault(); document.getElementById('ci'+idx)?.classList.add('drag-over'); }
 function dragLeave(idx){ document.getElementById('ci'+idx)?.classList.remove('drag-over'); }
@@ -1969,24 +479,21 @@ function dropOn(idx){
   updateClipUI();
 }
 
-// ── MERGE ──────────────────────────────
+// ════════════════════════════════════════
+// MERGE
+// ════════════════════════════════════════
 let mergedBlob = null;
 
 async function startMerge(){
   if(VE.clips.length < 2){ toast('צריך לפחות 2 קליפים'); return; }
-
   document.getElementById('mergeProgress').style.display = 'block';
   document.getElementById('btnMerge').disabled = true;
   document.getElementById('mergeResult').style.display = 'none';
   document.querySelectorAll('#mergeCard .msg.error').forEach(e=>e.remove());
-
-  const FPS        = 30;
-
+  const FPS = 30;
   try{
-    // STEP 1: Preload all clips
     setMergeStatus('טוען קליפים...');
     setMergePct(2);
-
     const vids = [];
     for(let i = 0; i < VE.clips.length; i++){
       const v = document.createElement('video');
@@ -2001,19 +508,13 @@ async function startMerge(){
       vids.push(v);
       setMergePct(2 + Math.round((i+1)/VE.clips.length * 15));
     }
-
-    // STEP 2: Setup canvas + AudioContext
     setMergeStatus('מכין הקלטה...');
     setMergePct(18);
-
     const canvas = document.createElement('canvas');
     canvas.width = 1280; canvas.height = 720;
     const ctx = canvas.getContext('2d');
-
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const audioDest = audioCtx.createMediaStreamDestination();
-
-    // Gain nodes — all start at 0
     const gains = vids.map(v => {
       v.muted = false;
       const src  = audioCtx.createMediaElementSource(v);
@@ -2023,77 +524,49 @@ async function startMerge(){
       gain.connect(audioDest);
       return gain;
     });
-
     const combined = new MediaStream([
       ...canvas.captureStream(FPS).getVideoTracks(),
       ...audioDest.stream.getAudioTracks()
     ]);
-
     const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
       ? 'video/webm;codecs=vp9,opus' : 'video/webm';
     const rec = new MediaRecorder(combined, { mimeType, videoBitsPerSecond: 8_000_000 });
     const chunks = [];
     rec.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
     rec.start(100);
-
-    const OVERLAP_MS = 500; // כלל ברזל — 0.5 שניות overlap בין כל קליפ
-
-    // STEP 3: Play each clip
+    const OVERLAP_MS = 500;
     for(let i = 0; i < vids.length; i++){
-      const curr    = vids[i];
-      const gCurr   = gains[i];
-      const durMs   = (isNaN(curr.duration)||!isFinite(curr.duration) ? 10 : curr.duration) * 1000;
-      const next    = vids[i+1] || null;
-      const gNext   = gains[i+1] || null;
-      const isFirst = i === 0;
-      const isLast  = i === vids.length - 1;
-
+      const curr  = vids[i];
+      const gCurr = gains[i];
+      const durMs = (isNaN(curr.duration)||!isFinite(curr.duration) ? 10 : curr.duration) * 1000;
+      const next  = vids[i+1] || null;
+      const gNext = gains[i+1] || null;
       setMergeStatus('מעבד קליפ ' + (i+1) + ' מתוך ' + vids.length);
       setMergePct(18 + Math.round(i / vids.length * 75));
-
-      // FADE IN אודיו — רק לקליפ הראשון
-      // קליפים שניים ואילך כבר מקבלים FADE IN מה-crossfade של הקליפ הקודם
       const now = audioCtx.currentTime;
-      if(isFirst){
+      if(i === 0){
         gCurr.gain.cancelScheduledValues(now);
         gCurr.gain.setValueAtTime(0, now);
         gCurr.gain.linearRampToValueAtTime(1, now + OVERLAP_MS/1000);
       }
-
-      // Reset and play — רק אם הקליפ לא כבר רץ (הופעל מהסיבוב הקודם כ-next)
       if(curr.paused || curr.ended || curr.currentTime < 0.01){
         curr.currentTime = 0;
         await curr.play();
       }
-
-      // Draw loop — משתמש ב-video.currentTime לסנכרון מדויק (לא performance.now)
       await new Promise(resolve => {
         const clipDurSec = durMs / 1000;
         const overlapSec = OVERLAP_MS / 1000;
         let transitionStarted = false;
         let ended = false;
-
         function frame(){
           if(ended) return;
-          // currentTime הוא הזמן האמיתי של הוידאו — מדויק ב-Android
           const elapsed = curr.currentTime;
           const remaining = clipDurSec - elapsed;
-
-          // FADE IN alpha — 0.5 שניות ראשונות
           let currAlpha = 1;
-          if(elapsed < overlapSec){
-            currAlpha = Math.max(0, Math.min(1, elapsed / overlapSec));
-          }
-          // FADE OUT alpha — 0.5 שניות אחרונות
-          if(remaining < overlapSec && remaining >= 0){
-            currAlpha = Math.min(currAlpha, Math.max(0, remaining / overlapSec));
-          }
-
-          // נקה canvas עם שחור
+          if(elapsed < overlapSec) currAlpha = Math.max(0, Math.min(1, elapsed / overlapSec));
+          if(remaining < overlapSec && remaining >= 0) currAlpha = Math.min(currAlpha, Math.max(0, remaining / overlapSec));
           ctx.fillStyle = '#000';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-          // cross-fade: ציור שני קליפים יחד בזמן המעבר
           if(transitionStarted && next){
             const nextAlpha = Math.max(0, Math.min(1, (overlapSec - remaining) / overlapSec));
             ctx.globalAlpha = nextAlpha;
@@ -2105,8 +578,6 @@ async function startMerge(){
             try { ctx.drawImage(curr, 0, 0, canvas.width, canvas.height); } catch(e){}
           }
           ctx.globalAlpha = 1;
-
-          // התחל מעבר כש-0.5 שניות נשארו
           if(!transitionStarted && remaining <= overlapSec && remaining >= 0){
             transitionStarted = true;
             const t = audioCtx.currentTime;
@@ -2121,28 +592,16 @@ async function startMerge(){
               gNext.gain.linearRampToValueAtTime(1, t + overlapSec);
             }
           }
-
-          // סיום קליפ
-          if(remaining <= 0 || curr.ended){
-            ended = true;
-            curr.pause();
-            // לא מאפסים gain מיידית — ה-ramp של crossfade כבר מוריד אותו בחלקות
-            resolve();
-            return;
-          }
-
+          if(remaining <= 0 || curr.ended){ ended = true; curr.pause(); resolve(); return; }
           requestAnimationFrame(frame);
         }
         requestAnimationFrame(frame);
       });
     }
-
-    // Done
     setMergeStatus('מסיים...');
     setMergePct(95);
     await new Promise(resolve => { rec.onstop = resolve; rec.stop(); });
     audioCtx.close();
-
     mergedBlob = new Blob(chunks, { type: mimeType });
     const url = URL.createObjectURL(mergedBlob);
     setMergePct(100);
@@ -2152,7 +611,6 @@ async function startMerge(){
     document.getElementById('mergeProgress').style.display = 'none';
     document.getElementById('btnMerge').disabled = false;
     toast('הסרטון מוכן!');
-
   }catch(e){
     document.getElementById('mergeProgress').style.display = 'none';
     document.getElementById('btnMerge').disabled = false;
@@ -2161,21 +619,15 @@ async function startMerge(){
   }
 }
 
-
-function setMergePct(p){
-  document.getElementById('mergePct').textContent = p+'%';
-  document.getElementById('mergeFill').style.width = p+'%';
-}
-function setMergeStatus(m){
-  document.getElementById('mergeStatus').textContent = m;
-}
+function setMergePct(p){ document.getElementById('mergePct').textContent=p+'%'; document.getElementById('mergeFill').style.width=p+'%'; }
+function setMergeStatus(m){ document.getElementById('mergeStatus').textContent=m; }
 
 function downloadMerged(){
   if(!mergedBlob){ toast('אין סרטון'); return; }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(mergedBlob);
   const ext = mergedBlob.type.includes('mp4') ? '.mp4' : '.webm';
-  a.download = (S.parasha?.h||'video') + '_מלא' + ext;
+  a.download = 'video_merged' + ext;
   a.click();
   toast('נשמר!');
 }
@@ -2192,324 +644,7 @@ function mergAgain(){
 // ════════════════════════════════════════
 let narBlob = null;
 let finalBlob = null;
-let narVideoBlob = null; // סרטון לקריינות — נפרד מהעורך
-
-function openMergeDirect(){
-  showScreen(5);
-  document.getElementById('importCard').style.display = 'block';
-  document.getElementById('narrationCard').style.display = 'none';
-  document.getElementById('narFinalResult') && (document.getElementById('narFinalResult').style.display = 'none');
-  updateClipUI();
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function openNarDirect(){
-  // טען API key מה-localStorage אם לא טעון
-  if(!S.apiKey){
-    const k = localStorage.getItem('veo_key');
-    if(k) S.apiKey = k;
-  }
-  if(!S.apiKey){ toast('נא להזין API Key בהגדרות תחילה'); return; }
-  showScreen(5);
-  document.getElementById('importCard').style.display = 'none';
-  document.getElementById('clipListCard').style.display = 'none';
-  document.getElementById('mergeCard').style.display = 'none';
-  document.getElementById('mergeResult').style.display = 'none';
-  document.getElementById('narrationCard').style.display = 'block';
-  // אפס state קריינות
-  narBlob = null;
-  narVideoBlob = null;
-  document.getElementById('narAudio').style.display = 'none';
-  document.getElementById('narAudio').src = '';
-  document.getElementById('narStep2').style.display = 'none';
-  document.getElementById('narStep3').style.display = 'none';
-  document.getElementById('narBlocksWrap').innerHTML = '';
-  document.getElementById('narText').value = '';
-  document.getElementById('existingVideoName').style.display = 'none';
-  document.getElementById('existingVideoFile').value = '';
-  const ttsBtn = document.getElementById('btnTTS');
-  ttsBtn.textContent = '🎙️ צור קול';
-  ttsBtn.onclick = generateTTS;
-  document.getElementById('duckLevel').oninput = function(){
-    document.getElementById('duckVal').textContent = this.value;
-  };
-  document.getElementById('narClips').oninput = function(){
-    document.getElementById('narDurDisplay').textContent = (parseInt(this.value)||0)*10;
-  };
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function showNarration(){
-  document.getElementById('narrationCard').style.display = 'block';
-  document.getElementById('narrationCard').scrollIntoView({behavior:'smooth'});
-  // Update duck value display
-  document.getElementById('duckLevel').oninput = function(){
-    document.getElementById('duckVal').textContent = this.value;
-  };
-  document.getElementById('narClips').oninput = function(){
-    document.getElementById('narDurDisplay').textContent = (parseInt(this.value)||0)*10;
-  };
-}
-
-async function generateNarText(){
-  const btn = document.getElementById('btnGenNar');
-  btn.disabled = true;
-  btn.textContent = '⏳ כותב...';
-  // אפס כפתור TTS לקריינות רגילה
-  const ttsBtn = document.getElementById('btnTTS');
-  ttsBtn.textContent = '🎙️ צור קול';
-  ttsBtn.onclick = generateTTS;
-  try{
-    const clips = parseInt(document.getElementById('narClips').value) || 24;
-    const dur = clips * 10;
-    const parasha = S.parasha?.h || '';
-    const scenes = S.scenes || [];
-    const videoDesc = document.getElementById('narVideoDesc').value.trim();
-
-    // בניית תיאור סצנות לפי קליפים
-    let scenesDesc = '';
-    if(videoDesc){
-      scenesDesc = videoDesc;
-    } else {
-      for(let i=0;i<clips;i++){
-        const sc = scenes[i];
-        const title = sc ? sc.title || ('סצנה '+(i+1)) : ('סצנה '+(i+1));
-        scenesDesc += (i+1)+'. ['+((i*10)+'–'+((i+1)*10)+' שניות')+'] '+title+'\n';
-      }
-    }
-
-    const prompt = 'אתה קריין סרט תיעודי תנכי — בסגנון Testament של Netflix ו-The Bible של History Channel.\n\n'+
-      'כתוב קריינות עברית לסרטון פרשת '+parasha+' המחולקת ל-'+clips+' בלוקים.\n\n'+
-      'תיאור הסצנות:\n'+scenesDesc+'\n'+
-      'כללים קריטיים לסגנון:\n'+
-      '• כל בלוק: מקסימום 22 מילים (חובה!)\n'+
-      '• משפטים קצרים — 5-8 מילים כל משפט. נקודה אחרי כל משפט\n'+
-      '• פתח כל בלוק בפועל חזק בהווה: "הולך", "עולה", "רואה", "שומע"\n'+
-      '• תיאורים חושיים — אור, קול, רוח, חום, כובד\n'+
-      '• השתמש בשמות המקוריים מהתנ"ך\n'+
-      '• אל תסביר — תאר ותרגיש\n'+
-      '• דוגמה טובה: "עולה אל ההר. הערפל עוטף אותו. שקט גמור."\n'+
-      '• דוגמה רעה: "משה עלה להר סיני כדי לקבל את התורה מהאל."\n'+
-      '• פורמט מדויק לכל בלוק: [BLOCK_N] טקסט הבלוק\n'+
-      '• ללא הוראות במאי — רק טקסט קריינות\n'+
-      '• חובה: הוסף audio tags לפי ההקשר הרגשי של כל משפט — החלט בעצמך מה מתאים:\n'+
-      '  tags זמינים: [slow] [pause] [awe] [dramatic] [soft] [whisper] [fast] [calm]\n'+
-      '  התגלות אלוהים/פלא → [slow][awe], מלחמה/שיא → [dramatic], מתח → [whisper], שקט → [soft]\n'+
-      '  אתה הבמאי — בחר לפי מה שקורה בכל סצנה\n'+
-      '• חשוב מאוד: כתוב כמות מילים שבקצב טבעי לא תעבור 9 שניות — בערך 15-18 מילים לבלוק\n'+
-      'כתוב את '+clips+' הבלוקים:';
-
-    const raw = await callGemini(prompt, 6000);
-
-    // פיצול לבלוקים
-    const blocks = [];
-    const lines = raw.split('\n');
-    let cur = '';
-    for(const line of lines){
-      const m = line.match(/^\[BLOCK_(\d+)\]\s*(.*)/);
-      if(m){
-        if(cur.trim()) blocks.push(cur.trim());
-        cur = m[2];
-      } else if(cur !== '' || line.trim()){
-        cur += (cur ? ' ' : '') + line.trim();
-      }
-    }
-    if(cur.trim()) blocks.push(cur.trim());
-
-    // אם הפרסור נכשל — הצג כטקסט רגיל
-    if(blocks.length < 2){
-      document.getElementById('narText').value = raw.trim();
-      document.getElementById('narText').style.display = 'block';
-      document.getElementById('narBlocksWrap').innerHTML = '';
-    } else {
-      // הצג בלוקים עם עריכה
-      renderNarBlocks(blocks, clips);
-      document.getElementById('narText').style.display = 'none';
-    }
-
-    document.getElementById('narStep2').style.display = 'block';
-  }catch(e){
-    toast('שגיאה: '+e.message);
-  }
-  btn.disabled = false;
-  btn.textContent = '✨ צור קריינות עם Gemini';
-}
-
-const MAX_WORDS_PER_BLOCK = 22;
-
-function countWords(str){ return str.trim() ? str.trim().split(/\s+/).length : 0; }
-
-function renderNarBlocks(blocks, clips){
-  const wrap = document.getElementById('narBlocksWrap');
-  let html = '<div style="margin-bottom:10px;">';
-  for(let i=0;i<clips;i++){
-    const text = blocks[i] || '';
-    const wc = countWords(text);
-    const over = wc > MAX_WORDS_PER_BLOCK;
-    const start = i*10, end = (i+1)*10;
-    html += '<div style="margin-bottom:8px;">'+
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">'+
-        '<span style="font-size:.7rem;color:var(--gold);font-weight:600;">'+(i+1)+'. ['+start+'–'+end+' שניות]</span>'+
-        '<span id="narWC_'+i+'" style="font-size:.68rem;font-weight:600;color:'+(over?'var(--red)':'var(--muted)')+';">'+wc+'/'+MAX_WORDS_PER_BLOCK+' מילים'+(over?' ⚠️':'')+'</span>'+
-      '</div>'+
-      '<textarea id="narBlock_'+i+'" style="width:100%;min-height:52px;background:var(--s2);border:1px solid '+(over?'var(--red)':'var(--border)')+';border-radius:6px;color:var(--text);font-family:Heebo,sans-serif;font-size:.82rem;line-height:1.7;padding:8px;outline:none;resize:vertical;direction:rtl;" oninput="updateBlockWC('+i+');syncNarText()">'+text+'</textarea>'+
-      '</div>';
-  }
-  html += '</div>';
-  wrap.innerHTML = html;
-  syncNarText();
-}
-
-function updateBlockWC(i){
-  const el = document.getElementById('narBlock_'+i);
-  const wc = el ? countWords(el.value) : 0;
-  const over = wc > MAX_WORDS_PER_BLOCK;
-  const wcEl = document.getElementById('narWC_'+i);
-  if(wcEl){
-    wcEl.textContent = wc+'/'+MAX_WORDS_PER_BLOCK+' מילים'+(over?' ⚠️':'');
-    wcEl.style.color = over ? 'var(--red)' : 'var(--muted)';
-  }
-  if(el) el.style.borderColor = over ? 'var(--red)' : 'var(--border)';
-}
-
-function syncNarText(){
-  const clips = parseInt(document.getElementById('narClips').value) || 24;
-  let full = '';
-  for(let i=0;i<clips;i++){
-    const el = document.getElementById('narBlock_'+i);
-    if(el && el.value.trim()) full += '[BLOCK_'+(i+1)+'] ' + el.value.trim() + '\n';
-  }
-  document.getElementById('narText').value = full.trim();
-}
-
-function pcmToWav(pcmData, sampleRate, numChannels, bitsPerSample){
-  const byteRate = sampleRate * numChannels * bitsPerSample / 8;
-  const blockAlign = numChannels * bitsPerSample / 8;
-  const dataSize = pcmData.length;
-  const buffer = new ArrayBuffer(44 + dataSize);
-  const view = new DataView(buffer);
-  const writeStr = (o,s) => { for(let i=0;i<s.length;i++) view.setUint8(o+i, s.charCodeAt(i)); };
-  writeStr(0,'RIFF');
-  view.setUint32(4, 36+dataSize, true);
-  writeStr(8,'WAVE');
-  writeStr(12,'fmt ');
-  view.setUint32(16, 16, true);
-  view.setUint16(20, 1, true);
-  view.setUint16(22, numChannels, true);
-  view.setUint32(24, sampleRate, true);
-  view.setUint32(28, byteRate, true);
-  view.setUint16(32, blockAlign, true);
-  view.setUint16(34, bitsPerSample, true);
-  writeStr(36,'data');
-  view.setUint32(40, dataSize, true);
-  new Uint8Array(buffer).set(pcmData, 44);
-  return buffer;
-}
-
-async function generateTTS(){
-  const text = document.getElementById('narText').value.trim();
-  if(!text){ toast('אין טקסט'); return; }
-
-  const btn = document.getElementById('btnTTS');
-  btn.disabled = true;
-
-  try{
-    const voice = document.getElementById('narVoice').value;
-    const CLIP_SEC = 10;
-    const OVERLAP = 0.2;
-    const BLOCK_START = CLIP_SEC - OVERLAP; // 9.8 — כל בלוק מתחיל ב-i×9.8
-
-    // פצל לבלוקים לפי [BLOCK_N]
-    const rawBlocks = [];
-    const lines = text.split('\n');
-    let cur = '';
-    for(const line of lines){
-      const m = line.match(/^\[BLOCK_(\d+)\]\s*(.*)/);
-      if(m){ if(cur.trim()) rawBlocks.push(cur.trim()); cur = m[2]; }
-      else { cur += (cur?' ':'')+line.trim(); }
-    }
-    if(cur.trim()) rawBlocks.push(cur.trim());
-    const blocks = rawBlocks.length>0 ? rawBlocks : [text.replace(/\[BLOCK_\d+\]/g,'').trim()];
-    const N = blocks.length;
-
-    // נקה tags
-    const cleanBlocks = blocks.map(b =>
-      b.replace(/\[(slow|fast|pause|awe|dramatic|soft|whisper|calm|happy|sad|excited|angry|fearful|relief|alarm|anxiety)\]/gi,'')
-       .replace(/\s+/g,' ').trim()
-    );
-
-    btn.textContent = '⏳ יוצר '+N+' בלוקים...';
-
-    // שלב 1 — TTS לכל בלוק בנפרד
-    const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-    const decoded = [];
-
-    for(let i=0;i<N;i++){
-      btn.textContent = '⏳ בלוק '+(i+1)+'/'+N+'...';
-      const clean = cleanBlocks[i];
-
-      if(voice.startsWith('gemini-')){
-        const voiceName = voice.replace('gemini-','');
-        const stylePrompt = 'You are a calm, natural narrator reading a Hebrew biblical story. Speak in a flowing, gentle, conversational tone. DO NOT be dramatic. Keep a steady natural pace. Never read in English.';
-        const resp = await fetch(
-          'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent',
-          {method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':S.apiKey},
-           body:JSON.stringify({contents:[{parts:[{text:stylePrompt+'\n\nRead this Hebrew text:\n'+clean}]}],
-             generationConfig:{responseModalities:['AUDIO'],speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName}}}}})}
-        );
-        if(!resp.ok){const e=await resp.json();throw new Error(e.error?.message||'שגיאת TTS בלוק '+(i+1));}
-        const data=await resp.json();
-        const b64=data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-        if(!b64) throw new Error('לא התקבל אודיו לבלוק '+(i+1));
-        const pcm=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
-        decoded.push(await audioCtx.decodeAudioData(pcmToWav(pcm,24000,1,16).slice(0)));
-      } else {
-        const ssml='<speak><prosody rate="slow" pitch="-2st">'+clean.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</prosody></speak>';
-        const resp=await fetch('https://texttospeech.googleapis.com/v1/text:synthesize?key='+(S.ttsKey||S.apiKey),
-          {method:'POST',headers:{'Content-Type':'application/json'},
-           body:JSON.stringify({input:{ssml},voice:{languageCode:'he-IL',name:voice},audioConfig:{audioEncoding:'MP3',speakingRate:0.9,pitch:-2.0}})});
-        if(!resp.ok){const e=await resp.json();throw new Error(e.error?.message||'שגיאת TTS');}
-        const data=await resp.json();
-        const bytes=atob(data.audioContent);
-        const arr=new Uint8Array(bytes.length);
-        for(let j=0;j<bytes.length;j++) arr[j]=bytes.charCodeAt(j);
-        decoded.push(await audioCtx.decodeAudioData(arr.buffer));
-      }
-    }
-
-    // שלב 2 — הרכב buffer בדיוק N×10 שניות
-    // בלוק i מתחיל ב: i × 9.8 שניות
-    btn.textContent = '⏳ מרכיב...';
-    const SR = decoded[0].sampleRate;
-    const TOTAL_SAMPLES = Math.round(N * CLIP_SEC * SR);
-    const out = new Float32Array(TOTAL_SAMPLES);
-
-    for(let i=0;i<decoded.length;i++){
-      const startSample = Math.round(i * BLOCK_START * SR);
-      const maxSamples = Math.round(BLOCK_START * SR); // חותך בדיוק ל-9.8 שניות
-      const src = decoded[i].getChannelData(0);
-      const len = Math.min(src.length, maxSamples, TOTAL_SAMPLES - startSample);
-      for(let j=0;j<len;j++) out[startSample+j] += src[j];
-    }
-
-    // שלב 3 — המר ל-WAV
-    const pcm16 = new Int16Array(TOTAL_SAMPLES);
-    for(let i=0;i<TOTAL_SAMPLES;i++)
-      pcm16[i] = Math.max(-32768,Math.min(32767,Math.round(out[i]*32767)));
-    narBlob = new Blob([pcmToWav(new Uint8Array(pcm16.buffer),SR,1,16)],{type:'audio/wav'});
-
-    const url = URL.createObjectURL(narBlob);
-    const audio = document.getElementById('narAudio');
-    audio.src = url;
-    audio.style.display = 'block';
-    document.getElementById('narStep3').style.display = 'block';
-    toast('✅ קריינות — '+(N*CLIP_SEC)+' שנ׳ בדיוק ('+N+' בלוקים)');
-  }catch(e){
-    toast('שגיאת TTS: '+e.message);
-  }
-  btn.disabled = false;
-  btn.textContent = '🎙️ צור קול';
-}
+let narVideoBlob = null;
 
 function loadExistingVideo(input){
   const file = input.files[0];
@@ -2524,39 +659,26 @@ function loadExistingVideo(input){
 async function mergeNarration(){
   if(!narVideoBlob){ toast('אין סרטון — טען סרטון קודם'); return; }
   if(!narBlob){ toast('אין קריינות — צור קול קודם'); return; }
-
   const btn = document.getElementById('btnMergeNar');
   btn.disabled = true;
   btn.textContent = '⏳ ממזג אודיו...';
-
   try{
     const duckPct = parseInt(document.getElementById('duckLevel').value) / 100;
-
-    // שלב 1 — decode שני האודיו
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
     btn.textContent = '⏳ טוען מוזיקה...';
     const vidArrayBuf = await (await fetch(URL.createObjectURL(narVideoBlob))).arrayBuffer();
     const musicBuf = await audioCtx.decodeAudioData(vidArrayBuf);
-
     btn.textContent = '⏳ טוען קריינות...';
     const narArrayBuf = await (await fetch(URL.createObjectURL(narBlob))).arrayBuffer();
     const narBuf = await audioCtx.decodeAudioData(narArrayBuf);
-
     audioCtx.close();
-
-    // שלב 2 — מיזוג ב-OfflineAudioContext
     btn.textContent = '⏳ מעבד אודיו...';
     const sampleRate = musicBuf.sampleRate;
     const totalDur = musicBuf.duration;
     const offCtx = new OfflineAudioContext(2, Math.ceil(sampleRate * totalDur), sampleRate);
-
-    // מוזיקה עם ducking
     const musicSrc = offCtx.createBufferSource();
     musicSrc.buffer = musicBuf;
     const musicGain = offCtx.createGain();
-    musicGain.gain.setValueAtTime(1, 0);
-    // ducking — מוזיקה יורדת בזמן הקריינות
     const narDur = narBuf.duration;
     musicGain.gain.setValueAtTime(1, 0);
     musicGain.gain.linearRampToValueAtTime(duckPct, 0.3);
@@ -2565,8 +687,6 @@ async function mergeNarration(){
     musicSrc.connect(musicGain);
     musicGain.connect(offCtx.destination);
     musicSrc.start(0);
-
-    // קריינות
     const narSrc = offCtx.createBufferSource();
     narSrc.buffer = narBuf;
     const narGain = offCtx.createGain();
@@ -2574,24 +694,17 @@ async function mergeNarration(){
     narSrc.connect(narGain);
     narGain.connect(offCtx.destination);
     narSrc.start(0);
-
     const mixedBuf = await offCtx.startRendering();
-
-    // שלב 3 — המרה ל-WAV blob
     btn.textContent = '⏳ מכין וידאו...';
     const wavBlob = audioBufferToWav(mixedBuf);
-
-    // שלב 4 — וידאו + אודיו ממוזג דרך MediaRecorder
     const canvas = document.createElement('canvas');
     canvas.width = 1280; canvas.height = 720;
     const ctx = canvas.getContext('2d');
-
     const vid = document.createElement('video');
     vid.src = URL.createObjectURL(narVideoBlob);
     vid.muted = true;
     vid.playsInline = true;
     await new Promise(r => { vid.onloadeddata = r; vid.load(); });
-
     const mixedAudio = new Audio(URL.createObjectURL(wavBlob));
     const liveCtx = new (window.AudioContext || window.webkitAudioContext)();
     const mixedSrc = liveCtx.createMediaElementSource(mixedAudio);
@@ -2600,24 +713,16 @@ async function mergeNarration(){
     const liveDest = liveCtx.createMediaStreamDestination();
     mixedSrc.connect(liveGain);
     liveGain.connect(liveDest);
-
     const videoStream = canvas.captureStream(30);
-    const combined = new MediaStream([
-      ...videoStream.getVideoTracks(),
-      ...liveDest.stream.getAudioTracks()
-    ]);
-
-    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
-      ? 'video/webm;codecs=vp9,opus' : 'video/webm';
+    const combined = new MediaStream([...videoStream.getVideoTracks(), ...liveDest.stream.getAudioTracks()]);
+    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus') ? 'video/webm;codecs=vp9,opus' : 'video/webm';
     const rec = new MediaRecorder(combined, { mimeType, videoBitsPerSecond: 8000000 });
     const chunks = [];
     rec.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
     rec.start(100);
-
     btn.textContent = '⏳ מקליט...';
     await vid.play();
     await mixedAudio.play();
-
     await new Promise(resolve => {
       function frame(){
         ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
@@ -2626,16 +731,13 @@ async function mergeNarration(){
       }
       requestAnimationFrame(frame);
     });
-
     await new Promise(r => { rec.onstop = r; rec.stop(); });
     liveCtx.close();
-
     finalBlob = new Blob(chunks, { type: mimeType });
     const url = URL.createObjectURL(finalBlob);
     document.getElementById('narFinalVideo').src = url;
     document.getElementById('narFinalResult').style.display = 'block';
     toast('הסרטון עם קריינות מוכן!');
-
   }catch(e){
     toast('שגיאה: ' + e.message);
   }
@@ -2649,206 +751,20 @@ function audioBufferToWav(buffer){
   const length = buffer.length * numCh * 2;
   const ab = new ArrayBuffer(44 + length);
   const view = new DataView(ab);
-  const writeStr = (o, s) => { for(let i=0;i<s.length;i++) view.setUint8(o+i, s.charCodeAt(i)); };
-  writeStr(0,'RIFF');
-  view.setUint32(4, 36+length, true);
-  writeStr(8,'WAVE');
-  writeStr(12,'fmt ');
-  view.setUint32(16, 16, true);
-  view.setUint16(20, 1, true);
-  view.setUint16(22, numCh, true);
-  view.setUint32(24, sampleRate, true);
-  view.setUint32(28, sampleRate*numCh*2, true);
-  view.setUint16(32, numCh*2, true);
-  view.setUint16(34, 16, true);
-  writeStr(36,'data');
-  view.setUint32(40, length, true);
+  const writeStr = (o,s) => { for(let i=0;i<s.length;i++) view.setUint8(o+i,s.charCodeAt(i)); };
+  writeStr(0,'RIFF'); view.setUint32(4,36+length,true); writeStr(8,'WAVE'); writeStr(12,'fmt ');
+  view.setUint32(16,16,true); view.setUint16(20,1,true); view.setUint16(22,numCh,true);
+  view.setUint32(24,sampleRate,true); view.setUint32(28,sampleRate*numCh*2,true);
+  view.setUint16(32,numCh*2,true); view.setUint16(34,16,true); writeStr(36,'data'); view.setUint32(40,length,true);
   let offset = 44;
   for(let i=0;i<buffer.length;i++){
     for(let ch=0;ch<numCh;ch++){
-      const s = Math.max(-1, Math.min(1, buffer.getChannelData(ch)[i]));
-      view.setInt16(offset, s < 0 ? s*0x8000 : s*0x7FFF, true);
+      const s = Math.max(-1,Math.min(1,buffer.getChannelData(ch)[i]));
+      view.setInt16(offset, s<0?s*0x8000:s*0x7FFF, true);
       offset += 2;
     }
   }
-  return new Blob([ab], { type: 'audio/wav' });
-}
-
-// ════════════════════════════════════════
-// VOICE ACTING — דיבוב דמויות
-// ════════════════════════════════════════
-
-const VOICE_MAP = {
-  'השם':   { voice:'he-IL-Wavenet-B', rate:0.70, pitch:-6.0, breakMs:900 },
-  'נביא':  { voice:'he-IL-Wavenet-D', rate:0.85, pitch:-3.0, breakMs:600 },
-  'משה':   { voice:'he-IL-Wavenet-D', rate:0.88, pitch:-2.0, breakMs:500 },
-  'מלך':   { voice:'he-IL-Wavenet-B', rate:0.85, pitch:-1.5, breakMs:500 },
-  'לוחם':  { voice:'he-IL-Wavenet-D', rate:1.10, pitch: 1.0, breakMs:300 },
-  'מבוגר': { voice:'he-IL-Wavenet-C', rate:0.88, pitch:-1.0, breakMs:450 },
-  'מלאך':  { voice:'he-IL-Wavenet-A', rate:0.90, pitch: 3.0, breakMs:600 },
-  'ילד':   { voice:'he-IL-Wavenet-A', rate:1.05, pitch: 4.0, breakMs:300 },
-  'ילדה':  { voice:'he-IL-Wavenet-C', rate:1.05, pitch: 4.0, breakMs:300 },
-  'נרטור': { voice:'he-IL-Wavenet-D', rate:0.92, pitch:-1.0, breakMs:500 },
-};
-
-async function generateVoiceAct(){
-  const btn = document.getElementById('btnGenVoice');
-  btn.disabled = true;
-  btn.textContent = '⏳ כותב תסריט...';
-  try{
-    const clips = parseInt(document.getElementById('narClips').value) || 24;
-    const parasha = S.parasha?.h || '';
-    const scenes = S.scenes || [];
-    const videoDesc = document.getElementById('narVideoDesc').value.trim();
-
-    let scenesDesc = '';
-    if(videoDesc){
-      scenesDesc = videoDesc;
-    } else {
-      for(let i=0;i<clips;i++){
-        const sc = scenes[i];
-        const title = sc ? sc.title || ('סצנה '+(i+1)) : ('סצנה '+(i+1));
-        scenesDesc += (i+1)+'. ['+(i*10)+'–'+((i+1)*10)+' שניות] '+title+'\n';
-      }
-    }
-
-    const prompt =
-      'אתה כותב תסריט דיבוב לסרטון תנכי בסגנון Testament של Netflix.\n\n'+
-      'פרשה: '+parasha+'\n\n'+
-      'סצנות:\n'+scenesDesc+'\n'+
-      'כתוב תסריט דיבוב מלא. כל שורה בפורמט הזה בדיוק:\n'+
-      '[דמות|קצב] טקסט\n\n'+
-      'דמויות אפשריות: השם, נביא, משה, מלך, לוחם, מבוגר, מלאך, ילד, ילדה, נרטור\n'+
-      'קצבים: איטי / רגיל / מהיר\n\n'+
-      'כללים:\n'+
-      '• [השם|איטי] — סמכותי מאוד, קול אלוהי עמוק\n'+
-      '• [משה|רגיל] — מנהיג, נחרץ, סמכותי\n'+
-      '• [לוחם|מהיר] — אנרגטי, קצר, חד\n'+
-      '• [מלאך|רגיל] — שקט, מסתורי, רך\n'+
-      '• [נרטור|רגיל] — לתיאורי סצנה בלבד\n'+
-      '• כל שורה: מקסימום 15 מילים\n'+
-      '• התאם דמות לפי מה שקורה בכל סצנה\n'+
-      '• סצנת מתח → קצב מהיר. התגלות → איטי. דיאלוג → רגיל\n'+
-      '• ללא הסברים — רק שורות תסריט\n'+
-      '• הוסף audio tags בתוך הטקסט לפי ההקשר — החלט בעצמך:\n'+
-      '  tags זמינים: [slow] [pause] [awe] [dramatic] [soft] [whisper] [fast] [calm]\n'+
-      '  אתה הבמאי — בחר לפי מה שמרגיש נכון לכל רגע\n\n'+
-      'כתוב את התסריט:';
-
-    const raw = await callGemini(prompt, 8000);
-    const lines = raw.split('\n').filter(l => l.trim() && l.match(/^\[/));
-
-    document.getElementById('narText').value = raw.trim();
-    document.getElementById('narText').style.display = 'block';
-    document.getElementById('narBlocksWrap').innerHTML =
-      '<div style="background:rgba(200,164,74,.08);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px;">'+
-      '<div style="font-size:.74rem;color:var(--gold);margin-bottom:4px;">🎭 '+lines.length+' שורות דיבוב — ניתן לערוך למעלה</div>'+
-      '<div style="font-size:.7rem;color:var(--muted);">לחץ "צור קולות" ליצירת הדיבוב המלא</div></div>';
-
-    window._voiceLines = lines;
-    document.getElementById('btnTTS').textContent = '🎭 צור קולות';
-    document.getElementById('btnTTS').onclick = generateTTSMultiVoice;
-    document.getElementById('narStep2').style.display = 'block';
-    toast(lines.length+' שורות דיבוב מוכנות');
-  }catch(e){
-    toast('שגיאה: '+e.message);
-  }
-  btn.disabled = false;
-  btn.textContent = '🎭 דיבוב דמויות';
-}
-
-async function generateTTSMultiVoice(){
-  // קרא את הטקסט הנוכחי מה-textarea — כולל עריכות של המשתמש
-  const currentText = document.getElementById('narText').value.trim();
-  const lines = currentText
-    ? currentText.split('\n').filter(l => l.trim() && l.match(/^\[/))
-    : window._voiceLines;
-  if(!lines || !lines.length){ toast('אין תסריט דיבוב'); return; }
-
-  const btn = document.getElementById('btnTTS');
-  btn.disabled = true;
-
-  try{
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const audioBuffers = [];
-
-    for(let i=0;i<lines.length;i++){
-      const line = lines[i].trim();
-
-      // פקודת הפסקה — [pause|X]
-      const pauseM = line.match(/^\[pause\|([0-9.]+)\]/i);
-      if(pauseM){
-        const silenceSec = parseFloat(pauseM[1]) || 0.5;
-        const silenceLen = Math.ceil(audioCtx.sampleRate * silenceSec);
-        const silenceBuf = audioCtx.createBuffer(1, silenceLen, audioCtx.sampleRate);
-        audioBuffers.push(silenceBuf);
-        continue;
-      }
-
-      const m = line.match(/^\[([^\|]+)\|([^\]]+)\]\s*(.*)/);
-      if(!m) continue;
-      const role = m[1].trim();
-      const speed = m[2].trim();
-      const text = m[3].trim();
-      if(!text) continue;
-
-      const cfg = VOICE_MAP[role] || VOICE_MAP['נרטור'];
-      let rateMulti = 1.0;
-      if(speed === 'איטי') rateMulti = 0.85;
-      else if(speed === 'מהיר') rateMulti = 1.15;
-      const finalRate = Math.min(Math.max(cfg.rate * rateMulti, 0.25), 4.0);
-
-      btn.textContent = '⏳ '+(i+1)+'/'+lines.length+' — '+role+'...';
-
-      const clean = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      const ssml = '<speak><prosody rate="'+(finalRate*100).toFixed(0)+'%" pitch="'+cfg.pitch+'st">'+
-        clean+'</prosody><break time="'+cfg.breakMs+'ms"/></speak>';
-
-      const resp = await fetch(
-        'https://texttospeech.googleapis.com/v1/text:synthesize?key='+(S.ttsKey||S.apiKey),
-        {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({
-            input:{ ssml },
-            voice:{ languageCode:'he-IL', name: cfg.voice },
-            audioConfig:{ audioEncoding:'MP3' }
-          })
-        }
-      );
-      if(!resp.ok){ const e=await resp.json(); throw new Error(e.error?.message||'שגיאת TTS'); }
-      const data = await resp.json();
-      const bytes = atob(data.audioContent);
-      const arr = new Uint8Array(bytes.length);
-      for(let j=0;j<bytes.length;j++) arr[j]=bytes.charCodeAt(j);
-      const ab = await audioCtx.decodeAudioData(arr.buffer);
-      audioBuffers.push(ab);
-    }
-
-    btn.textContent = '⏳ מחבר קולות...';
-    const sr = audioBuffers[0].sampleRate;
-    const totalLen = audioBuffers.reduce((s,b) => s+b.length, 0);
-    const merged = audioCtx.createBuffer(1, totalLen, sr);
-    const ch = merged.getChannelData(0);
-    let offset = 0;
-    for(const b of audioBuffers){
-      ch.set(b.getChannelData(0), offset);
-      offset += b.length;
-    }
-    audioCtx.close();
-
-    narBlob = audioBufferToWav(merged);
-    const url = URL.createObjectURL(narBlob);
-    const audio = document.getElementById('narAudio');
-    audio.src = url;
-    audio.style.display = 'block';
-    document.getElementById('narStep3').style.display = 'block';
-    toast('דיבוב מוכן — האזן לפני מיזוג');
-  }catch(e){
-    toast('שגיאת דיבוב: '+e.message);
-  }
-  btn.disabled = false;
-  btn.textContent = '🎭 צור קולות';
+  return new Blob([ab],{type:'audio/wav'});
 }
 
 function downloadFinal(){
@@ -2856,12 +772,12 @@ function downloadFinal(){
   const a = document.createElement('a');
   const ext = finalBlob.type.includes('mp4') ? '.mp4' : '.webm';
   a.href = URL.createObjectURL(finalBlob);
-  a.download = (S.parasha?.h||'video') + '_עם_קריינות' + ext;
+  a.download = 'video_with_narration' + ext;
   a.click();
 }
 
 // ════════════════════════════════════════
-// MANUAL NARRATION — עריכה עצמאית
+// MANUAL NARRATION
 // ════════════════════════════════════════
 const MANUAL_TAG_PARAMS = {
   'dramatic': { rate:0.85, pitch:-2.0, breakMs:700 },
@@ -2895,16 +811,11 @@ function openManualNar(){
   const clips = parseInt(document.getElementById('narClips').value) || 1;
   wrap.style.display = 'block';
   renderManualBlocks(clips);
-
-  // כשמשנים את מספר הקליפים — מרנדר מחדש
-  const narClipsEl = document.getElementById('narClips');
-  narClipsEl.oninput = function(){
-    const n = Math.min(25, Math.max(1, parseInt(this.value)||1));
+  document.getElementById('narClips').oninput = function(){
+    const n = Math.min(60, Math.max(1, parseInt(this.value)||1));
     document.getElementById('narDurDisplay').textContent = n * 10;
     renderManualBlocks(n);
   };
-
-  // עדכן כפתור TTS לפונקציה המתאימה
   const ttsBtn = document.getElementById('btnTTS');
   ttsBtn.textContent = '🎙️ צור קול';
   ttsBtn.onclick = generateManualTTS;
@@ -2918,18 +829,15 @@ function renderManualBlocks(n){
   const tagsHtml = MANUAL_TAG_LABELS.map(t =>
     `<button type="button" class="btn btn-ghost" style="font-size:.68rem;padding:4px 9px;border-radius:6px;" onclick="insertManualTag(this,'${t.key}')">${t.label}</button>`
   ).join('');
-
   let html = '';
   for(let i = 0; i < n; i++){
-    const start = i * 10, end = (i + 1) * 10;
-    html += `
-    <div style="margin-bottom:12px;">
+    const start = i*10, end = (i+1)*10;
+    html += `<div style="margin-bottom:12px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
         <span style="font-size:.72rem;color:var(--gold);font-weight:600;">${i+1}. [${start}–${end} שניות]</span>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;">${tagsHtml}</div>
-      <textarea id="manualBlock_${i}"
-        style="width:100%;min-height:64px;background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Heebo',sans-serif;font-size:.84rem;line-height:1.8;padding:9px;outline:none;resize:vertical;direction:rtl;"></textarea>
+      <textarea id="manualBlock_${i}" style="width:100%;min-height:64px;background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Heebo',sans-serif;font-size:.84rem;line-height:1.8;padding:9px;outline:none;resize:vertical;direction:rtl;"></textarea>
     </div>`;
   }
   wrap.innerHTML = html;
@@ -2939,22 +847,31 @@ function insertManualTag(btn, tagKey){
   const blockDiv = btn.closest('div[style*="margin-bottom:12px"]');
   const ta = blockDiv ? blockDiv.querySelector('textarea') : null;
   if(!ta) return;
-
-  const tag = '[' + tagKey + '] ';
   const val = ta.value;
-
-  // תמיד הוסף שורה חדשה בסוף עם ה-tag
-  ta.value = (val.length > 0 ? val + '\n' : '') + tag;
-  // קרסור לסוף — מוכן לכתיבה
+  ta.value = (val.length > 0 ? val + '\n' : '') + '[' + tagKey + '] ';
   ta.setSelectionRange(ta.value.length, ta.value.length);
   ta.focus();
+}
+
+function pcmToWav(pcmData, sampleRate, numChannels, bitsPerSample){
+  const byteRate = sampleRate * numChannels * bitsPerSample / 8;
+  const blockAlign = numChannels * bitsPerSample / 8;
+  const dataSize = pcmData.length;
+  const buffer = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(buffer);
+  const writeStr = (o,s) => { for(let i=0;i<s.length;i++) view.setUint8(o+i,s.charCodeAt(i)); };
+  writeStr(0,'RIFF'); view.setUint32(4,36+dataSize,true); writeStr(8,'WAVE'); writeStr(12,'fmt ');
+  view.setUint32(16,16,true); view.setUint16(20,1,true); view.setUint16(22,numChannels,true);
+  view.setUint32(24,sampleRate,true); view.setUint32(28,byteRate,true);
+  view.setUint16(32,blockAlign,true); view.setUint16(34,bitsPerSample,true);
+  writeStr(36,'data'); view.setUint32(40,dataSize,true);
+  new Uint8Array(buffer).set(pcmData, 44);
+  return buffer;
 }
 
 async function generateManualTTS(){
   const clips = parseInt(document.getElementById('narClips').value) || 1;
   const voice = document.getElementById('narVoice').value;
-
-  // אסוף בלוקים — כל קופסא = מערך שורות
   const blocks = [];
   for(let i = 0; i < clips; i++){
     const ta = document.getElementById('manualBlock_' + i);
@@ -2962,31 +879,22 @@ async function generateManualTTS(){
     const lines = ta.value.split('\n').filter(l => l.trim());
     if(lines.length) blocks.push(lines);
   }
-
   if(!blocks.length){ toast('אין טקסט לקריינות'); return; }
   const N = blocks.length;
-
   const btn = document.getElementById('btnTTS');
   btn.disabled = true;
   btn.textContent = '⏳ יוצר קול...';
-
   const CLIP_SEC = 10;
   const OVERLAP = 0.2;
-  const BLOCK_START = CLIP_SEC - OVERLAP; // 9.8 שניות
-
+  const BLOCK_START = CLIP_SEC - OVERLAP;
   try{
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    // decoded[i] = אודיו מחובר של כל השורות בבלוק i
     const decoded = [];
-
     for(let i = 0; i < N; i++){
       btn.textContent = '⏳ בלוק ' + (i+1) + '/' + N + '...';
       const lines = blocks[i];
-
-      // שלב א — TTS לכל שורה בנפרד לפי הנימה שלה
       const lineBuffers = [];
       for(const raw of lines){
-        // הפסקה — 0.5 שניות שקט
         if(raw.match(/^\[pause\]\s*$/i)){
           const silenceLen = Math.ceil(audioCtx.sampleRate * 0.5);
           lineBuffers.push(audioCtx.createBuffer(1, silenceLen, audioCtx.sampleRate));
@@ -2996,43 +904,24 @@ async function generateManualTTS(){
         const tagKey = tagMatch ? tagMatch[1].toLowerCase() : 'natural';
         const text = tagMatch ? tagMatch[2].trim() : raw;
         if(!text) continue;
-
         const params = MANUAL_TAG_PARAMS[tagKey] || MANUAL_TAG_PARAMS['natural'];
         const clean = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-
-        if(voice.startsWith('gemini-')){
-          const voiceName = voice.replace('gemini-','');
-          const toneDesc = tagKey==='dramatic'?'dramatic and intense':tagKey==='slow'?'very slow and deliberate':tagKey==='fast'?'fast and energetic':tagKey==='sad'?'sad and sorrowful':tagKey==='happy'?'joyful and upbeat':tagKey==='whisper'?'in a low whisper':tagKey==='awe'?'with deep awe and reverence':tagKey==='calm'?'calm and peaceful':'natural and conversational';
-          const stylePrompt = 'You are a Hebrew narrator. Read the following text '+toneDesc+'. Never read in English.';
-          const resp = await fetch(
-            'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent',
-            {method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':S.apiKey},
-             body:JSON.stringify({contents:[{parts:[{text:stylePrompt+'\n\n'+text}]}],
-               generationConfig:{responseModalities:['AUDIO'],speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName}}}}})}
-          );
-          if(!resp.ok){const e=await resp.json();throw new Error(e.error?.message||'שגיאת Gemini TTS');}
-          const data=await resp.json();
-          const b64=data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-          if(!b64) throw new Error('לא התקבל אודיו בבלוק '+(i+1));
-          const pcm=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
-          lineBuffers.push(await audioCtx.decodeAudioData(pcmToWav(pcm,24000,1,16).slice(0)));
-        } else {
-          const ssml='<speak><prosody rate="'+(params.rate*100).toFixed(0)+'%" pitch="'+params.pitch+'st">'+clean+'</prosody><break time="'+params.breakMs+'ms"/></speak>';
-          const resp=await fetch('https://texttospeech.googleapis.com/v1/text:synthesize?key='+(S.ttsKey||S.apiKey),
-            {method:'POST',headers:{'Content-Type':'application/json'},
-             body:JSON.stringify({input:{ssml},voice:{languageCode:'he-IL',name:voice},audioConfig:{audioEncoding:'MP3'}})});
-          if(!resp.ok){const e=await resp.json();throw new Error(e.error?.message||'שגיאת TTS');}
-          const data=await resp.json();
-          const bytes=atob(data.audioContent);
-          const arr=new Uint8Array(bytes.length);
-          for(let j=0;j<bytes.length;j++) arr[j]=bytes.charCodeAt(j);
-          lineBuffers.push(await audioCtx.decodeAudioData(arr.buffer));
-        }
+        const ttsKey = S.ttsKey || S.apiKey || localStorage.getItem('veo_key') || '';
+        if(!ttsKey) throw new Error('נא להזין API Key');
+        const ssml = '<speak><prosody rate="'+(params.rate*100).toFixed(0)+'%" pitch="'+params.pitch+'st">'+clean+'</prosody><break time="'+params.breakMs+'ms"/></speak>';
+        const resp = await fetch(
+          'https://texttospeech.googleapis.com/v1/text:synthesize?key='+ttsKey,
+          {method:'POST',headers:{'Content-Type':'application/json'},
+           body:JSON.stringify({input:{ssml},voice:{languageCode:'he-IL',name:voice},audioConfig:{audioEncoding:'MP3'}})}
+        );
+        if(!resp.ok){const e=await resp.json();throw new Error(e.error?.message||'שגיאת TTS');}
+        const data=await resp.json();
+        const bytes=atob(data.audioContent);
+        const arr=new Uint8Array(bytes.length);
+        for(let j=0;j<bytes.length;j++) arr[j]=bytes.charCodeAt(j);
+        lineBuffers.push(await audioCtx.decodeAudioData(arr.buffer));
       }
-
       if(!lineBuffers.length) continue;
-
-      // שלב ב — חבר את כל שורות הבלוק לאחד
       const SR = lineBuffers[0].sampleRate;
       const blockTotalLen = lineBuffers.reduce((s,b)=>s+b.length,0);
       const blockBuf = audioCtx.createBuffer(1, blockTotalLen, SR);
@@ -3041,15 +930,11 @@ async function generateManualTTS(){
       for(const b of lineBuffers){ blockCh.set(b.getChannelData(0), off); off += b.length; }
       decoded.push(blockBuf);
     }
-
     if(!decoded.length) throw new Error('לא התקבל אודיו');
-
-    // שלב ג — הרכב buffer בדיוק N×10 שניות עם OVERLAP 0.2 — בדיוק כמו generateTTS
     btn.textContent = '⏳ מרכיב...';
     const SR = decoded[0].sampleRate;
     const TOTAL_SAMPLES = Math.round(N * CLIP_SEC * SR);
     const out = new Float32Array(TOTAL_SAMPLES);
-
     for(let i=0;i<decoded.length;i++){
       const startSample = Math.round(i * BLOCK_START * SR);
       const maxSamples = Math.round(BLOCK_START * SR);
@@ -3057,58 +942,22 @@ async function generateManualTTS(){
       const len = Math.min(src.length, maxSamples, TOTAL_SAMPLES - startSample);
       for(let j=0;j<len;j++) out[startSample+j] += src[j];
     }
-
-    // שלב ד — המר ל-WAV
     const pcm16 = new Int16Array(TOTAL_SAMPLES);
     for(let i=0;i<TOTAL_SAMPLES;i++)
       pcm16[i] = Math.max(-32768, Math.min(32767, Math.round(out[i]*32767)));
-    narBlob = new Blob([pcmToWav(new Uint8Array(pcm16.buffer), SR, 1, 16)], {type:'audio/wav'});
-
+    narBlob = new Blob([pcmToWav(new Uint8Array(pcm16.buffer), SR, 1, 16)],{type:'audio/wav'});
     const url = URL.createObjectURL(narBlob);
     const audio = document.getElementById('narAudio');
     audio.src = url;
     audio.style.display = 'block';
     document.getElementById('narStep3').style.display = 'block';
-    toast('✅ קריינות עצמאית — '+(N*CLIP_SEC)+' שנ׳ בדיוק ('+N+' בלוקים)');
+    toast('✅ קריינות מוכנה — האזן לפני מיזוג');
     audioCtx.close();
-
   }catch(e){
     toast('שגיאת TTS: ' + e.message);
   }
   btn.disabled = false;
   btn.textContent = '🎙️ צור קול';
-}
-
-// ════════════════════════════════════════
-// STATE PERSISTENCE
-// ════════════════════════════════════════
-function saveState(){
-  try{
-    localStorage.setItem('saved_scenes', JSON.stringify(S.scenes));
-    localStorage.setItem('saved_parasha', JSON.stringify(S.parasha));
-    localStorage.setItem('saved_durSec', S.durSec);
-    localStorage.setItem('saved_model', S.model);
-    if(S.hebrewScript) localStorage.setItem('saved_script', S.hebrewScript);
-    localStorage.setItem('saved_videoStyle', S.videoStyle || 'animation');
-  }catch(e){ console.log('save error',e); }
-}
-
-function loadState(){
-  try{
-    const scenes = localStorage.getItem('saved_scenes');
-    const parasha = localStorage.getItem('saved_parasha');
-    const dur = localStorage.getItem('saved_durSec');
-    const model = localStorage.getItem('saved_model');
-    const script = localStorage.getItem('saved_script');
-    if(scenes) S.scenes = JSON.parse(scenes);
-    if(parasha) S.parasha = JSON.parse(parasha);
-    if(dur) S.durSec = parseInt(dur);
-    if(model) S.model = model;
-    if(script) S.hebrewScript = script;
-    const vs = localStorage.getItem('saved_videoStyle');
-    if(vs) S.videoStyle = vs;
-    return !!(scenes && parasha);
-  }catch(e){ return false; }
 }
 
 // ════════════════════════════════════════
